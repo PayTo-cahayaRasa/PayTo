@@ -1,4 +1,4 @@
-# Database Schema Reference
+# Referensi Database Schema
 
 ## Overview
 
@@ -13,11 +13,11 @@
 
 | Table | Description |
 |-------|-------------|
-| `users` | System users (cashiers, supervisors) with role-based access |
-| `products` | Product catalog with pricing and inventory tracking |
+| `users` | System users (cashiers, supervisors) dengan role-based access |
+| `products` | Product catalog dengan pricing dan inventory tracking |
 | `categories` | Product category definitions |
-| `sales` | Sales transactions with multi-payment support |
-| `sale_items` | Line items for each sale transaction |
+| `sales` | Sales transactions dengan multi-payment support |
+| `sale_items` | Line items untuk setiap sale transaction |
 | `stock_items` | Inventory stock levels per product |
 | `stock_movements` | Historical stock movement records |
 | `refunds` | Product refund records |
@@ -28,18 +28,18 @@
 | Table | Description |
 |-------|-------------|
 | `app_settings` | Application configuration key-value pairs |
-| `cache` | Cache storage for application data |
-| `cache_locks` | Cache lock management for concurrent access |
+| `cache` | Cache storage untuk application data |
+| `cache_locks` | Cache lock management untuk concurrent access |
 | `failed_jobs` | Failed queue job records |
 | `jobs` | Queue job waiting/processing records |
 | `sync_batches` | Device sync batch tracking |
-| `sync_idempotency_keys` | Idempotency key tracking for sync operations |
+| `sync_idempotency_keys` | Idempotency key tracking untuk sync operations |
 
 ### Feature Tables
 
 | Table | Description |
 |-------|-------------|
-| `approvals` | Approval workflow records for special actions |
+| `approvals` | Approval workflow records untuk special actions |
 | `push_subscriptions` | Web push notification subscription data |
 | `work_time_logs` | Employee work time tracking logs |
 | `inventory_recommendations` | Automated inventory restocking recommendations |
@@ -259,28 +259,70 @@
 
 **Indexes:**
 - Primary: `id`
-- Foreign: `sale_id` → `sales.id` (NO ACTION)
+- Foreign: `sale_id` → `sales.id` (CASCADE)
 - Foreign: `requested_by` → `users.id` (NO ACTION)
 - Foreign: `approved_by` → `users.id` (NO ACTION)
 
 ---
 
-### `payments`
+### `push_subscriptions`
 
 | Column | Type | Nullable | Default | Description |
 |--------|------|----------|---------|-------------|
 | `id` | bigint unsigned | NO | - | Primary key |
-| `sale_id` | bigint unsigned | NO | - | Sale reference |
-| `method` | enum('CASH','EWALLET') | NO | 'CASH' | Payment method |
-| `amount` | decimal(12,2) | NO | 0.00 | Payment amount |
-| `reference` | varchar(255) | YES | NULL | Payment reference (e.g., transaction ID) |
-| `status` | enum('RECORDED','CONFIRMED') | NO | 'RECORDED' | Payment status |
+| `user_id` | bigint unsigned | NO | - | User reference |
+| `endpoint` | text | NO | - | Push endpoint URL |
+| `keys_p256dh` | text | NO | - | VAPID public key |
+| `keys_auth` | text | NO | - | VAPID auth secret |
+| `device_info` | text | YES | NULL | Device information |
+| `active` | tinyint(1) | NO | 1 | Subscription active |
 | `created_at` | timestamp | YES | NULL | Creation timestamp |
 | `updated_at` | timestamp | YES | NULL | Last update timestamp |
 
 **Indexes:**
 - Primary: `id`
-- Foreign: `sale_id` → `sales.id` (CASCADE)
+- Foreign: `user_id` → `users.id` (CASCADE)
+
+---
+
+### `work_time_logs`
+
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| `id` | bigint unsigned | NO | - | Primary key |
+| `user_id` | bigint unsigned | NO | - | User reference |
+| `work_date` | date | NO | - | Work date |
+| `start_time` | time | NO | - | Shift start time |
+| `end_time` | time | YES | NULL | Shift end time |
+| `pause_duration` | int unsigned | NO | 0 | Pause time in seconds |
+| `action` | enum('START','PAUSE','RESUME','END') | NO | - | Work action |
+| `created_at` | timestamp | NO | CURRENT_TIMESTAMP | Log timestamp |
+
+**Indexes:**
+- Primary: `id`
+- Foreign: `user_id` → `users.id` (CASCADE)
+
+---
+
+### `inventory_recommendations`
+
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| `id` | bigint unsigned | NO | - | Primary key |
+| `product_id` | bigint unsigned | NO | - | Product reference |
+| `avg_daily_sales_7d` | decimal(12,3) | NO | 0.000 | 7-day average daily sales |
+| `avg_daily_sales_30d` | decimal(12,3) | NO | 0.000 | 30-day average daily sales |
+| `lead_time_days` | int | NO | 0 | Supplier lead time |
+| `safety_stock` | decimal(12,3) | NO | 0.000 | Safety stock level |
+| `reorder_point` | decimal(12,3) | NO | 0.000 | Calculated reorder point |
+| `suggested_reorder_qty` | decimal(12,3) | NO | 0.000 | Recommended reorder quantity |
+| `computed_at` | timestamp | YES | NULL | Recommendation computed time |
+| `created_at` | timestamp | YES | NULL | Creation timestamp |
+| `updated_at` | timestamp | YES | NULL | Last update timestamp |
+
+**Indexes:**
+- Primary: `id`
+- Foreign: `product_id` → `products.id` (CASCADE)
 
 ---
 
@@ -290,10 +332,10 @@
 |--------|------|----------|---------|-------------|
 | `id` | bigint unsigned | NO | - | Primary key |
 | `name` | varchar(255) | NO | - | Template name |
-| `version` | int | NO | 1 | Template version |
-| `is_active` | tinyint(1) | NO | 0 | Active template flag |
-| `template_json` | json | NO | - | JSON template definition |
-| `created_by` | bigint unsigned | NO | - | Creator user ID |
+| `version` | varchar(50) | NO | '1.0' | Template version |
+| `is_active` | tinyint(1) | NO | 1 | Active status |
+| `template_json` | json | NO | - | Template configuration |
+| `created_by` | bigint unsigned | NO | - | Creator user reference |
 | `created_at` | timestamp | YES | NULL | Creation timestamp |
 | `updated_at` | timestamp | YES | NULL | Last update timestamp |
 
@@ -309,16 +351,15 @@
 |--------|------|----------|---------|-------------|
 | `id` | bigint unsigned | NO | - | Primary key |
 | `sale_id` | bigint unsigned | NO | - | Sale reference |
-| `template_id` | bigint unsigned | NO | - | Template used |
-| `printed_by` | bigint unsigned | NO | - | User who printed |
-| `printed_at` | timestamp | YES | NULL | Print timestamp |
+| `template_id` | bigint unsigned | NO | - | Template reference |
+| `printed_by` | bigint unsigned | NO | - | Printer user reference |
 | `status` | enum('SUCCESS','FAILED') | NO | - | Print status |
 | `error_message` | text | YES | NULL | Error details |
-| `created_at` | timestamp | YES | NULL | Creation timestamp |
+| `created_at` | timestamp | YES | NULL | Print timestamp |
 
 **Indexes:**
 - Primary: `id`
-- Foreign: `sale_id` → `sales.id` (NO ACTION)
+- Foreign: `sale_id` → `sales.id` (CASCADE)
 - Foreign: `template_id` → `receipt_templates.id` (NO ACTION)
 - Foreign: `printed_by` → `users.id` (NO ACTION)
 
@@ -329,126 +370,17 @@
 | Column | Type | Nullable | Default | Description |
 |--------|------|----------|---------|-------------|
 | `id` | bigint unsigned | NO | - | Primary key |
-| `actor_id` | bigint unsigned | YES | NULL | User ID (if available) |
-| `event` | varchar(255) | NO | - | Event type/name |
-| `entity_type` | varchar(255) | YES | NULL | Affected entity type |
-| `entity_id` | varchar(255) | YES | NULL | Affected entity ID |
-| `meta_json` | json | YES | NULL | Additional event metadata |
+| `actor_id` | bigint unsigned | NO | - | Actor user reference |
+| `event` | varchar(255) | NO | - | Event type |
+| `entity_type` | varchar(255) | NO | - | Entity type |
+| `entity_id` | bigint unsigned | NO | - | Entity ID |
+| `meta_json` | json | YES | NULL | Additional metadata |
 | `occurred_at` | timestamp | YES | NULL | Event timestamp |
-| `created_at` | timestamp | YES | NULL | Log creation timestamp |
-| `updated_at` | timestamp | YES | NULL | Last update timestamp |
+| `created_at` | timestamp | YES | NULL | Log timestamp |
 
 **Indexes:**
 - Primary: `id`
 - Foreign: `actor_id` → `users.id` (NO ACTION)
-
----
-
-### `push_subscriptions`
-
-| Column | Type | Nullable | Default | Description |
-|--------|------|----------|---------|-------------|
-| `id` | bigint unsigned | NO | - | Primary key |
-| `user_id` | bigint unsigned | YES | NULL | User reference |
-| `endpoint` | varchar(512) | NO | - | Push endpoint URL |
-| `public_key` | varchar(255) | NO | - | VAPID public key |
-| `auth_token` | varchar(255) | NO | - | VAPID auth token |
-| `content_encoding` | varchar(50) | NO | 'aesgcm' | Content encoding |
-| `user_agent` | text | YES | NULL | Browser user agent |
-| `last_seen_at` | timestamp | YES | NULL | Last activity timestamp |
-| `created_at` | timestamp | YES | NULL | Creation timestamp |
-| `updated_at` | timestamp | YES | NULL | Last update timestamp |
-
-**Indexes:**
-- Primary: `id`
-- Unique: `endpoint`
-- Foreign: `user_id` → `users.id` (SET NULL)
-
----
-
-### `inventory_recommendations`
-
-| Column | Type | Nullable | Default | Description |
-|--------|------|----------|---------|-------------|
-| `id` | bigint unsigned | NO | - | Primary key |
-| `product_id` | bigint unsigned | NO | - | Product reference |
-| `avg_daily_sales_7d` | decimal(12,3) | NO | 0.000 | 7-day average daily sales |
-| `avg_daily_sales_30d` | decimal(12,3) | NO | 0.000 | 30-day average daily sales |
-| `lead_time_days` | int | NO | 3 | Supplier lead time |
-| `safety_stock` | decimal(12,3) | NO | 0.000 | Safety stock level |
-| `reorder_point` | decimal(12,3) | NO | 0.000 | Reorder threshold |
-| `suggested_reorder_qty` | decimal(12,3) | NO | 0.000 | Recommended order quantity |
-| `computed_at` | timestamp | YES | NULL | Computation timestamp |
-| `created_at` | timestamp | YES | NULL | Creation timestamp |
-| `updated_at` | timestamp | YES | NULL | Last update timestamp |
-
-**Indexes:**
-- Primary: `id`
-- Foreign: `product_id` → `products.id` (NO ACTION)
-
----
-
-### `sync_batches`
-
-| Column | Type | Nullable | Default | Description |
-|--------|------|----------|---------|-------------|
-| `id` | bigint unsigned | NO | - | Primary key |
-| `device_id` | varchar(255) | NO | - | Device identifier |
-| `batch_uuid` | char(36) | NO | - | Unique batch UUID |
-| `pushed_at` | timestamp | YES | NULL | Push timestamp |
-| `status` | enum('RECEIVED','PROCESSED','FAILED') | NO | 'RECEIVED' | Batch status |
-| `error_message` | text | YES | NULL | Error details |
-| `created_at` | timestamp | YES | NULL | Creation timestamp |
-| `updated_at` | timestamp | YES | NULL | Last update timestamp |
-
-**Indexes:**
-- Primary: `id`
-- Unique: `batch_uuid`
-
----
-
-### `sync_idempotency_keys`
-
-| Column | Type | Nullable | Default | Description |
-|--------|------|----------|---------|-------------|
-| `id` | bigint unsigned | NO | - | Primary key |
-| `key` | varchar(255) | NO | - | Idempotency key |
-| `ref_type` | varchar(255) | YES | NULL | Reference type |
-| `ref_id` | bigint unsigned | YES | NULL | Reference ID |
-| `created_at` | timestamp | YES | NULL | Creation timestamp |
-| `updated_at` | timestamp | YES | NULL | Last update timestamp |
-
-**Indexes:**
-- Primary: `id`
-- Unique: `key`
-
----
-
-### `cache`
-
-| Column | Type | Nullable | Default | Description |
-|--------|------|----------|---------|-------------|
-| `key` | varchar(255) | NO | - | Cache key |
-| `value` | mediumtext | NO | - | Cache value |
-| `expiration` | int | NO | - | Expiration timestamp |
-
-**Indexes:**
-- Primary: `key`
-- Index: `expiration`
-
----
-
-### `cache_locks`
-
-| Column | Type | Nullable | Default | Description |
-|--------|------|----------|---------|-------------|
-| `key` | varchar(255) | NO | - | Lock key |
-| `owner` | varchar(255) | NO | - | Lock owner |
-| `expiration` | int | NO | - | Expiration timestamp |
-
-**Indexes:**
-- Primary: `key`
-- Index: `expiration`
 
 ---
 
@@ -458,7 +390,7 @@
 |--------|------|----------|---------|-------------|
 | `id` | bigint unsigned | NO | - | Primary key |
 | `uuid` | varchar(255) | NO | - | Unique UUID |
-| `connection` | text | NO | - | Queue connection |
+| `connection` | text | NO | - | Queue connection name |
 | `queue` | text | NO | - | Queue name |
 | `payload` | longtext | NO | - | Job payload |
 | `exception` | longtext | NO | - | Exception details |
@@ -477,7 +409,7 @@
 | `id` | bigint unsigned | NO | - | Primary key |
 | `queue` | varchar(255) | NO | - | Queue name |
 | `payload` | longtext | NO | - | Job payload |
-| `attempts` | tinyint unsigned | NO | 0 | Retry count |
+| `attempts` | tinyint unsigned | NO | 0 | Number of attempts |
 | `reserved_at` | int unsigned | YES | NULL | Reserved timestamp |
 | `available_at` | int unsigned | NO | - | Available timestamp |
 | `created_at` | int unsigned | NO | - | Creation timestamp |
@@ -488,119 +420,80 @@
 
 ---
 
-### `work_time_logs`
+### `sync_batches`
 
 | Column | Type | Nullable | Default | Description |
 |--------|------|----------|---------|-------------|
 | `id` | bigint unsigned | NO | - | Primary key |
-| `user_id` | bigint unsigned | NO | - | User reference |
-| `action` | enum('START','PAUSE','RESUME','END') | NO | - | Action type |
-| `timestamp` | timestamp | NO | - | Action timestamp |
-| `duration_seconds` | int unsigned | YES | NULL | Duration in seconds |
+| `device_id` | varchar(255) | NO | - | Device identifier |
+| `batch_uuid` | char(36) | NO | - | Batch UUID |
+| `status` | enum('RECEIVED','PROCESSED','FAILED') | NO | 'RECEIVED' | Batch status |
+| `error_message` | text | YES | NULL | Error details |
+| `retry_count` | int | NO | 0 | Retry attempts |
+| `created_at` | timestamp | YES | NULL | Creation timestamp |
+| `processed_at` | timestamp | YES | NULL | Processing timestamp |
+
+**Indexes:**
+- Primary: `id`
+
+---
+
+### `sync_idempotency_keys`
+
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| `id` | bigint unsigned | NO | - | Primary key |
+| `local_txn_uuid` | char(36) | NO | - | Local transaction UUID |
+| `device_id` | varchar(255) | NO | - | Device identifier |
+| `ref_id` | bigint unsigned | NO | - | Reference entity ID |
+| `ref_type` | varchar(255) | NO | - | Reference entity type |
 | `created_at` | timestamp | YES | NULL | Creation timestamp |
 
 **Indexes:**
 - Primary: `id`
-- Foreign: `user_id` → `users.id` (NO ACTION)
+- Unique: `local_txn_uuid`, `device_id`
 
 ---
 
-## Entity Relationship Overview
+### Status Enums
 
-### Core Sales Flow
+**`sales.status`:**
+- `DRAFT` - Sale draft
+- `PENDING_PAYMENT` - Waiting for payment
+- `PAID` - Payment received
+- `VOID` - Sale cancelled
+- `SYNC_FAILED` - Sync failed
 
-1. **Users** create **Sales** transactions
-2. Each **Sale** contains multiple **Sale Items** referencing **Products**
-3. **Payments** are recorded against **Sales**
-4. When **Sales** are completed, **Stock Movements** update inventory
-5. **Stock Items** track current stock levels per **Product**
+**`refunds.status`:**
+- `REQUESTED` - Refund requested
+- `APPROVED` - Refund approved
+- `COMPLETED` - Refund completed
 
-### Refund Flow
+**`approvals.status`:**
+- `PENDING` - Waiting for approval
+- `APPROVED` - Approved
+- `REJECTED` - Rejected
 
-1. **Refunds** reference original **Sales** and are initiated by **Users**
-2. **Refund Items** reference original **Sale Items**
-3. Refunds require approval via **Approvals** table
+**`work_time_logs.action`:**
+- `START` - Shift started
+- `PAUSE` - Shift paused
+- `RESUME` - Shift resumed
+- `END` - Shift ended
 
-### Inventory Management
+**`stock_movements.type`:**
+- `SALE_OUT` - Stock decreased due to sale
+- `RETURN_IN` - Stock increased due to return
+- `ADJUSTMENT` - Manual stock adjustment
+- `SYNC_CORRECTION` - Stock correction from sync
 
-1. **Products** have associated **Stock Items** for current inventory
-2. **Stock Movements** track all inventory changes:
-   - `SALE_OUT`: Decrease from sales
-   - `RETURN_IN`: Increase from returns
-   - `ADJUSTMENT`: Manual adjustments
-   - `SYNC_CORRECTION`: Sync corrections
-3. **Inventory Recommendations** provide restocking suggestions based on sales history
+**`receipt_print_logs.status`:**
+- `SUCCESS` - Print successful
+- `FAILED` - Print failed
 
-### Audit & Compliance
-
-1. **Approvals** track special actions (discount overrides, voids, refunds)
-2. **Audit Logs** record application events
-3. **Receipt Print Logs** track receipt generation
-
-### Device Sync
-
-1. **Sync Batches** track device-to-server synchronization
-2. **Sync Idempotency Keys** prevent duplicate submissions
-
----
-
-## Enum Reference
-
-### `users.role`
-- `CASHIER`
-- `SUPERVISOR`
-
-### `sales.status`
-- `DRAFT`
-- `PENDING_PAYMENT`
-- `PAID`
-- `VOID`
-- `SYNC_FAILED`
-
-### `stock_movements.type`
-- `SALE_OUT`
-- `RETURN_IN`
-- `ADJUSTMENT`
-- `SYNC_CORRECTION`
-
-### `refunds.status`
-- `REQUESTED`
-- `APPROVED`
-- `COMPLETED`
-
-### `approvals.action`
-- `DISCOUNT_OVERRIDE`
-- `PRICE_OVERRIDE`
-- `VOID`
-- `REFUND`
-
-### `approvals.status`
-- `PENDING`
-- `APPROVED`
-- `REJECTED`
-
-### `payments.method`
-- `CASH`
-- `EWALLET`
-
-### `payments.status`
-- `RECORDED`
-- `CONFIRMED`
-
-### `receipt_print_logs.status`
-- `SUCCESS`
-- `FAILED`
-
-### `sync_batches.status`
-- `RECEIVED`
-- `PROCESSED`
-- `FAILED`
-
-### `work_time_logs.action`
-- `START`
-- `PAUSE`
-- `RESUME`
-- `END`
+**`sync_batches.status`:**
+- `RECEIVED` - Batch received
+- `PROCESSED` - Batch processed
+- `FAILED` - Batch processing failed
 
 ---
 

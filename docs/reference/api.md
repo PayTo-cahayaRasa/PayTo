@@ -1,4 +1,4 @@
-# API Reference
+# Referensi API
 
 ## Overview
 
@@ -10,31 +10,31 @@ http://localhost/api
 
 ### Authentication
 
-All API endpoints (except `/pos/login`) require authentication using Laravel's session-based authentication. Use the `X-CSRF-TOKEN` header with a valid CSRF token.
+Semua API endpoints (kecuali `/pos/login`) memerlukan authentication menggunakan Laravel's session-based authentication. Gunakan header `X-CSRF-TOKEN` dengan valid CSRF token.
 
 **POS Login Flow:**
-- Use `/pos/login` endpoint to authenticate
-- The endpoint returns a redirect URL based on user role
-- Subsequent requests will use the authenticated session
+- Gunakan endpoint `/pos/login` untuk authentication
+- Endpoint mengembalikan redirect URL berdasarkan user role
+- Request selanjutnya akan menggunakan authenticated session
 
 ### Response Format
 
-All responses are JSON formatted with consistent structure:
+Semua responses berformat JSON dengan struktur yang konsisten:
 
 ```json
 {
   "data": { ... },
-  "message": "Optional success message",
+  "message": "Pesan sukses opsional",
   "errors": { ... }
 }
 ```
 
 ### Status Codes
 
-| Code | Description |
+| Kode | Deskripsi |
 |------|-------------|
-| 200 | Success |
-| 201 | Created |
+| 200 | Sukses |
+| 201 | Dibuat |
 | 400 | Bad Request |
 | 401 | Unauthorized |
 | 403 | Forbidden |
@@ -50,11 +50,11 @@ All responses are JSON formatted with consistent structure:
 
 **GET** `/admin/dashboard`
 
-#### Description
-Returns comprehensive dashboard data including today's sales summary, transaction count, low stock alerts, weekly trends, and recent activities.
+#### Deskripsi
+Mengembalikan data dashboard komprehensif termasuk ringkasan penjualan hari ini, jumlah transaksi, alert stok rendah, tren mingguan, dan aktivitas terbaru.
 
 #### Authentication
-Required (SUPERVISOR role)
+Diperlukan (role SUPERVISOR)
 
 #### Response
 ```json
@@ -96,17 +96,17 @@ Required (SUPERVISOR role)
 
 **GET** `/admin/profile`
 
-#### Description
-Returns the current admin user profile information including name, role, email, and join date.
+#### Deskripsi
+Mengembalikan informasi profile admin user saat ini termasuk nama, role, email, dan tanggal join.
 
 #### Authentication
-Required (SUPERVISOR role)
+Diperlukan (role SUPERVISOR)
 
 #### Response
 ```json
 {
   "data": {
-    "name": "Admin Name",
+    "name": "Nama Admin",
     "role": "SUPERVISOR",
     "id": "SPV-001",
     "email": "admin@example.com",
@@ -125,18 +125,21 @@ Required (SUPERVISOR role)
 
 **GET** `/admin/products`
 
-#### Description
-Returns a paginated list of all products with stock information.
+#### Deskripsi
+Mengembalikan list produk yang dipaginasi dengan informasi stock.
 
 #### Authentication
-Required (SUPERVISOR role)
+Diperlukan (role SUPERVISOR)
 
 #### Query Parameters
 
-| Parameter | Type | Description |
+| Parameter | Type | Deskripsi |
 |-----------|------|-------------|
-| page | integer | Page number (default: 1) |
-| per_page | integer | Items per page (default: 10) |
+| page | integer | Nomor halaman (default: 1) |
+| per_page | integer | Items per halaman (default: 10) |
+| category | integer | Filter by category ID |
+| status | string | Filter by status (ACTIVE/INACTIVE) |
+| search | string | Search by name or SKU |
 
 #### Response
 ```json
@@ -171,7 +174,7 @@ Required (SUPERVISOR role)
 **POST** `/admin/products`
 
 #### Authentication
-Required (SUPERVISOR role)
+Diperlukan (role SUPERVISOR)
 
 #### Request Body
 
@@ -233,15 +236,15 @@ curl -X POST http://localhost/api/admin/products \
 
 **GET** `/admin/products/{product}`
 
-#### Description
-Returns detailed information about a specific product.
+#### Deskripsi
+Mengembalikan informasi detail tentang produk spesifik.
 
 #### Authentication
-Required (SUPERVISOR role)
+Diperlukan (role SUPERVISOR)
 
 #### Path Parameters
 
-| Parameter | Type | Description |
+| Parameter | Type | Deskripsi |
 |-----------|------|-------------|
 | product | integer | Product ID |
 
@@ -270,17 +273,17 @@ Required (SUPERVISOR role)
 **PUT** `/admin/products/{product}`
 
 #### Authentication
-Required (SUPERVISOR role)
+Diperlukan (role SUPERVISOR)
 
 #### Path Parameters
 
-| Parameter | Type | Description |
+| Parameter | Type | Deskripsi |
 |-----------|------|-------------|
 | product | integer | Product ID |
 
 #### Request Body
 
-All fields are optional. Only provided fields will be updated.
+Semua fields opsional. Hanya fields yang diisi yang akan diupdate.
 
 | Field | Type | Validation |
 |-------|------|------------|
@@ -323,11 +326,11 @@ curl -X PUT http://localhost/api/admin/products/1 \
 **DELETE** `/admin/products/{product}`
 
 #### Authentication
-Required (SUPERVISOR role)
+Diperlukan (role SUPERVISOR)
 
 #### Path Parameters
 
-| Parameter | Type | Description |
+| Parameter | Type | Deskripsi |
 |-----------|------|-------------|
 | product | integer | Product ID |
 
@@ -346,11 +349,11 @@ Required (SUPERVISOR role)
 
 **GET** `/admin/inventory/recommendations`
 
-#### Description
-Analyzes sales data from the last 7 days to provide inventory restocking recommendations. Returns products with stock levels below reorder points.
+#### Deskripsi
+Menganalisis data penjualan dari 7 hari terakhir untuk memberikan rekomendasi restocking inventory. Mengembalikan produk dengan level stok di bawah reorder points.
 
 #### Authentication
-Required (SUPERVISOR role)
+Diperlukan (role SUPERVISOR)
 
 #### Response
 ```json
@@ -358,199 +361,83 @@ Required (SUPERVISOR role)
   "data": [
     {
       "id": 1,
-      "productName": "Kopi Bubuk Arabica",
+      "name": "Kopi Bubuk",
       "sku": "KPB-001",
-      "stock": 2.5,
-      "avgSales7d": 5.0,
-      "leadTime": 3,
-      "reorderPoint": 15.0,
-      "suggestedQty": 12.5,
-      "status": "WARNING"
+      "category_name": "Minuman",
+      "current_stock": 2.5,
+      "avg_daily_sales_7d": 5.2,
+      "avg_daily_sales_30d": 4.8,
+      "reorder_point": 10.0,
+      "recommendation": "35",
+      "reason": "Berdasarkan rata-rata 7 hari: 5.2 unit/hari, lead time 5 hari, safety stock 10"
     }
   ],
   "meta": {
-    "window_days": 7,
-    "computed_at": "2026-06-29 12:00:00"
-  }
-}
-```
-
-#### Status Values
-
-- **SAFE**: Stock is above reorder point
-- **WARNING**: Stock is at or below reorder point
-- **CRITICAL**: Stock is at or below safety stock level
-
----
-
-## Receipt Settings
-
-### Get Receipt Settings
-
-**GET** `/admin/receipt-settings`
-
-#### Description
-Returns current receipt header and footer configuration.
-
-#### Authentication
-Required (SUPERVISOR role)
-
-#### Response
-```json
-{
-  "data": {
-    "header": "TOKO CABANG PUSAT\nJl. Sudirman No. 45, Jakarta",
-    "footer": "Terima kasih atas kunjungan Anda\nFollow IG: @tokokopi"
-  }
-}
-```
-
-### Update Receipt Settings
-
-**PUT** `/admin/receipt-settings`
-
-#### Authentication
-Required (SUPERVISOR role)
-
-#### Request Body
-
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| header | string | Yes | max:2000 |
-| footer | string | Yes | max:2000 |
-
-#### Example Request
-```bash
-curl -X PUT http://localhost/api/admin/receipt-settings \
-  -H "Content-Type: application/json" \
-  -H "X-CSRF-TOKEN: your-csrf-token" \
-  -d '{
-    "header": "CAFE RAJA KOPI\nJl. Merdeka No. 10, Bandung",
-    "footer": "Terima kasih atas kepercayaan Anda"
-  }'
-```
-
-#### Success Response
-```json
-{
-  "data": {
-    "header": "CAFE RAJA KOPI\nJl. Merdeka No. 10, Bandung",
-    "footer": "Terima kasih atas kepercayaan Anda"
+    "total": 1,
+    "products_below_reorder_point": 1
   }
 }
 ```
 
 ---
 
-## Approvals
+## Stock Management
 
-### List Pending Approvals
+### Adjust Stock
 
-**GET** `/admin/approvals`
+**POST** `/admin/products/{product}/adjust-stock`
 
-#### Description
-Returns list of pending refund approval requests.
-
-#### Authentication
-Required (SUPERVISOR role)
-
-#### Response
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "sale": {
-        "invoice_no": "INV-2026-001",
-        "total": 150000,
-        "date": "29 Jun 2026 10:30"
-      },
-      "requested_by": {
-        "name": "John Doe",
-        "username": "cashier1"
-      },
-      "reason": "Barang rusak saat dikirim",
-      "items": [
-        {
-          "product": "Kopi Bubuk Arabica",
-          "qty": 2,
-          "subtotal": 100000
-        }
-      ],
-      "total_amount": 100000,
-      "status": "PENDING"
-    }
-  ]
-}
-```
-
-### Approve Refund
-
-**POST** `/admin/approvals/{approval}/approve`
+#### Deskripsi
+Manual stock adjustment untuk correcting inventory.
 
 #### Authentication
-Required (SUPERVISOR role)
+Diperlukan (role SUPERVISOR)
 
 #### Path Parameters
 
-| Parameter | Type | Description |
+| Parameter | Type | Deskripsi |
 |-----------|------|-------------|
-| approval | integer | Approval ID |
-
-#### Example Request
-```bash
-curl -X POST http://localhost/api/admin/approvals/1/approve \
-  -H "X-CSRF-TOKEN: your-csrf-token"
-```
-
-#### Success Response
-```json
-{
-  "data": {
-    "id": 1,
-    "status": "APPROVED"
-  },
-  "message": "Refund disetujui dan diproses."
-}
-```
-
-### Reject Refund
-
-**POST** `/admin/approvals/{approval}/reject`
-
-#### Authentication
-Required (SUPERVISOR role)
-
-#### Path Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| approval | integer | Approval ID |
+| product | integer | Product ID |
 
 #### Request Body
 
 | Field | Type | Required | Validation |
 |-------|------|----------|------------|
-| reason | string | Yes | min:5, max:255 |
+| quantity | number | Yes | min:0.001 |
+| adjustment_type | string | Yes | INCREASE or DECREASE |
+| reason | string | Yes | max:255 |
+| note | string | No | max:500 |
 
 #### Example Request
 ```bash
-curl -X POST http://localhost/api/admin/approvals/1/reject \
+curl -X POST http://localhost/api/admin/products/1/adjust-stock \
   -H "Content-Type: application/json" \
   -H "X-CSRF-TOKEN: your-csrf-token" \
   -d '{
-    "reason": "Waktu refund telah melewati batas 2 hari"
+    "quantity": 50,
+    "adjustment_type": "INCREASE",
+    "reason": "Stock opname correction",
+    "note": "Penyesuaian stok setelah physical count"
   }'
 ```
 
-#### Success Response
+#### Response
 ```json
 {
+  "success": true,
   "data": {
-    "id": 1,
-    "status": "REJECTED"
+    "id": 456,
+    "product_id": 1,
+    "previous_quantity": 100,
+    "adjustment": 50,
+    "new_quantity": 150,
+    "adjustment_type": "INCREASE",
+    "reason": "Stock opname correction",
+    "note": "Penyesuaian stok setelah physical count",
+    "created_by": "admin",
+    "created_at": "2026-06-28 21:30:00"
   },
-  "message": "Refund ditolak."
+  "message": "Stock berhasil diadjust."
 }
 ```
 
@@ -558,39 +445,53 @@ curl -X POST http://localhost/api/admin/approvals/1/reject \
 
 ## Staff Management
 
-### List All Staff
+### List Staff
 
-**GET** `/admin/staff`
-
-#### Description
-Returns list of all staff members (CASHIER and SUPERVISOR roles).
+**GET** `/api/admin/staff`
 
 #### Authentication
-Required (SUPERVISOR role)
+Diperlukan (role SUPERVISOR)
+
+#### Query Parameters
+
+| Parameter | Type | Deskripsi |
+|-----------|------|-------------|
+| status | string | Filter by status (ACTIVE/INACTIVE) |
+| role | string | Filter by role (CASHIER/SUPERVISOR) |
+| search | string | Search by name or username |
 
 #### Response
 ```json
 {
+  "success": true,
   "data": [
     {
       "id": 1,
-      "name": "John Doe",
-      "username": "cashier1",
+      "name": "Budi Santoso",
+      "username": "budi.s",
       "role": "CASHIER",
       "status": "ACTIVE",
       "is_active": true,
-      "lastLogin": "2 jam yang lalu"
+      "total_transactions": 1250,
+      "total_sales": 157500000,
+      "created_at": "2026-01-15 08:00:00",
+      "last_login_at": "2026-06-28 20:45:00"
     }
-  ]
+  ],
+  "meta": {
+    "total": 1,
+    "active": 1,
+    "inactive": 0
+  }
 }
 ```
 
 ### Create Staff
 
-**POST** `/admin/staff`
+**POST** `/api/admin/staff`
 
 #### Authentication
-Required (SUPERVISOR role)
+Diperlukan (role SUPERVISOR)
 
 #### Request Body
 
@@ -598,667 +499,111 @@ Required (SUPERVISOR role)
 |-------|------|----------|------------|
 | name | string | Yes | max:255 |
 | username | string | Yes | max:255, unique |
-| role | string | Yes | enum:CASHIER,SUPERVISOR |
+| password | string | Yes | min:8 |
+| pin | string | Yes | exactly 6 digits |
+| role | string | Yes | CASHIER or SUPERVISOR |
 | is_active | boolean | No | default: true |
-| password | string | Conditional | min:6, max:255 (required if pin not provided) |
-| pin | string | Conditional | digits:6 (required if password not provided) |
-
-**Note:** Either password or PIN must be provided, but not both.
-
-#### Example Request (Password)
-```bash
-curl -X POST http://localhost/api/admin/staff \
-  -H "Content-Type: application/json" \
-  -H "X-CSRF-TOKEN: your-csrf-token" \
-  -d '{
-    "name": "Jane Smith",
-    "username": "cashier2",
-    "role": "CASHIER",
-    "password": "password123",
-    "is_active": true
-  }'
-```
-
-#### Example Request (PIN)
-```bash
-curl -X POST http://localhost/api/admin/staff \
-  -H "Content-Type: application/json" \
-  -H "X-CSRF-TOKEN: your-csrf-token" \
-  -d '{
-    "name": "Bob Wilson",
-    "username": "supervisor1",
-    "role": "SUPERVISOR",
-    "pin": "123456",
-    "is_active": true
-  }'
-```
-
-#### Success Response
-```json
-{
-  "data": {
-    "id": 2,
-    "name": "Jane Smith",
-    "username": "cashier2",
-    "role": "CASHIER",
-    "status": "ACTIVE"
-  },
-  "message": "Staf berhasil ditambahkan."
-}
-```
-
-### Get Staff Details
-
-**GET** `/admin/staff/{user}`
-
-#### Authentication
-Required (SUPERVISOR role)
-
-#### Path Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| user | integer | User ID |
 
 #### Response
 ```json
 {
+  "success": true,
   "data": {
-    "id": 1,
-    "name": "John Doe",
-    "username": "cashier1",
+    "id": 123,
+    "name": "Dewi Lestari",
+    "username": "dewi.l",
     "role": "CASHIER",
     "status": "ACTIVE",
     "is_active": true,
-    "lastLogin": "2 jam yang lalu"
-  }
-}
-```
-
-### Update Staff
-
-**PUT** `/admin/staff/{user}`
-
-#### Authentication
-Required (SUPERVISOR role)
-
-#### Path Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| user | integer | User ID |
-
-#### Request Body
-
-All fields are optional. Only provided fields will be updated.
-
-| Field | Type | Validation |
-|-------|------|------------|
-| name | string | max:255 |
-| username | string | max:255, unique |
-| role | string | enum:CASHIER,SUPERVISOR |
-| is_active | boolean | |
-| password | string | min:6, max:255 |
-| pin | string | digits:6 |
-
-**Note:** Either password or PIN can be provided, but not both.
-
-#### Example Request
-```bash
-curl -X PUT http://localhost/api/admin/staff/1 \
-  -H "Content-Type: application/json" \
-  -H "X-CSRF-TOKEN: your-csrf-token" \
-  -d '{
-    "name": "John Doe Updated",
-    "is_active": false
-  }'
-```
-
-#### Success Response
-```json
-{
-  "data": {
-    "id": 1,
-    "name": "John Doe Updated",
-    "is_active": false
+    "created_at": "2026-03-15 09:30:00",
+    "last_login_at": null
   },
-  "message": "Staf berhasil diperbarui."
+  "message": "Staff berhasil dibuat."
 }
 ```
 
-### Delete Staff
+### Deactivate Staff
 
-**DELETE** `/admin/staff/{user}`
+**PATCH** `/api/admin/staff/{staff}`
 
 #### Authentication
-Required (SUPERVISOR role)
-
-#### Path Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| user | integer | User ID |
+Diperlukan (role SUPERVISOR)
 
 #### Response
 ```json
 {
-  "message": "Staf berhasil dihapus."
-}
-```
-
-### Reset Staff PIN
-
-**POST** `/admin/staff/{user}/reset-pin`
-
-#### Description
-Resets the staff member's PIN to a new value.
-
-#### Authentication
-Required (SUPERVISOR role)
-
-#### Path Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| user | integer | User ID |
-
-#### Request Body
-
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| pin | string | Yes | digits:6 |
-
-#### Example Request
-```bash
-curl -X POST http://localhost/api/admin/staff/1/reset-pin \
-  -H "Content-Type: application/json" \
-  -H "X-CSRF-TOKEN: your-csrf-token" \
-  -d '{
-    "pin": "654321"
-  }'
-```
-
-#### Success Response
-```json
-{
-  "message": "PIN staf berhasil direset."
+  "success": true,
+  "data": {
+    "id": 123,
+    "status": "INACTIVE",
+    "is_active": false
+  },
+  "message": "User berhasil dinonaktifkan."
 }
 ```
 
 ---
 
-## POS API
+## Approval Workflow
 
-### POS Login
+### List Pending Approvals
 
-**POST** `/pos/login`
-
-#### Description
- authenticates POS users using either credentials or PIN.
-
-#### Request Body
-
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| login_method | string | Yes | enum:CREDENTIALS,PIN |
-| role | string | No | enum:KASIR,ADMIN |
-| username | string | Conditional | max:255 (required if login_method=CREDENTIALS) |
-| password | string | Conditional | max:255 (required if login_method=CREDENTIALS) |
-| pin | string | Conditional | digits:6 (required if login_method=PIN) |
-
-#### Example Request (Credentials)
-```bash
-curl -X POST http://localhost/api/pos/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "login_method": "CREDENTIALS",
-    "username": "cashier1",
-    "password": "password123"
-  }'
-```
-
-#### Example Request (PIN)
-```bash
-curl -X POST http://localhost/api/pos/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "login_method": "PIN",
-    "pin": "123456"
-  }'
-```
-
-#### Success Response
-```json
-{
-  "redirect": "/kasir"
-}
-```
-
-#### Error Response (422)
-```json
-{
-  "message": "Kredensial tidak valid."
-}
-```
-
-### Get POS Products
-
-**GET** `/pos/products`
-
-#### Description
-Returns list of active products available for sale in POS.
+**GET** `/api/supervisor/refunds?status=pending`
 
 #### Authentication
-Required
+Diperlukan (role SUPERVISOR)
 
 #### Response
 ```json
 {
+  "success": true,
   "data": [
     {
-      "id": 1,
-      "name": "Kopi Bubuk Arabica",
-      "sku": "KPB-001",
-      "price": 50000.00,
-      "discount": 10.00,
-      "price_after_discount": 45000.00,
-      "stock": 50.0
-    }
-  ]
-}
-```
-
-### Get POS History
-
-**GET** `/pos/history`
-
-#### Description
-Returns paginated list of completed sales transactions for the current user.
-
-#### Authentication
-Required
-
-#### Query Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| page | integer | Page number (default: 1) |
-| per_page | integer | Items per page (default: 10) |
-| start_date | string | Filter by start date (YYYY-MM-DD) |
-| end_date | string | Filter by end date (YYYY-MM-DD) |
-
-#### Response
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "invoice_no": "INV-2026-001",
-      "total": 45000,
-      "payment_method": "CASH",
-      "cash_received": 50000,
-      "change": 5000,
-      "items": 1,
-      "occurred_at": "29 Jun 2026 10:30"
+      "id": 78,
+      "sale_id": 123,
+      "status": "PENDING_APPROVAL",
+      "total_amount": 7500,
+      "items": [
+        {
+          "product_name": "Teh Botol Sasa 250ml",
+          "quantity": 1,
+          "price": 7500
+        }
+      ],
+      "refund_method": "CASH",
+      "note": "Customer tidak jadi beli",
+      "created_by": "kasir1",
+      "created_at": "2026-06-28 21:00:00"
     }
   ],
   "meta": {
-    "current_page": 1,
-    "per_page": 10,
-    "total": 25,
-    "last_page": 3
+    "total": 1,
+    "pending": 1,
+    "approved": 0,
+    "rejected": 0
   }
 }
 ```
 
-### Get POS Profile
+### Approve Refund
 
-**GET** `/pos/profile`
-
-#### Description
-Returns current POS user profile information.
-
-#### Authentication
-Required
-
-#### Query Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| user_id | integer | Optional user ID to look up |
-
-#### Response
-```json
-{
-  "data": {
-    "id": 1,
-    "name": "John Doe",
-    "username": "cashier1",
-    "role": "CASHIER",
-    "last_login_at": "2 jam yang lalu"
-  }
-}
-```
-
-### POS Checkout
-
-**POST** `/pos/checkout`
-
-#### Description
-Processes a new sale transaction.
-
-#### Authentication
-Required (CASHIER or SUPERVISOR role)
+**PATCH** `/api/supervisor/refunds/{refund}/approve`
 
 #### Request Body
-
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| payment_method | string | Yes | enum:CASH,EWALLET |
-| cash_received | number | Conditional | min:0 (required if payment_method=CASH) |
-| reference | string | No | max:255 |
-| items | array | Yes | min:1 item |
-
-#### Items Array
-
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| product_id | integer | Yes | exists:products,id |
-| qty | number | Yes | min:0.001 |
-| discount_amount | number | No | min:0 |
-
-#### Example Request
-```bash
-curl -X POST http://localhost/api/pos/checkout \
-  -H "Content-Type: application/json" \
-  -H "X-CSRF-TOKEN: your-csrf-token" \
-  -d '{
-    "payment_method": "CASH",
-    "cash_received": 100000,
-    "reference": "Customer referral",
-    "items": [
-      {
-        "product_id": 1,
-        "qty": 2,
-        "discount_amount": 5000
-      }
-    ]
-  }'
-```
-
-#### Success Response
 ```json
 {
-  "sale_id": 123,
-  "invoice_no": "INV-2026-123",
-  "payment": {
-    "status": "CONFIRMED"
-  },
-  "items": [
-    {
-      "product_id": 1,
-      "product_name": "Kopi Bubuk Arabica",
-      "qty": 2,
-      "price": 50000,
-      "discount": 5000,
-      "subtotal": 95000
-    }
-  ],
-  "totals": {
-    "subtotal": 95000,
-    "discount_total": 5000,
-    "tax_total": 0,
-    "grand_total": 95000,
-    "paid_total": 95000,
-    "change_total": 5000
-  }
+  "approval_note": "Setujui refund sesuai kebijakan"
 }
 ```
 
-### POS Refund
+### Reject Refund
 
-**POST** `/pos/refunds`
-
-#### Description
-Submits a refund request for supervisor approval. Refunds require approval before processing.
-
-#### Authentication
-Required (CASHIER or SUPERVISOR role)
+**PATCH** `/api/supervisor/refunds/{refund}/reject`
 
 #### Request Body
-
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| sale_id | integer | Yes | exists:sales,id |
-| items | array | Yes | min:1 item |
-| reason | string | Yes | min:10, max:255 |
-
-#### Items Array
-
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| sale_item_id | integer | Yes | exists:sale_items,id |
-| qty | number | Yes | min:0.001 |
-
-#### Example Request
-```bash
-curl -X POST http://localhost/api/pos/refunds \
-  -H "Content-Type: application/json" \
-  -H "X-CSRF-TOKEN: your-csrf-token" \
-  -d '{
-    "sale_id": 123,
-    "items": [
-      {
-        "sale_item_id": 5,
-        "qty": 1
-      }
-    ],
-    "reason": "Barang tidak sesuai pesanan"
-  }'
-```
-
-#### Success Response
 ```json
 {
-  "data": {
-    "id": 1,
-    "sale_id": 123,
-    "total_amount": 45000,
-    "status": "PENDING"
-  },
-  "message": "Permintaan refund berhasil dikirim untuk approval supervisor."
-}
-```
-
-### POS Logout
-
-**POST** `/pos/logout`
-
-#### Description
-Logs out the current POS user and saves work session data.
-
-#### Authentication
-Required
-
-#### Response
-```json
-{
-  "status": "ok"
-}
-```
-
-### Get POS Settings
-
-**GET** `/pos/settings`
-
-#### Description
-Returns current POS settings including printer configuration.
-
-#### Authentication
-Required
-
-#### Response
-```json
-{
-  "data": {
-    "printer": {
-      "name": "EPSON TM-T82",
-      "status": "connected"
-    },
-    "sync": {
-      "mode": "auto"
-    }
-  }
-}
-```
-
-### Update POS Printer
-
-**POST** `/pos/settings/printer`
-
-#### Description
-Updates the default printer configuration.
-
-#### Authentication
-Required
-
-#### Request Body
-
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| name | string | Yes | max:255 |
-
-#### Example Request
-```bash
-curl -X POST http://localhost/api/pos/settings/printer \
-  -H "Content-Type: application/json" \
-  -H "X-CSRF-TOKEN: your-csrf-token" \
-  -d '{
-    "name": "EPSON TM-T82 II"
-  }'
-```
-
-#### Success Response
-```json
-{
-  "data": {
-    "name": "EPSON TM-T82 II",
-    "status": "connected"
-  }
-}
-```
-
-### Test POS Printer
-
-**POST** `/pos/settings/printer/test`
-
-#### Description
-Sends a test print job to the configured printer.
-
-#### Authentication
-Required
-
-#### Response
-```json
-{
-  "message": "Test print berhasil dikirim."
-}
-```
-
-### Sync POS Data
-
-**POST** `/pos/sync/batches`
-
-#### Description
-Processes batch sync transactions from offline POS devices. Supports idempotency to prevent duplicate processing.
-
-#### Authentication
-Required
-
-#### Request Body
-
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| device_id | string | Yes | max:255 |
-| batch_uuid | string | Yes | uuid |
-| transactions | array | Yes | min:1 transaction |
-
-#### Transaction Object
-
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| local_txn_uuid | string | Yes | uuid |
-| occurred_at | string | No | date |
-| checkout | object | Yes | same as /pos/checkout |
-
-#### Example Request
-```bash
-curl -X POST http://localhost/api/pos/sync/batches \
-  -H "Content-Type: application/json" \
-  -H "X-CSRF-TOKEN: your-csrf-token" \
-  -d '{
-    "device_id": "pos-device-001",
-    "batch_uuid": "550e8400-e29b-41d4-a716-446655440000",
-    "transactions": [
-      {
-        "local_txn_uuid": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
-        "checkout": {
-          "payment_method": "CASH",
-          "cash_received": 100000,
-          "items": [
-            {
-              "product_id": 1,
-              "qty": 2
-            }
-          ]
-        }
-      }
-    ]
-  }'
-```
-
-#### Success Response (All Processed)
-```json
-{
-  "message": "Batch berhasil diproses.",
-  "data": {
-    "batch_uuid": "550e8400-e29b-41d4-a716-446655440000",
-    "status": "PROCESSED",
-    "results": [
-      {
-        "local_txn_uuid": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
-        "status": "PROCESSED",
-        "sale_id": 124,
-        "invoice_no": "INV-2026-124"
-      }
-    ]
-  }
-}
-```
-
-#### Success Response (Partial Failure)
-```json
-{
-  "message": "Batch diproses dengan sebagian kegagalan.",
-  "data": {
-    "batch_uuid": "550e8400-e29b-41d4-a716-446655440000",
-    "status": "FAILED",
-    "results": [
-      {
-        "local_txn_uuid": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
-        "status": "PROCESSED",
-        "sale_id": 124,
-        "invoice_no": "INV-2026-124"
-      },
-      {
-        "local_txn_uuid": "6ba7b810-9dad-11d1-80b4-00c04fd430c9",
-        "status": "FAILED",
-        "errors": {
-          "qty": ["Jumlah item tidak valid."]
-        }
-      }
-    ]
-  }
+  "rejection_reason": "Refund melewati batas waktu 2 hari"
 }
 ```
 
@@ -1266,85 +611,110 @@ curl -X POST http://localhost/api/pos/sync/batches \
 
 ## Push Notifications
 
-### Subscribe to Push Notifications
+### Get VAPID Public Key
 
-**POST** `/push/subscriptions`
+**GET** `/api/push/vapid-public-key`
 
-#### Description
-Subscribes a user to web push notifications.
+#### Response
+```json
+{
+  "public_key": "BOtXK2J..."
+}
+```
 
-#### Authentication
-Required
+### Subscribe to Push
+
+**POST** `/api/push/subscribe`
 
 #### Request Body
-
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| endpoint | string | Yes | max:512 |
-| keys.p256dh | string | Yes | max:255 |
-| keys.auth | string | Yes | max:255 |
-| content_encoding | string | No | max:50 |
-
-#### Example Request
-```bash
-curl -X POST http://localhost/api/push/subscriptions \
-  -H "Content-Type: application/json" \
-  -H "X-CSRF-TOKEN: your-csrf-token" \
-  -d '{
-    "endpoint": "https://fcm.googleapis.com/fcm/send/...",
-    "keys": {
-      "p256dh": "BID...",
-      "auth": "gAAA..."
-    },
-    "content_encoding": "aes128gcm"
-  }'
-```
-
-#### Success Response
 ```json
 {
-  "data": {
-    "id": 1,
-    "endpoint": "https://fcm.googleapis.com/fcm/send/..."
-  },
-  "message": "Subscription berhasil dibuat."
+  "endpoint": "https://fcm.googleapis.com/fcm/send/...",
+  "keys": {
+    "p256dh": "BNQ...",
+    "auth": "..."
+  }
 }
 ```
 
-### Unsubscribe from Push Notifications
+### Send Notification
 
-**DELETE** `/push/subscriptions`
+**POST** `/api/admin/push/send`
 
-#### Description
-Removes the current user's push subscription.
+#### Request Body
+```json
+{
+  "title": "Order Baru",
+  "body": "Ada order baru dari customer Budi",
+  "data": {
+    "order_id": 123,
+    "type": "new_order"
+  }
+}
+```
 
-#### Authentication
-Required
+---
+
+## Sync Operations
+
+### Sync Offline Transactions
+
+**POST** `/api/pos/sync`
+
+#### Request Body
+```json
+{
+  "transactions": [
+    {
+      "local_txn_uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "device_id": "POS-001",
+      "items": [
+        {
+          "product_id": 123,
+          "quantity": 2,
+          "price": 6000
+        }
+      ],
+      "payment_method": "CASH",
+      "total_amount": 12000,
+      "created_at": "2026-06-28T21:00:00.000Z"
+    }
+  ]
+}
+```
 
 #### Response
 ```json
 {
-  "message": "Subscription berhasil dihapus."
-}
-```
-
-### Send Test Push Notification
-
-**POST** `/push/test`
-
-#### Description
-Sends a test push notification to all subscribed users.
-
-#### Authentication
-Required (SUPERVISOR role)
-
-#### Response
-```json
-{
-  "message": "Pengiriman test push selesai.",
+  "success": true,
   "data": {
-    "sent": 5,
-    "failed": 0
+    "synced": [
+      {
+        "local_txn_uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "sale_id": 789,
+        "created_at": "2026-06-28 21:00:00"
+      }
+    ],
+    "failed": [
+      {
+        "local_txn_uuid": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+        "error": "Product stock insufficient",
+        "retryable": true
+      }
+    ],
+    "duplicates": [
+      {
+        "local_txn_uuid": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+        "sale_id": 790,
+        "created_at": "2026-06-28 21:05:00"
+      }
+    ],
+    "summary": {
+      "total": 3,
+      "synced": 1,
+      "failed": 1,
+      "duplicates": 1
+    }
   }
 }
 ```
@@ -1357,26 +727,10 @@ Required (SUPERVISOR role)
 
 ```json
 {
-  "message": "The given data was invalid.",
+  "message": "Validasi gagal",
   "errors": {
-    "field_name": ["Error message 1", "Error message 2"]
+    "field_name": ["Pesan error 1", "Pesan error 2"]
   }
-}
-```
-
-### Unauthorized (401)
-
-```json
-{
-  "message": "Unauthorized."
-}
-```
-
-### Not Found (404)
-
-```json
-{
-  "message": "Resource not found."
 }
 ```
 
@@ -1390,38 +744,33 @@ Required (SUPERVISOR role)
 
 ---
 
-## Business Logic Notes
+## Notes
 
-### Refund Policy
-- Refunds must be requested within 2 days of the original sale
-- Supervisor approval is required for all refunds
-- The total refund amount cannot exceed the original payment
-- Refunded items must be part of the original sale
-- System checks item availability before allowing refunds
+### Partial Failures
 
-### Work Session Tracking
-- Staff work time is tracked from login to logout
-- If a user logs in again without logging out, the session continues
-- Work time is stored in seconds and accumulated across multiple sessions
-- Daily work data is reset when the work_date changes
+Batch operations mungkin mengembalikan partial failures:
+- Successful transactions tetap processed
+- Failed transactions dilog dan dapat diretry
+- Batch status menunjukkan overall success atau failure
 
 ### Stock Management
-- Stock is tracked with 3 decimal precision
-- Sale items reduce stock immediately
-- Refunds restore stock to inventory
-- Inventory recommendations calculate based on 7-day sales average
+
+- Stock ditrack dengan precision 3 decimal
+- Sale items mengurangi stock immediately
+- Refunds mengembalikan stock ke inventory
+- Inventory recommendations dihitung berdasarkan rata-rata penjualan 7 hari
 - Reorder point formula: (avg_sales_7d × lead_time) + safety_stock
 
 ### Sync Process
-- POS sync uses batch processing for offline transactions
-- Idempotency is enforced using device_id + local_txn_uuid
-- Duplicate transactions are identified and skipped
-- Partial failures allow successful transactions to complete
-- Batch status indicates overall success or failure
+
+- POS sync menggunakan batch processing untuk offline transactions
+- Idempotency di-enforce menggunakan device_id + local_txn_uuid
+- Duplicate transactions dideteksi dan di-skip
 
 ### Authentication
-- Session-based authentication is used
-- CSRF tokens are required for POST/PUT/DELETE requests
-- Staff can login using username/password or 6-digit PIN
-- Supervisor login grants access to both admin and POS features
-- Cashier login restricts access to POS features only
+
+- Session-based authentication digunakan
+- CSRF tokens diperlukan untuk POST/PUT/DELETE requests
+- Staff bisa login menggunakan username/password atau 6-digit PIN
+- Supervisor login memberikan akses ke both admin dan POS features
+- Cashier login membatasi akses hanya ke POS features

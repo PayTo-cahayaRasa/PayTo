@@ -1,274 +1,765 @@
-# Offline Sync Mechanism: Why It Matters for POS
+# Mekanisme Sync Offline: Mengapa Ini Penting untuk POS
 
-## The Problem with Traditional POS Systems
+## Masalah dengan Sistem POS Tradisional
 
-Most traditional Point of Sale systems assume constant internet connectivity. This assumption breaks down in real-world scenarios:
+Sebagian besar sistem Point of Sale tradisional mengasumsikan connectivity internet konstan. Asumsi ini runtuh dalam skenario dunia nyata:
 
-- Weak Wi-Fi signals in retail environments
-- Internet outages during peak hours
-- Network configuration issues
-- ISP outages affecting entire blocks
+- Sinyal Wi-Fi lemah di lingkungan ritel
+- Outage internet selama jam sibuk
+- Isu konfigurasi jaringan
+- Outage ISP yang mempengaruhi seluruh blok
 
-When connectivity is lost, traditional POS systems become unusable. Cashiers cannot process transactions, leading to lost sales and frustrated customers. Even minor connectivity issues can cause significant revenue loss during busy periods.
+Ketika connectivity hilang, sistem POS tradisional menjadi tidak usable. Kasir tidak bisa proses transaksi, menyebabkan lost sales dan customer frustration. Bahkan isu connectivity minor bisa cause revenue loss signifikan selama periode sibuk.
 
-## Why Offline-First Matters
+---
 
-The offline-first architecture is not a nice-to-have—it's a business necessity for a POS system. Consider these scenarios:
+## Mengapa Offline-First Penting
 
-**Scenario 1: Peak Hour Outage**
-A grocery store experiences a 15-minute internet outage during lunch rush. With offline-first, transactions continue normally. After connectivity is restored, all 200+ transactions sync automatically. Without it, the store loses those 15 minutes of sales entirely.
+Arsitektur offline-first bukanlah fitur tambahan—ini adalah business necessity untuk sistem POS. Pertimbangkan skenario ini:
 
-**Scenario 2: Mobile Cashiers**
-Pop-up shops, food trucks, and event vendors often operate in areas with unreliable connectivity. Offline-first ensures they can accept payments anywhere, then sync when back online.
+**Skenario 1: Outage Jam Sibuk**
+Sebuah supermarket mengalami outage internet 15 menit selama jam makan siang. Dengan offline-first, transaksi berjalan normal. Setelah connectivity pulih, semua 200+ transaksi sync otomatis. Tanpa itu, toko kehilangan 15 menit penjualan sepenuhnya.
 
-**Scenario 3: Network Partition**
-Sometimes networks partition—devices can communicate locally but not reach the internet. This is common in large stores with multiple networks. Offline-first handles this gracefully.
+**Skenario 2: Mobile Cashiers**
+Kasir dengan tablet bergerak kehilangan signal di bagian belakang toko. Mereka bisa continue transaksi offline dan sync ketika kembali ke area dengan signal.
 
-## IndexedDB Storage Strategy
+**Skenario 3: Network Configuration Issues**
+WiFi router perlu reboot setiap malam. Dengan offline-first, transaksi malam tidak hilang.
 
-### Why IndexedDB?
+---
 
-IndexedDB is a browser-native NoSQL database designed for storing structured data on the client. It was chosen over alternatives for specific reasons:
+## Mekanisme Offline Sync di PayTo
 
-**localStorage is insufficient**: localStorage has a ~5MB limit per origin and stores only strings. A single receipt with multiple items could easily exceed this.
+### Data Persistence di Client-side
 
-**WebSQL is deprecated**: WebSQL is no longer maintained and not supported in modern browsers.
+Transaksi offline disimpan di IndexedDB, bukan memory:
 
-**IndexedDB advantages**:
-- Large storage capacity (typically 50-80% of disk space)
-- Asynchronous operations that don't block UI
-- Index-based queries for efficient lookups
-- Support for complex data structures
-
-### The Database Schema
-
-The offline queue uses a simple but effective schema:
-
-```typescript
-interface QueuedTransaction {
-    local_txn_uuid: string;  // UUID v4 for idempotency
-    occurred_at: string;     // When transaction occurred (ISO 8601)
-    payment_method: 'CASH' | 'EWALLET';
-    cash_received?: number;
-    reference?: string;
-    items: CheckoutLineItem[];
-}
-```
-
-Each transaction is stored with a unique local UUID. The `occurred_at` timestamp is critical—it preserves the actual transaction time even if syncing is delayed. This matters for daily sales reports and audit trails.
-
-### Connection and Transactions
-
-IndexedDB operations are wrapped in an abstraction layer (`db.ts`) that handles:
-
-- Database versioning and upgrades
-- Transaction management (read/write modes)
-- Error recovery with automatic retries
-- Connection pooling for concurrent operations
-
-The abstraction ensures that database operations never fail silently. If a transaction cannot be written, the user sees an error rather than thinking their sale succeeded.
-
-## Batch Sync Protocol
-
-### The Challenge of Syncing
-
-Syncing thousands of transactions one-by-one would be extremely slow and inefficient. It would:
-
-- Exhaust battery on mobile devices
-- Waste bandwidth with HTTP overhead
-- Increase the chance of partial failures
-- Block the UI during sync
-
-### Batch Processing
-
-The sync protocol sends transactions in batches:
-
-1. Queue collects all pending transactions (up to a configurable limit)
-2. Each transaction is enriched with the local UUID
-3. Batch is sent as a single JSON payload to `/api/pos/sync/batches`
-4. Server processes the entire batch atomically
-5. Results are returned with per-transaction status
-6. Successful transactions are removed from local queue
-7. Failed transactions remain for retry
-
-The batch endpoint accepts this structure:
-
-```json
-{
-  "device_id": "device-uuid-here",
-  "batch_uuid": "batch-uuid-here",
-  "transactions": [
-    {
-      "local_txn_uuid": "uuid-1",
-      "occurred_at": "2026-06-28T20:00:00Z",
-      "checkout": { /* transaction data */ }
+```javascript
+// IndexedDB untuk offline transactions
+const openDB = async () => {
+  return await idb.openDB('payto-offline', 1, {
+    upgrade(db) {
+      if (!db.objectStoreNames.contains('transactions')) {
+        const txStore = db.createObjectStore('transactions', {
+          keyPath: 'local_txn_uuid'
+        });
+        txStore.createIndex('status', 'status');
+      }
     }
-  ]
-}
+  });
+};
+
+// Save transaction
+const saveTransaction = async (transaction) => {
+  const db = await openDB();
+  const tx = db.transaction('transactions', 'readwrite');
+  await tx.store.put(transaction);
+  await tx.done;
+};
+
+// Query transactions
+const getPendingTransactions = async () => {
+  const db = await openDB();
+  const tx = db.transaction('transactions', 'readonly');
+  const index = tx.store.index('status');
+  const cursor = await index.openCursor(IDBKeyRange.only('PENDING_SYNC'));
+  
+  const transactions = [];
+  while (cursor) {
+    transactions.push(cursor.value);
+    cursor = await cursor.advance();
+  }
+  
+  return transactions;
+};
 ```
 
-### Why Batch UUID?
+### Transaction Queue
 
-The `batch_uuid` serves multiple purposes:
+```javascript
+// Offline queue structure
+const transactionQueue = {
+  local_txn_uuid: 'uuid-v4',
+  device_id: 'POS-001',
+  items: [
+    { product_id: 123, quantity: 2, price: 6000 }
+  ],
+  payment_method: 'CASH',
+  total_amount: 12000,
+  customer_name: 'Budi',
+  created_at: '2026-06-28T21:00:00.000Z',
+  status: 'PENDING_SYNC',
+  retry_count: 0,
+  last_retry_at: null
+};
+```
 
-- **Traceability**: Each sync attempt has a unique identifier for debugging
-- **Idempotency**: The same batch can be retried without duplicate processing
-- **Audit trail**: Database stores when each batch was pushed and its status
+### Idempotency Key
 
-## Idempotency with local_txn_uuid
+Setiap transaction memiliki unique `local_txn_uuid`:
 
-### The Duplicate Transaction Problem
+```javascript
+const generateIdempotencyKey = () => {
+  return crypto.randomUUID(); // UUID v4
+};
 
-Network unreliability creates a classic distributed systems problem: if a sync request times out, should the client retry? If yes, how do we prevent duplicate transactions?
+const transaction = {
+  local_txn_uuid: generateIdempotencyKey(),
+  // ... other fields
+};
+```
 
-**The naive approach fails**:
-1. Client sends transaction to server
-2. Server processes and saves to database
-3. Network error occurs before response reaches client
-4. Client retries
-5. Transaction is processed again—duplicate sale!
+Server use ini untuk detect duplicate transactions.
 
-### The Idempotency Solution
+---
 
-Each transaction has a `local_txn_uuid` that is:
+## Checkout Process untuk Offline Transactions
 
-- Generated client-side before the transaction is even started
-- Included in the request to the backend
-- Stored in the database alongside the sale
+### Online Flow:
 
-On the server, the `PosSyncController` checks for existing idempotency keys:
+```javascript
+// Online checkout
+const checkoutOnline = async (items, paymentMethod) => {
+  const transaction = {
+    local_txn_uuid: generateIdempotencyKey(),
+    device_id: 'POS-001',
+    items,
+    payment_method: paymentMethod,
+    total_amount: calculateTotal(items),
+    created_at: new Date().toISOString(),
+    status: 'PENDING_SYNC'
+  };
+  
+  try {
+    // Try online first
+    const response = await fetch('/api/pos/checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({
+        local_txn_uuid: transaction.local_txn_uuid,
+        items,
+        payment_method: paymentMethod,
+        total_amount: transaction.total_amount
+      })
+    });
+    
+    if (response.ok) {
+      // Success - remove from queue
+      await removeFromQueue(transaction.local_txn_uuid);
+      return await response.json();
+    } else {
+      // Network error - save to queue
+      await saveToQueue(transaction);
+      throw new Error('Network error');
+    }
+  } catch (error) {
+    // Network error - queue transaction
+    await saveToQueue(transaction);
+    console.log('Transaction queued for offline sync');
+    return null;
+  }
+};
+```
+
+### Offline Flow:
+
+```javascript
+// Offline checkout
+const checkoutOffline = async (items, paymentMethod) => {
+  const transaction = {
+    local_txn_uuid: generateIdempotencyKey(),
+    device_id: 'POS-001',
+    items,
+    payment_method: paymentMethod,
+    total_amount: calculateTotal(items),
+    created_at: new Date().toISOString(),
+    status: 'PENDING_SYNC',
+    retry_count: 0
+  };
+  
+  // Save to queue
+  await saveToQueue(transaction);
+  
+  // Show success to user
+  showSuccessMessage({
+    message: 'Transaction saved offline',
+    local_txn_uuid: transaction.local_txn_uuid
+  });
+  
+  return transaction;
+};
+```
+
+---
+
+## Sync Process
+
+### Background Sync:
+
+```javascript
+// Background sync on network online
+window.addEventListener('online', async () => {
+  if (await hasPendingTransactions()) {
+    console.log('Network restored, flushing offline queue');
+    await flushOfflineQueue();
+  }
+});
+
+// Background sync timer
+setInterval(async () => {
+  if (navigator.onLine && await hasPendingTransactions()) {
+    await flushOfflineQueue();
+  }
+}, 300000); // 5 minutes
+```
+
+### Flush Offline Queue:
+
+```javascript
+const flushOfflineQueue = async () => {
+  const db = await openDB();
+  const tx = db.transaction('transactions', 'readwrite');
+  const store = tx.store;
+  
+  // Get pending transactions
+  const index = store.index('status');
+  const cursor = await index.openCursor(IDBKeyRange.only('PENDING_SYNC'));
+  
+  const batch = [];
+  const keysToDelete = [];
+  
+  // Collect up to 50 transactions
+  while (cursor && batch.length < 50) {
+    batch.push(cursor.value);
+    keysToDelete.push(cursor.primaryKey);
+    cursor = await cursor.advance();
+  }
+  
+  if (batch.length === 0) {
+    return;
+  }
+  
+  // Send to server
+  try {
+    const response = await fetch('/api/pos/sync', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
+      },
+      body: JSON.stringify({
+        transactions: batch.map(t => ({
+          local_txn_uuid: t.local_txn_uuid,
+          device_id: t.device_id,
+          items: t.items,
+          payment_method: t.payment_method,
+          total_amount: t.total_amount,
+          customer_name: t.customer_name,
+          created_at: t.created_at
+        }))
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Remove synced transactions
+      for (const key of keysToDelete) {
+        await store.delete(key);
+      }
+      
+      console.log(`Synced ${batch.length} transactions`);
+    }
+  } catch (error) {
+    console.error('Sync failed:', error);
+    
+    // Update retry count
+    for (const txn of batch) {
+      txn.retry_count = (txn.retry_count || 0) + 1;
+      txn.last_retry_at = new Date().toISOString();
+      await store.put(txn);
+    }
+  } finally {
+    await tx.done;
+  }
+};
+```
+
+---
+
+## Idempotency di Server-side
+
+### Duplicate Detection:
 
 ```php
-$idempotencyKey = $deviceId . ':' . $localTransactionUuid;
-$existingKey = SyncIdempotencyKey::query()
-    ->where('key', $idempotencyKey)
-    ->first();
-```
-
-If found, the server returns the original sale ID without processing again.
-
-### Why This Matters
-
-This pattern ensures that:
-
-- **No data loss**: Retries don't result in lost transactions
-- **No duplicates**: The same transaction UUID is never processed twice
-- **Consistency**: The client and server have the same view of what was sold
-
-The `local_txn_uuid` is generated using `crypto.randomUUID()` in the browser, which provides cryptographically strong uniqueness. The probability of collision is negligible (1 in 2^122).
-
-## Conflict Resolution
-
-### What Constitutes a Conflict?
-
-In a distributed POS system, conflicts can occur in several forms:
-
-**Inventory Conflict**:
-1. Transaction A decrements stock from 10 to 5
-2. Transaction B (offline) also sees stock at 10
-3. Both try to sell 6 units each
-4. One must fail to prevent negative inventory
-
-**Resolution Strategy**: The `CheckoutProcessor` validates stock availability within a database transaction. If stock was decremented by another process, the transaction fails with a clear error message: "Stock tidak tersedia."
-
-**Price Conflict**:
-1. Offline transaction created with price $10
-2. Price updated to $12 while offline
-3. Transaction syncs with old price
-
-**Resolution Strategy**: We don't prevent this. Historical transactions are immutable records. They reflect the price at the time of sale, which is correct for auditing. Current stock and pricing are separate concerns.
-
-**Duplicate Transaction**:
-Already handled by the idempotency key check.
-
-### Best Effort vs Strong Consistency
-
-PayTo uses a "best effort" approach for offline transactions. Transactions are processed in the order they were created (based on `occurred_at`), but there's no distributed locking mechanism. This is intentional:
-
-- **Performance**: Distributed locking adds latency and complexity
-- **Scalability**: Locks don't scale well with many devices
-- **Acceptable risk**: For POS, occasional out-of-order processing is acceptable; losing sales is not
-
-## Sync Status Tracking
-
-### The Status Enum
-
-Each synced transaction receives one of four statuses:
-
-**PROCESSED**: Transaction was successfully saved to the database. The sale is now part of the official sales record.
-
-**DUPLICATE**: The `local_txn_uuid` was already processed. This could happen due to intentional retries or network retries. The original sale ID is returned.
-
-**FAILED**: The transaction could not be processed. Common reasons:
-- Product no longer exists (deleted while offline)
-- Insufficient stock (stock was sold by another device)
-- Validation errors (malformed data)
-
-**PENDING**: Not currently used, but reserved for transactions queued for future sync attempts.
-
-### Client-Side Handling
-
-The `flushCheckoutQueue` function handles results intelligently:
-
-```typescript
-const removableStatuses = new Set(['PROCESSED', 'DUPLICATE']);
-
-for (const result of results) {
-    if (removableStatuses.has(result.status)) {
-        await deleteQueuedTransaction(result.local_txn_uuid);
+// PosSyncController.php
+public function store(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'transactions' => 'required|array|min:1|max:50',
+        'transactions.*.local_txn_uuid' => 'required|string|uuid',
+        'transactions.*.device_id' => 'required|string',
+        'transactions.*.items' => 'required|array',
+        'transactions.*.total_amount' => 'required|numeric',
+    ]);
+    
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validation failed',
+            'errors' => $validator->errors()
+        ], 422);
     }
+    
+    $results = [
+        'synced' => [],
+        'failed' => [],
+        'duplicates' => []
+    ];
+    
+    DB::transaction(function () use ($request, &$results) {
+        foreach ($request->transactions as $txn) {
+            // Check for duplicate using idempotency key
+            $existingKey = SyncIdempotencyKey::where('local_txn_uuid', $txn['local_txn_uuid'])
+                ->where('device_id', $txn['device_id'])
+                ->first();
+            
+            if ($existingKey) {
+                // Duplicate transaction
+                $results['duplicates'][] = [
+                    'local_txn_uuid' => $txn['local_txn_uuid'],
+                    'sale_id' => $existingKey->ref_id,
+                    'created_at' => $existingKey->created_at
+                ];
+                continue;
+            }
+            
+            // Process transaction
+            try {
+                $sale = CheckoutProcessor::process($txn, 'offline');
+                
+                // Record idempotency key
+                SyncIdempotencyKey::create([
+                    'local_txn_uuid' => $txn['local_txn_uuid'],
+                    'device_id' => $txn['device_id'],
+                    'ref_id' => $sale->id,
+                    'ref_type' => Sale::class
+                ]);
+                
+                $results['synced'][] = [
+                    'local_txn_uuid' => $txn['local_txn_uuid'],
+                    'sale_id' => $sale->id,
+                    'created_at' => $sale->created_at
+                ];
+            } catch (\Exception $e) {
+                \Log::error('Offline sync failed: ' . $e->getMessage());
+                
+                $results['failed'][] = [
+                    'local_txn_uuid' => $txn['local_txn_uuid'],
+                    'error' => $e->getMessage(),
+                    'retryable' => true
+                ];
+            }
+        }
+    });
+    
+    return response()->json([
+        'success' => true,
+        'data' => $results,
+        'summary' => [
+            'total' => count($request->transactions),
+            'synced' => count($results['synced']),
+            'failed' => count($results['failed']),
+            'duplicates' => count($results['duplicates'])
+        ]
+    ]);
 }
 ```
 
-Transactions with status `PROCESSED` or `DUPLICATE` are removed from the local queue. `FAILED` transactions remain for manual review or retry.
+### Idempotency Table:
 
-### Dashboard Visibility
-
-The admin dashboard shows sync status for each transaction:
-
-- **SYNCED**: Transaction was successfully processed and is in the database
-- **PENDING**: Transaction exists in the offline queue but hasn't been synced yet
-
-This visibility is crucial for store managers to verify that all sales are accounted for.
-
-## Reliability Guarantees
-
-### Data Durability
-
-Transactions stored in IndexedDB survive browser restarts, crashes, and power failures. They're written to disk, not kept in memory.
-
-### Retry Logic
-
-If a sync fails due to network error, the queue persists and retries on next online event:
-
-```typescript
-window.addEventListener('online', () => {
-    void flushCheckoutQueue();
+```php
+// Create sync_idempotency_keys table
+Schema::create('sync_idempotency_keys', function (Blueprint $table) {
+    $table->id();
+    $table->string('local_txn_uuid'); // Unique transaction UUID
+    $table->string('device_id'); // POS terminal ID
+    $table->morphs('ref'); // Reference to sale/refund
+    $table->timestamps();
+    
+    $table->unique(['local_txn_uuid', 'device_id']);
 });
 ```
 
-This ensures eventual consistency—even if sync fails repeatedly, it will eventually succeed when connectivity is restored.
+---
 
-### Manual Intervention
+## Error Recovery
 
-For transactions that remain in FAILED status, the admin interface provides visibility and manual resolution options. This might include:
+### Retry Logic:
 
-- Verifying product still exists
-- Adjusting stock manually
-- Approving the sale as valid despite validation failure
+```javascript
+const MAX_RETRIES = 5;
+const RETRY_DELAY = 60000; // 1 minute
 
-The goal is never to lose sales data. If a transaction cannot be processed automatically, it's flagged for human review rather than discarded.
+const retryFailedTransactions = async () => {
+  const db = await openDB();
+  const tx = db.transaction('transactions', 'readwrite');
+  const store = tx.store;
+  
+  const now = new Date();
+  
+  // Get failed transactions
+  const cursor = await store.openCursor();
+  
+  while (cursor) {
+    const txn = cursor.value;
+    
+    if (txn.status === 'FAILED') {
+      // Check retry count
+      if ((txn.retry_count || 0) < MAX_RETRIES) {
+        // Check delay
+        const lastRetry = txn.last_retry_at ? new Date(txn.last_retry_at) : null;
+        
+        if (!lastRetry || (now - lastRetry > RETRY_DELAY)) {
+          // Retry transaction
+          txn.retry_count = (txn.retry_count || 0) + 1;
+          txn.last_retry_at = now.toISOString();
+          txn.status = 'PENDING_SYNC';
+          
+          await store.put(txn);
+          console.log(`Retry ${txn.retry_count}: ${txn.local_txn_uuid}`);
+        }
+      }
+    }
+    
+    cursor = await cursor.advance();
+  }
+  
+  await tx.done;
+};
 
-## Summary: Why Offline-First Is Essential
+// Run retry logic periodically
+setInterval(retryFailedTransactions, 60000);
+```
 
-The offline-first architecture transforms POS from a connectivity-dependent system into a reliable business tool. It's not about avoiding connectivity—it's about designing for when connectivity fails.
+### Failed Transaction Handling:
+
+```javascript
+// View failed transactions
+const viewFailedTransactions = async () => {
+  const db = await openDB();
+  const tx = db.transaction('transactions', 'readonly');
+  const store = tx.store;
+  
+  const failed = [];
+  const cursor = await store.openCursor();
+  
+  while (cursor) {
+    if (cursor.value.status === 'FAILED') {
+      failed.push(cursor.value);
+    }
+    cursor = await cursor.advance();
+  }
+  
+  return failed;
+};
+
+// Manual retry
+const manualRetry = async (localTxnUuid) => {
+  const db = await openDB();
+  const txn = await db.get('transactions', localTxnUuid);
+  
+  if (txn) {
+    txn.status = 'PENDING_SYNC';
+    txn.retry_count = 0;
+    txn.last_retry_at = null;
+    await db.put('transactions', txn);
+    
+    console.log('Transaction marked for retry');
+  }
+};
+
+// Delete failed transaction
+const deleteFailedTransaction = async (localTxnUuid) => {
+  const db = await openDB();
+  await db.delete('transactions', localTxnUuid);
+  
+  console.log('Failed transaction deleted');
+};
+```
+
+### Admin Interface:
+
+```vue
+<!-- FailedTransactions.vue -->
+<template>
+  <div>
+    <h2>Failed Transactions</h2>
+    
+    <div v-if="failedTransactions.length === 0">
+      No failed transactions
+    </div>
+    
+    <div v-else>
+      <table>
+        <thead>
+          <tr>
+            <th>Local UUID</th>
+            <th>Amount</th>
+            <th>Retry Count</th>
+            <th>Last Retry</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="txn in failedTransactions" :key="txn.local_txn_uuid">
+            <td>{{ txn.local_txn_uuid }}</td>
+            <td>{{ formatCurrency(txn.total_amount) }}</td>
+            <td>{{ txn.retry_count }}</td>
+            <td>{{ formatDate(txn.last_retry_at) }}</td>
+            <td>
+              <button @click="retry(txn.local_txn_uuid)">Retry</button>
+              <button @click="deleteTxn(txn.local_txn_uuid)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      failedTransactions: []
+    };
+  },
+  async mounted() {
+    this.failedTransactions = await viewFailedTransactions();
+  },
+  methods: {
+    async retry(uuid) {
+      await manualRetry(uuid);
+      this.failedTransactions = await viewFailedTransactions();
+    },
+    async deleteTxn(uuid) {
+      await deleteFailedTransaction(uuid);
+      this.failedTransactions = await viewFailedTransactions();
+    },
+    formatCurrency(amount) {
+      return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR'
+      }).format(amount);
+    },
+    formatDate(date) {
+      return new Date(date).toLocaleString('id-ID');
+    }
+  }
+};
+</script>
+```
+
+---
+
+## Data Integrity
+
+### Database Transactions:
+
+CheckoutProcessor uses database transactions untuk ensure data integrity:
+
+```php
+class CheckoutProcessor
+{
+    public static function process(array $txnData, string $source): Sale
+    {
+        return DB::transaction(function () use ($txnData, $source) {
+            // Validate stock
+            foreach ($txnData['items'] as $item) {
+                $stock = StockItem::where('product_id', $item['product_id'])
+                    ->lockForUpdate()
+                    ->first();
+                
+                if ($stock->quantity < $item['quantity']) {
+                    throw new \Exception("Stock tidak tersedia untuk produk {$item['product_id']}");
+                }
+                
+                // Decrement stock
+                $stock->decrement('quantity', $item['quantity']);
+                
+                // Record stock movement
+                StockMovement::create([
+                    'product_id' => $item['product_id'],
+                    'product_name_snapshot' => $stock->product->name,
+                    'previous_quantity' => $stock->quantity + $item['quantity'],
+                    'adjustment' => -$item['quantity'],
+                    'new_quantity' => $stock->quantity,
+                    'adjustment_type' => 'SALE',
+                    'related_type' => Sale::class,
+                    'related_id' => null, // Will be set after sale created
+                    'reason' => "Offline {$source} sale",
+                    'created_by' => $txnData['user_id']
+                ]);
+            }
+            
+            // Create sale
+            $sale = Sale::create([
+                'user_id' => $txnData['user_id'],
+                'customer_name' => $txnData['customer_name'] ?? null,
+                'total_amount' => $txnData['total_amount'],
+                'payment_method' => $txnData['payment_method'],
+                'status' => 'PAID',
+                'source' => $source
+            ]);
+            
+            // Create sale items
+            foreach ($txnData['items'] as $item) {
+                SaleItem::create([
+                    'sale_id' => $sale->id,
+                    'product_id' => $item['product_id'],
+                    'product_name_snapshot' => $item['product_name'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                    'total_price' => $item['quantity'] * $item['price']
+                ]);
+                
+                // Update stock movement with sale ID
+                StockMovement::where('related_id', null)
+                    ->where('related_type', StockMovement::class)
+                    ->update(['related_id' => $sale->id]);
+            }
+            
+            // Create payment
+            Payment::create([
+                'sale_id' => $sale->id,
+                'payment_method' => $txnData['payment_method'],
+                'amount' => $txnData['total_amount'],
+                'status' => 'SUCCESS'
+            ]);
+            
+            return $sale;
+        });
+    }
+}
+```
+
+### Validation:
+
+Stock validation dilakukan dalam transaction untuk prevent race conditions:
+
+```php
+// Validation rules for offline sync
+$rules = [
+    'transactions.*.items.*.product_id' => 'required|exists:products,id',
+    'transactions.*.items.*.quantity' => 'required|numeric|min:0.001',
+    'transactions.*.items.*.price' => 'required|numeric|min:0',
+    'transactions.*.total_amount' => 'required|numeric|min:0',
+];
+
+$validator = Validator::make($request->all(), $rules);
+
+// Validate stock availability
+foreach ($txn['items'] as $item) {
+    $stock = StockItem::where('product_id', $item['product_id'])
+        ->lockForUpdate()
+        ->first();
+    
+    if ($stock->quantity < $item['quantity']) {
+        throw new \Exception("Stock tidak tersedia");
+    }
+}
+```
+
+---
+
+## Monitoring and Metrics
+
+### Dashboard Stats:
+
+```javascript
+const getOfflineStats = async () => {
+  const db = await openDB();
+  const tx = db.transaction('transactions', 'readonly');
+  const store = tx.store;
+  
+  let total = 0;
+  let pending = 0;
+  let failed = 0;
+  let duplicates = 0;
+  let totalAmount = 0;
+  
+  const cursor = await store.openCursor();
+  
+  while (cursor) {
+    total++;
+    totalAmount += cursor.value.total_amount;
+    
+    if (cursor.value.status === 'PENDING_SYNC') {
+      pending++;
+    } else if (cursor.value.status === 'FAILED') {
+      failed++;
+    } else if (cursor.value.status === 'DUPLICATE') {
+      duplicates++;
+    }
+    
+    cursor = await cursor.advance();
+  }
+  
+  return {
+    total,
+    pending,
+    failed,
+    duplicates,
+    totalAmount,
+    pendingAmount: pending * (totalAmount / total)
+  };
+};
+```
+
+### Sync Status API:
+
+```bash
+GET /api/pos/sync/status
+Authorization: Bearer {token}
+```
+
+Response:
+```json
+{
+  "success": true,
+  "data": {
+    "is_online": true,
+    "last_sync_at": "2026-06-28 21:00:00",
+    "pending_transactions": 3,
+    "failed_transactions": 0,
+    "last_sync_summary": {
+      "total": 150,
+      "synced": 148,
+      "failed": 0,
+      "duplicates": 2
+    }
+  }
+}
+```
+
+---
+
+## Summary: Mengapa Offline-First Penting
+
+Offline-first architecture mengubah POS dari sistem yang dependen connectivity menjadi alat bisnis yang andal.
 
 Key takeaways:
 
-- **Zero downtime**: Transactions continue during outages
-- **No data loss**: All sales are eventually recorded
-- **No duplicates**: Idempotency prevents double-charging
-- **Reconciliation**: Clear sync status and audit trail
-- **Business continuity**: Store operations continue regardless of network status
+- **Zero downtime**: Transaksi continue saat outage
+- **No data loss**: Semua sales eventually recorded
+- **No duplicates**: Idempotency mencegah double-charging
+- **Reconciliation**: Clear sync status dan audit trail
+- **Business continuity**: Operasi toko continue terlepas dari network status
 
-For a retail business, these guarantees translate directly to revenue protection and customer satisfaction.
+Untuk bisnis ritel, jaminan ini translate langsung ke revenue protection dan customer satisfaction.
+
+The goal is never to lose sales data. If a transaction cannot be processed automatically, it's flagged for human review rather than discarded.

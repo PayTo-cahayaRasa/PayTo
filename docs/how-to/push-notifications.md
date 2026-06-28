@@ -1,321 +1,610 @@
-# Push Notification Setup
+# Setup Push Notification
 
-Learn how to configure and send push notifications to POS terminals for important alerts and updates.
+Pelajari cara mengonfigurasi dan mengirim push notifications ke POS terminals untuk peringatan penting dan updates.
 
 ## Overview
 
-Push notifications enable real-time communication with POS terminals for order confirmations, alerts, and system updates using the Web Push protocol.
+Push notifications memungkinkan real-time communication dengan POS terminals untuk order confirmations, alerts, dan system updates menggunakan Web Push protocol.
 
-## Problem: Need to generate VAPID keys for push notifications
+---
 
-Setting up VAPID (Voluntary Application Server Identification) keys for secure push notifications.
+## Masalah: Perlu generate VAPID keys untuk push notifications
 
-### Solution
+Setup VAPID (Voluntary Application Server Identification) keys untuk secure push notifications.
 
-**Generate VAPID keys using Laravel Tinker:**
+### Solusi
+
+**Generate VAPID keys menggunakan Laravel Tinker:**
 
 ```bash
 php artisan tinker
 ```
 
 ```php
-// Generate VAPID keys
-$publicKey = 'BDi5f6e5V8xK6Yz...'; // 87 chars base64
-$privateKey = 'qN8Z3e5R6t8U9y...'; // 44 chars base64
-$subject = 'mailto:admin@payto.local';
+use WebPush\WebPush;
+
+$publicKey = WebPush::generateVAPIDKeys();
+echo "Public Key: " . $publicKey['publicKey'] . "\n";
+echo "Private Key: " . $publicKey['privateKey'] . "\n";
 ```
 
-**Or generate programmatically:**
-
-```bash
-# Using minishlink/webpush CLI (if available)
-composer require minishlink/web-push
-```
-
-**Store VAPID keys in `.env`:**
+**Hasil keys:**
 
 ```
-VAPID_PUBLIC_KEY=BDi5f6e5V8xK6Yz...
-VAPID_PRIVATE_KEY=qN8Z3e5R6t8U9y...
-VAPID_SUBJECT=mailto:admin@payto.local
+Public Key: BOtXK2J... (Base64 encoded)
+Private Key: d4cHd... (Base64 encoded)
 ```
 
-**Verify configuration:**
+**Simpan di `.env`:**
+
+```
+VAPID_PUBLIC_KEY=BOtXK2J...
+VAPID_PRIVATE_KEY=d4cHd...
+VAPID_SUBJECT=mailto:admin@example.com
+```
+
+**Get VAPID keys in PHP:**
 
 ```php
-// In a tinker session
-dd(config('services.vapid'));
+$publicKey = config('services.vapid.public_key');
+$privateKey = config('services.vapid.private_key');
+$subject = config('services.vapid.subject');
 ```
 
-**Expected output:**
+---
 
-```php
-[
-  "public_key" => "BDi5f6e5V8xK6Yz...",
-  "private_key" => "qN8Z3e5R6t8U9y...",
-  "subject" => "mailto:admin@payto.local"
-]
-```
+## Masalah: Subscribe user ke push notifications
 
-## Problem: Need to subscribe a POS terminal to push notifications
+User perlu subscribe untuk menerima push notifications.
 
-Setting up a POS terminal to receive push notifications.
+### Solusi
 
-### Solution
-
-**Subscribe from frontend (React/Inertia):**
+**Subscribe user:**
 
 ```javascript
-import { useEffect } from 'react';
-
-function usePushSubscription() {
-  useEffect(() => {
-    const subscribeToPush = async () => {
-      try {
-        // Check service worker registration
-        if ('serviceWorker' in navigator && 'PushManager' in window) {
-          const registration = await navigator.serviceWorker.ready;
-          
-          // Check if already subscribed
-          const existingSubscription = await registration.pushManager.getSubscription();
-          if (existingSubscription) {
-            console.log('Already subscribed:', existingSubscription);
-            return;
-          }
-          
-          // Subscribe with VAPID public key
-          const vapidPublicKey = 'BDi5f6e5V8xK6Yz...'; // Your public key
-          const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
-          
-          const subscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: convertedVapidKey
-          });
-          
-          // Send subscription to backend
-          await fetch('/api/push/subscriptions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify({
-              endpoint: subscription.endpoint,
-              keys: {
-                p256dh: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))),
-                auth: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth'))))
-              }
-            })
-          });
-          
-          console.log('Subscribed successfully');
-        }
-      } catch (error) {
-        console.error('Push subscription error:', error);
-      }
-    };
+const subscribeUser = async () => {
+  // Get service worker registration
+  const registration = await navigator.serviceWorker.ready;
+  
+  // Get VAPID public key
+  const response = await fetch('/api/push/vapid-public-key');
+  const { publicKey } = await response.json();
+  
+  // Subscribe
+  const subscribeOptions = {
+    userVisibleOnly: true,
+    applicationServerKey: publicKey
+  };
+  
+  try {
+    const subscription = await registration.pushManager.subscribe(subscribeOptions);
     
-    subscribeToPush();
-  }, []);
-}
-
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
-  
-  const rawData = atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-  
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
+    // Send subscription to server
+    await fetch('/api/push/subscribe', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify(subscription)
+    });
+    
+    console.log('Subscribed successfully');
+    return subscription;
+  } catch (error) {
+    console.error('Subscription failed:', error);
+    throw error;
   }
-  
-  return outputArray;
-}
+};
 ```
 
-**Expected response:**
+**Server-side subscription handler:**
 
-```json
+```php
+// PushSubscriptionController.php
+public function store(Request $request)
 {
-  "message": "Push subscription created successfully.",
-  "data": {
-    "id": 1,
-    "endpoint": "https://fcm.googleapis.com/fcm/send/xyz123...",
-    "public_key": "BDi5f6e5V8xK6Yz...",
-    "last_seen_at": "2026-06-28T20:30:00.000000Z"
-  }
+    $validator = Validator::make($request->all(), [
+        'endpoint' => 'required|url',
+        'keys.p256dh' => 'required|string',
+        'keys.auth' => 'required|string'
+    ]);
+    
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid subscription data',
+            'errors' => $validator->errors()
+        ], 422);
+    }
+    
+    $user = $request->user();
+    
+    // Check for existing subscription
+    $existing = PushSubscription::where('endpoint', $request->endpoint)
+        ->where('user_id', $user->id)
+        ->first();
+    
+    if ($existing) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Already subscribed'
+        ]);
+    }
+    
+    // Create subscription
+    PushSubscription::create([
+        'user_id' => $user->id,
+        'endpoint' => $request->endpoint,
+        'keys' => [
+            'p256dh' => $request->keys->p256dh,
+            'auth' => $request->keys->auth
+        ],
+        'device_info' => $request->header('User-Agent'),
+        'active' => true
+    ]);
+    
+    return response()->json([
+        'success' => true,
+        'message' => 'Subscribed successfully'
+    ]);
 }
 ```
 
-**What happens:**
-- Subscription is stored in database
-- Subscription can receive notifications for this user
-- Last seen timestamp is updated
-- Push service will deliver notifications to this endpoint
+---
 
-## Problem: Need to send test push notification
+## Masalah: Unsubscribe dari push notifications
 
-Verifying the push notification system is working correctly.
+User ingin stop menerima push notifications.
 
-### Solution
+### Soloise
 
-**Send test notification:**
+**Unsubscribe user:**
+
+```javascript
+const unsubscribeUser = async () => {
+  const registration = await navigator.serviceWorker.ready;
+  
+  const subscription = await registration.pushManager.getSubscription();
+  
+  if (!subscription) {
+    console.log('Not subscribed');
+    return;
+  }
+  
+  // Remove from server
+  try {
+    await fetch('/api/push/unsubscribe', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({ endpoint: subscription.endpoint })
+    });
+  } catch (error) {
+    console.error('Failed to unsubscribe from server:', error);
+  }
+  
+  // Remove from browser
+  try {
+    await subscription.unsubscribe();
+    console.log('Unsubscribed successfully');
+  } catch (error) {
+    console.error('Failed to unsubscribe from push manager:', error);
+  }
+};
+```
+
+**Server-side unsubscribe handler:**
+
+```php
+// PushSubscriptionController.php
+public function destroy(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'endpoint' => 'required|url'
+    ]);
+    
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid request'
+        ], 422);
+    }
+    
+    $user = $request->user();
+    
+    $subscription = PushSubscription::where('endpoint', $request->endpoint)
+        ->where('user_id', $user->id)
+        ->first();
+    
+    if ($subscription) {
+        $subscription->delete();
+    }
+    
+    return response()->json([
+        'success' => true,
+        'message' => 'Unsubscribed successfully'
+    ]);
+}
+```
+
+---
+
+## Masalah: Send push notification
+
+Send notification ke user atau all POS terminals.
+
+### Solusi
+
+**Send single notification:**
+
+```php
+// Send to single user
+public function sendToUser($userId, $title, $body, $data = [])
+{
+    $user = User::find($userId);
+    
+    if (!$user) {
+        throw new \Exception('User not found');
+    }
+    
+    $subscriptions = PushSubscription::where('user_id', $userId)
+        ->where('active', true)
+        ->get();
+    
+    $payload = json_encode([
+        'title' => $title,
+        'body' => $body,
+        'icon' => '/images/icon-192.png',
+        'data' => $data
+    ]);
+    
+    $sent = 0;
+    $failed = 0;
+    
+    foreach ($subscriptions as $subscription) {
+        try {
+            $push = new \WebPush\WebPush([
+                'VAPID' => [
+                    'publicKey' => config('services.vapid.public_key'),
+                    'privateKey' => config('services.vapid.private_key'),
+                    'subject' => config('services.vapid.subject')
+                ]
+            ]);
+            
+            $push->send(
+                $subscription->endpoint,
+                $payload,
+                $subscription->getHeaders()
+            );
+            
+            $sent++;
+        } catch (\Exception $e) {
+            \Log::error('Push notification failed: ' . $e->getMessage());
+            $failed++;
+            
+            // Mark subscription as inactive if failed
+            $subscription->update(['active' => false]);
+        }
+    }
+    
+    return [
+        'sent' => $sent,
+        'failed' => $failed
+    ];
+}
+
+// Usage
+$notification = new \App\Notifications\NewOrderNotification($order);
+$notification->sendToUser($userId, 'Order Baru', 'Ada order baru dari ' . $order->customer_name);
+```
+
+**Send bulk notification:**
+
+```php
+// Send to all active subscriptions
+public function sendToAll($title, $body, $data = [])
+{
+    $subscriptions = PushSubscription::where('active', true)->get();
+    
+    $payload = json_encode([
+        'title' => $title,
+        'body' => $body,
+        'icon' => '/images/icon-192.png',
+        'data' => $data
+    ]);
+    
+    $sent = 0;
+    $failed = 0;
+    
+    foreach ($subscriptions as $subscription) {
+        try {
+            $push = new \WebPush\WebPush([
+                'VAPID' => [
+                    'publicKey' => config('services.vapid.public_key'),
+                    'privateKey' => config('services.vapid.private_key'),
+                    'subject' => config('services.vapid.subject')
+                ]
+            ]);
+            
+            $push->send(
+                $subscription->endpoint,
+                $payload,
+                $subscription->getHeaders()
+            );
+            
+            $sent++;
+        } catch (\Exception $e) {
+            \Log::error('Push notification failed: ' . $e->getMessage());
+            $failed++;
+            
+            $subscription->update(['active' => false]);
+        }
+    }
+    
+    return [
+        'sent' => $sent,
+        'failed' => $failed
+    ];
+}
+```
+
+**Push notification controller:**
+
+```php
+// PushNotificationController.php
+public function send(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'title' => 'required|string|max:100',
+        'body' => 'required|string|max:500',
+        'user_id' => 'nullable|exists:users,id',
+        'data' => 'nullable|array'
+    ]);
+    
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validation failed',
+            'errors' => $validator->errors()
+        ], 422);
+    }
+    
+    try {
+        if ($request->user_id) {
+            $result = $this->sendToUser($request->user_id, $request->title, $request->body, $request->data);
+        } else {
+            $result = $this->sendToAll($request->title, $request->body, $request->data);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Notifications sent',
+            'data' => $result
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to send notifications',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+```
+
+**Example usage:**
 
 ```bash
-POST /api/push/test
+POST /api/admin/push/send
 Content-Type: application/json
-Authorization: Bearer {admin_token}
+Authorization: Bearer {token}
 
 {
-  "title": "Test Notification",
-  "body": "This is a test push notification from PayTo POS.",
-  "icon": "/logo.png"
+  "title": "Order Baru",
+  "body": "Ada order baru dari customer Budi",
+  "data": {
+    "order_id": 123,
+    "type": "new_order"
+  }
 }
 ```
 
-**Expected response:**
-
+Response:
 ```json
 {
-  "message": "Pengiriman test push selesai.",
+  "success": true,
+  "message": "Notifications sent",
   "data": {
-    "sent": 1,
+    "sent": 3,
     "failed": 0
   }
 }
 ```
 
-**Send to specific staff member:**
+---
 
-```bash
-POST /api/push/test
-Content-Type: application/json
-Authorization: Bearer {admin_token}
+## Push Event Handling di Service Worker
 
-{
-  "user_id": 56,
-  "title": "Shift Change Notification",
-  "body": "Your shift is starting in 30 minutes.",
-  "data": {
-    "type": "shift_reminder",
-    "timestamp": "2026-06-28T20:30:00+07:00"
+**Handle push events:**
+
+```javascript
+self.addEventListener('push', (event) => {
+  const data = event.data.json();
+  
+  const options = {
+    body: data.body,
+    icon: '/images/icon-192.png',
+    badge: '/images/badge-72.png',
+    vibrate: [200, 100, 200],
+    tag: 'notification-tag',
+    silent: false,
+    data: data.data || {}
+  };
+  
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  
+  if (event.action) {
+    // Handle notification action
+    console.log('Action clicked:', event.action);
+  } else {
+    // Open app
+    event.waitUntil(
+      clients.openWindow('/')
+    );
   }
-}
+});
 ```
 
-**Expected response:**
+---
 
-```json
-{
-  "message": "Pengiriman test push selesai.",
-  "data": {
-    "sent": 1,
-    "failed": 0
-  }
-}
-```
-
-**What happens:**
-- Notification is sent to all subscribed devices
-- Delivery report is collected
-- Failed subscriptions are logged
-- Success/failure count is returned
-
-## Problem: Need to handle notification permissions
-
-Managing browser push notification permissions and prompts.
-
-### Solution
+## Notification Permission Handling
 
 **Check permission status:**
 
 ```javascript
-const permission = await Notification.requestPermission();
-console.log('Permission:', permission); // 'granted', 'denied', or 'default'
+const checkNotificationPermission = async () => {
+  if (!('Notification' in window)) {
+    console.log('Notifications not supported');
+    return 'unsupported';
+  }
+  
+  const permission = await Notification.requestPermission();
+  
+  if (permission === 'granted') {
+    console.log('Notification permission granted');
+    return 'granted';
+  } else if (permission === 'denied') {
+    console.log('Notification permission denied');
+    return 'denied';
+  } else {
+    return 'default';
+  }
+};
+
+// Usage
+const permission = await checkNotificationPermission();
+
+if (permission === 'granted') {
+  await subscribeUser();
+} else if (permission === 'default') {
+  // Show button to request permission
+  document.getElementById('notifyBtn').style.display = 'block';
+}
 ```
 
-**Request permission with user interaction:**
+**Request permission with context:**
 
 ```javascript
-function requestPushPermission() {
+const requestNotificationPermission = async () => {
   if (!('Notification' in window)) {
-    alert('This browser does not support notifications.');
+    alert('Notifications not supported in this browser');
     return;
   }
   
-  Notification.requestPermission().then(permission => {
-    if (permission === 'granted') {
-      subscribeToPush();
-    } else {
-      console.log('Notification permission denied');
-    }
-  });
-}
-```
-
-**Listen for permission changes:**
-
-```javascript
-navigator.permissions.query({ name: 'notifications' }).then(result => {
-  console.log('Permission state:', result.state);
+  const permission = await Notification.requestPermission();
   
-  result.onchange = () => {
-    console.log('Permission changed to:', result.state);
-    // Re-check subscription status
-  };
-});
-```
-
-**Display subscription status:**
-
-```javascript
-async function checkSubscriptionStatus() {
-  const registration = await navigator.serviceWorker.ready;
-  const subscription = await registration.pushManager.getSubscription();
-  
-  if (subscription) {
-    console.log('✓ Subscribed to push notifications');
-    console.log('Endpoint:', subscription.endpoint);
+  if (permission === 'granted') {
+    console.log('Permission granted');
+    await subscribeUser();
   } else {
-    console.log('✗ Not subscribed - show subscribe button');
+    console.log('Permission denied');
+    alert('Notifications denied. You can enable them in browser settings.');
   }
-}
-```
+};
 
-**Unsubscribe from notifications:**
-
-```javascript
-async function unsubscribe() {
-  const registration = await navigator.serviceWorker.ready;
-  const subscription = await registration.pushManager.getSubscription();
-  
-  if (subscription) {
-    await subscription.unsubscribe();
-    
-    // Remove from backend
-    await fetch('/api/push/subscriptions', {
-      method: 'DELETE',
-      headers: {
-        'Authorization': 'Bearer ' + token
-      }
-    });
-    
-    console.log('Unsubscribed successfully');
-  }
-}
+// Show button
+document.getElementById('notifyBtn').addEventListener('click', requestNotificationPermission);
 ```
 
 **Notification permission states:**
+
 - `default`: Permission not yet requested (show prompt)
 - `granted`: Permission granted (subscribe to push)
 - `denied`: Permission denied (don't prompt again)
 
-**Best practices:**
-- Only request permission after user action (e.g., "Enable notifications")
-- Explain what notifications will be sent before requesting
-- Handle denied permission gracefully
-- Provide settings to re-enable notifications
-- Don't spam notifications - only send important alerts
+---
+
+## Best Practices
+
+### User Experience:
+
+1. Only request permission after user action (e.g., "Enable notifications")
+2. Explain what notifications will be sent before requesting
+3. Handle denied permission gracefully
+4. Provide settings to re-enable notifications
+5. Don't spam notifications - only send important alerts
+
+### Performance:
+
+1. Keep notification payload small (< 4KB)
+2. Use data fields for navigation
+3. Handle push events efficiently
+4. Close notifications after interaction
+
+### Reliability:
+
+1. Monitor failed subscriptions
+2. Remove inactive subscriptions
+3. Retry failed deliveries
+4. Log all push events
+
+### Security:
+
+1. Use VAPID for authentication
+2. Validate subscription data
+3. Store keys securely
+4. Don't expose sensitive data in notifications
+
+---
+
+## Testing Push Notifications
+
+### Using Chrome DevTools:
+
+1. Open DevTools > Application > Service Workers
+2. Click "Push" button on active service worker
+3. Enter payload JSON:
+
+```json
+{
+  "title": "Test Notification",
+  "body": "This is a test notification",
+  "icon": "/images/icon-192.png",
+  "data": {
+    "test": true
+  }
+}
+```
+
+### Browser Console:
+
+```javascript
+// Check push subscription
+const registration = await navigator.serviceWorker.ready;
+const subscription = await registration.pushManager.getSubscription();
+console.log(subscription);
+```
+
+---
+
+## Summary
+
+Push notification di PayTo mencakup:
+
+- VAPID keys generation dan configuration
+- Subscription management (subscribe/unsubscribe)
+- Send single and bulk notifications
+- Push event handling di service worker
+- Permission handling
+- Monitoring dan error tracking
+- Best practices untuk reliability
+
+Dengan sistem ini, business bisa communicate real-time dengan POS terminals untuk alerts dan updates.

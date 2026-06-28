@@ -1,104 +1,104 @@
-# System Architecture Overview
+# Overview Arsitektur Sistem
 
-This document explains the architectural design decisions behind the PayTo POS system and why they were chosen.
+Dokumen ini menjelaskan keputusan desain arsitektur di balik sistem POS PayTo dan mengapa mereka dipilih.
 
-## Tech Stack Rationale
+## Rationale Tech Stack
 
-### Why Laravel 12?
+### Mengapa Laravel 12?
 
-Laravel 12 was selected as the backend foundation because it provides an excellent balance of developer productivity and performance. Its robust ecosystem includes built-in authentication, Eloquent ORM for database operations, and a powerful routing system. For a POS system that needs to handle concurrent transactions reliably, Laravel's database transaction support and queue system are essential. The framework's maturity means battle-tested solutions for common problems like concurrency, data validation, and error handling are available out of the box.
+Laravel 12 dipilih sebagai fondasi backend karena memberikan keseimbangan yang excellent antara productivity dan performance developer. Ekosistem yang robust mencakup built-in authentication, Eloquent ORM untuk database operations, dan powerful routing system. Untuk sistem POS yang perlu handle concurrent transactions secara andal, database transaction support dan queue system Laravel sangat penting. Kematangan framework berarti solusi battle-tested untuk masalah umum seperti concurrency, data validation, dan error handling sudah tersedia.
 
-### Why React 19 with Inertia v2?
+### Mengapa React 19 dengan Inertia v2?
 
-The frontend uses React 19 because it offers the most modern JavaScript patterns and the best developer experience for building interactive interfaces. Inertia v2 was chosen specifically because it allows us to build a Single Page Application (SPA) without the complexity of managing a separate API backend. We get the benefits of client-side routing and state management while keeping our application logic in Laravel controllers. This architecture dramatically reduces development time and maintains type safety across the entire stack.
+Frontend menggunakan React 19 karena menawarkan JavaScript patterns paling modern dan developer experience terbaik untuk membangun interface interaktif. Inertia v2 dipilih khusus karena memungkinkan kita membangun Single Page Application (SPA) tanpa kompleksitas mengelola API backend terpisah. Kita mendapatkan manfaat client-side routing dan state management sambil menjaga aplikasi logic di Laravel controllers. Arsitektur ini sangat mengurangi waktu development dan menjaga type safety di seluruh stack.
 
-### Why Tailwind CSS v4?
+### Mengapa Tailwind CSS v4?
 
-Tailwind CSS v4 provides utility-first styling that enables rapid UI development while maintaining consistency across the application. The utility classes make it easy to create responsive designs that work across different screen sizes—from desktop registers to mobile devices. Tailwind's configuration system allows us to maintain a consistent design language through our theme colors, spacing scale, and typography system.
+Tailwind CSS v4 menyediakan utility-first styling yang memungkinkan rapid UI development sambil maintain konsistensi di seluruh aplikasi. Utility classes membuatnya mudah menciptakan responsive designs yang bekerja di berbagai ukuran layar—dari desktop registers hingga mobile devices. Sistem konfigurasi Tailwind memungkinkan kita maintain design language yang konsisten melalui theme colors, spacing scale, dan typography system.
 
-## Application Architecture Layers
+## Layer Arsitektur Aplikasi
 
 ### Frontend Layer (React + Inertia)
 
-The frontend is a client-side rendered SPA that communicates with the Laravel backend through Inertia's page protocol. Unlike traditional APIs that return JSON, Inertia returns fully rendered pages that are mounted on the client side. This approach keeps our code DRY—our Laravel controllers handle both data retrieval and page rendering. The React components live in `resources/js/Pages` and are organized by feature (POS interface for cashiers, admin dashboard for managers).
+Frontend adalah SPA yang di-render di sisi client yang berkomunikasi dengan backend Laravel melalui Inertia's page protocol. Berbeda dengan API tradisional yang mengembalikan JSON, Inertia mengembalikan halaman yang fully rendered yang di-mount di sisi client. Pendekatan ini menjaga code kita DRY—Laravel controllers menangani baik data retrieval maupun page rendering. React components tinggal di `resources/js/Pages` dan di-organize berdasarkan feature (POS interface untuk kasir, admin dashboard untuk manager).
 
-The frontend maintains local state for UI interactions (open modals, form inputs) while Inertia props handle server-side data. This separation of concerns keeps components focused and testable.
+Frontend maintain local state untuk UI interactions (open modals, form inputs) sementara Inertia props menangani server-side data. Pemisahan concern ini menjaga components focused dan testable.
 
 ### Backend Layer (Laravel)
 
-The backend is structured using the classic MVC pattern with some modern Laravel 12 conventions. Controllers handle HTTP requests, form request validation ensures data integrity, and services encapsulate business logic. The `CheckoutProcessor` service is a prime example—by extracting checkout logic into a dedicated service, we can reuse it across different contexts (online checkout, offline batch sync, refunds) without duplicating code.
+Backend di-structure menggunakan pola MVC klasik dengan beberapa modern Laravel 12 conventions. Controllers menangani HTTP requests, form request validation memastikan data integrity, dan services encapsulate business logic. Service `CheckoutProcessor` adalah contoh utama—dengan mengekstrak checkout logic ke service dedicated, kita bisa reuse di berbagai konteks (online checkout, offline batch sync, refunds) tanpa duplicate code.
 
-Database operations use Eloquent ORM exclusively. This provides several advantages: relationship methods make querying related data intuitive and prevent N+1 query problems, casts ensure data types are consistent, and query builders allow for complex queries while maintaining readability.
+Database operations menggunakan Eloquent ORM secara eksklusif. Ini menyediakan beberapa manfaat: relationship methods membuat querying related data intuitive dan mencegah N+1 query problems, casts memastikan data types konsisten, dan query builders memungkinkan complex queries sambil maintain readability.
 
 ### Data Layer (Database)
 
-The database schema is designed around the core POS workflows: products, sales, refunds, and inventory management. Each entity has a corresponding Eloquent model with relationship methods that define how entities interact. For example, a `Sale` has many `SaleItem` records, and each `SaleItem` belongs to a `Product`.
+Database schema di-design mengelilingi core POS workflows: products, sales, refunds, dan inventory management. Setiap entity memiliki Eloquent model yang sesuai dengan relationship methods yang mendefinisikan bagaimana entity berinteraksi. Misalnya, `Sale` memiliki banyak `SaleItem` records, dan setiap `SaleItem` milik `Product`.
 
-The schema includes both "snapshot" data (like `product_name_snapshot` on sale items) and "current" data (like product stock). This design choice ensures that historical records remain accurate even when product details change. If a product's name or price changes after a sale, the historical record maintains the original values.
+Schema mencakup data "snapshot" (seperti `product_name_snapshot` pada sale items) dan data "current" (seperti product stock). Pemilihan desain ini memastikan bahwa historical records tetap akurat bahkan ketika product details berubah. Jika nama atau harga product berubah setelah sale, historical record mempertahankan nilai asli.
 
-## Request/Response Flow
+## Alur Request/Response
 
-When a cashier completes a checkout:
+Ketika kasir menyelesaikan checkout:
 
-1. The React `PosCheckoutRequest` form validates input locally using TypeScript types
-2. Form submission triggers Inertia's `post` method with validation rules
-3. The Laravel route maps to `PosCheckoutController@store`
-4. The controller validates the request using the form request class
-5. `CheckoutProcessor` begins a database transaction
-6. Stock is validated and decremented for each product
-7. Sale and SaleItem records are created
-8. Payment record is created with the payment method
-9. Database transaction commits
-10. Inertia redirects to the sales history page with success message
+1. Form React `PosCheckoutRequest` validasi input secara lokal menggunakan TypeScript types
+2. Form submission trigger Inertia's `post` method dengan validation rules
+3. Route Laravel mapping ke `PosCheckoutController@store`
+4. Controller validasi request menggunakan form request class
+5. `CheckoutProcessor` memulai database transaction
+6. Stock divalidasi dan dikurangi untuk setiap product
+7. Record Sale dan SaleItem dibuat
+8. Record payment dibuat dengan payment method
+9. Database transaction commit
+10. Inertia redirect ke halaman sales history dengan success message
 
-For offline transactions, the flow diverges:
+Untuk offline transactions, flow diverges:
 
-1. Transactions are stored in IndexedDB with a unique `local_txn_uuid`
-2. When online, `flushCheckoutQueue` sends batches to the sync endpoint
-3. The `PosSyncController` processes each transaction
-4. Idempotency keys prevent duplicate processing
-5. Results are returned with status (PROCESSED, DUPLICATE, FAILED)
+1. Transactions disimpan di IndexedDB dengan unique `local_txn_uuid`
+2. Saat online, `flushCheckoutQueue` mengirim batches ke sync endpoint
+3. `PosSyncController` memproses setiap transaction
+4. Idempotency keys mencegah duplicate processing
+5. Results dikembalikan dengan status (PROCESSED, DUPLICATE, FAILED)
 
-## Authentication Strategy
+## Strategy Autentikasi
 
-PayTo implements a dual-layer authentication system:
+PayTo mengimplementasikan sistem autentikasi dual-layer:
 
 **Level 1: Session-based Authentication**
 
-Standard Laravel sessions store the authenticated user's ID. The session driver uses the database, which provides several benefits: session expiration is tracked in the database, sessions can be invalidated globally, and we can audit login/logout events. Sessions are configured with appropriate timeouts and secure cookie settings.
+Standard Laravel sessions menyimpan ID user yang terautentikasi. Session driver menggunakan database, yang menyediakan beberapa manfaat: session expiration di-track di database, sessions bisa di-invalidate secara global, dan kita bisa audit login/logout events. Sessions dikonfigurasi dengan timeouts dan secure cookie settings yang appropriate.
 
 **Level 2: PIN-based POS Authentication**
 
-For security and accountability, each POS session requires a secondary PIN authentication. This ensures that when a cashier leaves their register unattended, the session is protected. The PIN is hashed using bcrypt (separate from the password hash), and login attempts are logged.
+Untuk keamanan dan accountability, setiap POS session memerlukan secondary PIN authentication. Ini memastikan bahwa ketika kasir meninggalkan register tidak terawasi, session terproteksi. PIN di-hash menggunakan bcrypt (terpisah dari password hash), dan login attempts di-log.
 
 **Work Time Tracking**
 
-Every login is associated with a work session tracked by `work_date` and `work_seconds`. This enables hourly reporting and shift analysis. When a user logs out, the session duration is calculated and stored.
+Setiap login dikaitkan dengan work session yang di-track oleh `work_date` dan `work_seconds`. Ini memungkinkan hourly reporting dan shift analysis. Ketika user logout, duration session di-hitung dan disimpan.
 
 ## Role-Based Access Control
 
-Two roles exist in the system:
+Dua role ada di sistem:
 
 **CASHIER (Kasir)**
 
-Cashiers have access to the POS interface only. They can view products, process sales, and view their own transaction history. They cannot access admin features like product management or user administration. This separation ensures that cashiers cannot manipulate the system to their advantage.
+Kasir memiliki akses hanya ke interface POS. Mereka bisa view products, process sales, dan view history transaksi mereka sendiri. Mereka tidak bisa akses admin features seperti product management atau user administration. Pemisahan ini memastikan bahwa kasir tidak bisa manipulate sistem untuk keuntungan mereka.
 
 **ADMIN (Supervisor)**
 
-Admins have full access to the management dashboard. They can manage products, process refunds, view real-time inventory, and approve refund requests. The admin role is designed for store managers or supervisors who need oversight of all operations.
+Admin memiliki akses full ke management dashboard. Mereka bisa manage products, process refunds, view inventory real-time, dan approve refund requests. Role admin di-design untuk store managers atau supervisors yang perlu oversight dari semua operations.
 
-Authorization is implemented using Laravel's policy system. Each resource has a corresponding policy that defines what actions the authenticated user can perform. For example, the `AdminPolicy` might allow viewing all products but restrict deletion to super-admins.
+Authorization di-implementasikan menggunakan Laravel's policy system. Setiap resource memiliki policy yang sesuai yang mendefinisikan apa actions yang bisa dilakukan oleh user yang terautentikasi. Misalnya, `AdminPolicy` mungkin memungkinkan view semua products tapi restrict deletion ke super-admins.
 
-## Why This Architecture Works
+## Mengapa Arsitektur Ini Berfungsi
 
-The architecture prioritizes several key principles:
+Arsitektur memprioritaskan beberapa prinsip utama:
 
-**Consistency**: By using Inertia, we avoid the inconsistency that often arises when managing separate frontend and backend codebases. Types flow naturally from server to client.
+**Konsistensi**: Dengan menggunakan Inertia, kita hindari inkonsistensi yang sering muncul ketika mengelola codebase frontend dan backend terpisah. Types mengalir secara natural dari server ke client.
 
-**Maintainability**: The separation of concerns makes the codebase easier to understand. Controllers handle HTTP concerns, services handle business logic, and models handle data access.
+**Maintainability**: Pemisahan concern menjaga codebase lebih mudah dipahami. Controllers menangani HTTP concerns, services menangani business logic, dan models menangani data access.
 
-**Scalability**: The database-driven session system and queue-backed operations mean the system can scale horizontally. Add more application servers, and they all share the same session store.
+**Skalabilitas**: Sistem session database-driven dan queue-backed operations berarti sistem bisa scale horizontal. Tambah lebih banyak application servers, dan mereka semua share session store yang sama.
 
-**Reliability**: Database transactions ensure data integrity. The offline queue with idempotency keys means lost connections don't result in lost sales.
+**Keandalan**: Database transactions memastikan data integrity. Offline queue dengan idempotency keys berarti lost connections tidak menyebabkan lost sales.
 
-**Security**: Multiple authentication layers and role-based access control prevent unauthorized access. Password and PIN hashing use industry-standard algorithms.
+**Keamanan**: Multiple authentication layers dan role-based access control mencegah unauthorized access. Password dan PIN hashing menggunakan algorithms standar industri.

@@ -1,30 +1,30 @@
-# Getting Started with PayTo
+# Memulai dengan PayTo
 
-Welcome to PayTo! This tutorial will help you set up the development environment and get started working with the project.
+Selamat datang di PayTo! Tutorial ini akan membantu Anda setup development environment dan mulai bekerja dengan project.
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed on your system:
+Sebelum memulai, pastikan Anda menginstall hal-hal berikut di sistem Anda:
 
-- **PHP 8.2+** - Required for Laravel framework
+- **PHP 8.2+** - Diperlukan untuk Laravel framework
 - **Composer** - PHP dependency manager
-- **Node.js 18+** - JavaScript runtime for frontend
-- **npm** - Node package manager (comes with Node.js)
-- **MySQL 5.7+ or SQLite** - Database (SQLite is used by default)
+- **Node.js 18+** - JavaScript runtime untuk frontend
+- **npm** - Node package manager (sudah termasuk dengan Node.js)
+- **MySQL 5.7+ atau SQLite** - Database (SQLite digunakan secara default)
 - **Git** - Version control
 
-### Verify installations
+### Verifikasi instalasi
 
 ```bash
-php -v           # Should show PHP 8.2 or higher
-composer -V      # Should show Composer version
-node -v          # Should show Node.js version
-npm -v           # Should show npm version
+php -v           # Harus menampilkan PHP 8.2 atau lebih tinggi
+composer -V      # Harus menampilkan Composer version
+node -v          # Harus menampilkan Node.js version
+npm -v           # Harus menampilkan npm version
 ```
 
-## Project Setup
+## Setup Project
 
-### 1. Clone the repository
+### 1. Clone repository
 
 ```bash
 git clone <repository-url>
@@ -33,7 +33,7 @@ cd PayTo
 
 ### 2. Copy environment file
 
-Copy the example environment file to create your own `.env` file:
+Copy file environment example untuk membuat file `.env` Anda sendiri:
 
 ```bash
 copy .env.example .env
@@ -41,7 +41,7 @@ copy .env.example .env
 
 ### 3. Install PHP dependencies
 
-Run Composer to install all PHP packages:
+Jalankan Composer untuk install semua PHP packages:
 
 ```bash
 composer install
@@ -70,7 +70,7 @@ added 145 packages, and audited 146 packages in 2m
 
 ### 5. Generate application key
 
-Generate a unique application key for encryption:
+Generate unique application key untuk encryption:
 
 ```bash
 php artisan key:generate
@@ -83,16 +83,16 @@ Application key set successfully.
 
 ### 6. Configure database
 
-The default configuration uses SQLite, which requires no setup. The database file is located at `database/database.sqlite`.
+Konfigurasi default menggunakan SQLite, yang tidak memerlukan setup. Database file terletak di `database/database.sqlite`.
 
-If you want to use MySQL instead:
+Jika Anda ingin menggunakan MySQL:
 
-1. Create a new database in MySQL:
+1. Create database baru di MySQL:
 ```sql
 CREATE DATABASE payto;
 ```
 
-2. Update your `.env` file:
+2. Update file `.env` Anda:
 ```
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -102,7 +102,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-### 7. Run migrations
+### 7. Jalankan migrations
 
 Create database tables:
 
@@ -119,15 +119,15 @@ Migrating: 2024_01_01_000002_create_products_table
 Migrated:  2024_01_01_000002_create_products_table
 ```
 
-### 8. Run seeders
+### 8. Jalankan seeders
 
-Populate the database with initial data including sample users:
+Populate database dengan data awal termasuk sample users:
 
 ```bash
 php artisan db:seed
 ```
 
-This creates two default users:
+Ini membuat dua default users:
 
 | Username | Role | PIN |
 |----------|------|-----|
@@ -136,32 +136,31 @@ This creates two default users:
 
 ### 9. Build frontend assets
 
-Compile your frontend assets with Vite:
+Compile frontend assets dengan Vite:
 
 ```bash
 npm run build
 ```
 
-For development mode (with hot-reload), use:
-
+Untuk development mode (dengan hot-reload), gunakan:
 ```bash
 npm run dev
 ```
 
 ## Development Environment
 
-### Running the development server
+### Menjalankan development server
 
-Use the convenient composer script to run all services simultaneously:
+Gunakan composer script yang convenient untuk menjalankan semua services secara bersamaan:
 
 ```bash
 composer run dev
 ```
 
-This command starts:
-- **PHP development server** - Runs on port 8000
-- **Vite development server** - Handles frontend hot-reloading
-- **Queue worker** - Processes background jobs
+Command ini menjalankan:
+- **PHP development server** - Berjalan di port 8000
+- **Vite development server** - Handle frontend hot-reloading
+- **Queue worker** - Process background jobs
 - **Logs** - Pail log viewer
 
 Expected output:
@@ -172,46 +171,46 @@ Expected output:
 [vite] Starting vite...
 ```
 
-### Access the application
+### Akses aplikasi
 
-Open your browser and visit:
+Buka browser Anda dan kunjungi:
 
 ```
 http://localhost:8000
 ```
 
-## First Steps
+## Langkah Pertama
 
-### 1. Login to the application
+### 1. Login ke aplikasi
 
-Navigate to `/login` and use the default credentials:
+Navigate ke `/login` dan gunakan default credentials:
 
 - **Username**: `testuser`
 - **PIN**: `123456`
 
-Or for supervisor access:
+Atau untuk supervisor access:
 - **Username**: `supervisor`
 - **PIN**: `654321`
 
-### 2. Explore the POS interface
+### 2. Jelajahi interface POS
 
-After logging in as a cashier, you'll be redirected to `/kasir` (POS interface). You can:
+Setelah login sebagai kasir, Anda akan diarahkan ke `/kasir` (POS interface). Anda bisa:
 
 - Scan products
-- Process payments
+- Proses pembayaran
 - View receipts
 - Handle refunds
 
-### 3. Access admin panel
+### 3. Akses admin panel
 
-Navigate to `/admin` to access administrative features:
+Navigate ke `/admin` untuk akses administrative features:
 
 - Product management
 - User management
 - Sales reports
 - System settings
 
-## Project Structure Overview
+## Overview Struktur Project
 
 ```
 PayTo/
@@ -222,14 +221,14 @@ PayTo/
 │   │   └── Middleware/  # Custom middleware
 │   └── Providers/       # Service providers
 ├── database/
-│   ├── factories/       # Model factories for testing
+│   ├── factories/       # Model factories untuk testing
 │   ├── migrations/      # Database migrations
 │   └── seeders/         # Database seeders
 ├── resources/
 │   ├── js/              # React frontend components
 │   │   ├── Pages/       # Inertia pages
 │   │   └── Layouts/     # Layout components
-│   └── views/           # Blade views (if any)
+│   └── views/           # Blade views (jika ada)
 ├── routes/
 │   ├── web.php          # Web routes
 │   ├── api.php          # API routes
@@ -237,87 +236,82 @@ PayTo/
 ├── tests/
 │   ├── Feature/         # Feature tests
 │   └── Unit/            # Unit tests
-├── docs/                # Documentation
-├── public/              # Publicly accessible files
+├── docs/                # Dokumentasi
+├── public/              # Files yang dapat diakses publik
 ├── storage/             # Generated files (logs, cache, uploads)
 ├── .env                 # Environment configuration
 ├── composer.json        # PHP dependencies
 └── package.json         # Node dependencies
 ```
 
-### Key models
+### Model-key
 
-- **User** - Staff users with different roles
-- **Product** - Products in inventory
-- **Sale** - Sale transactions
-- **SaleItem** - Individual items in a sale
+- **User** - Staff users dengan role berbeda
+- **Product** - Products dalam inventory
+- **Sale** - Sales transactions
+- **SaleItem** - Individual items dalam sale
 - **Payment** - Payment records
 - **StockMovement** - Inventory tracking
 - **ReceiptTemplate** - Receipt formatting
 - **AppSetting** - System configuration
 
-## Common Tasks
+## Tugas Umum
 
-### Clear caches
+### Menambah product baru
 
 ```bash
-php artisan cache:clear
-php artisan config:clear
-php artisan route:clear
-php artisan view:clear
+php artisan make:product "Produk Baru"
 ```
 
-### Run tests
+### Menjalankan tests
 
 ```bash
-composer test
-# or
 php artisan test
 ```
 
-### Format code
+### Running linting
 
 ```bash
-vendor/bin/pint
+composer run lint
 ```
-
-## Next Steps
-
-- **API Reference**: See [docs/reference/api.md](reference/api.md) for API endpoint documentation
-- **Database Schema**: Review migrations in `database/migrations/` for complete schema
-- **Project Documentation**: Check the `docs/` folder for more guides
-- **Laravel Documentation**: https://laravel.com/docs/12.x
-- **Inertia.js Documentation**: https://inertiajs.com/
 
 ## Troubleshooting
 
-### "Unable to locate file in Vite manifest"
-
-Run `npm run dev` or `npm run build` to compile frontend assets.
-
 ### Database connection errors
 
-Ensure your `.env` database settings are correct and the database server is running.
+Pastikan database server berjalan dan credentials di `.env` benar.
 
 ### Permission denied errors
 
-On Linux/Mac, ensure the `storage/` and `bootstrap/cache/` directories are writable:
+Di Linux/Mac, pastikan directory `storage/` dan `bootstrap/cache/` dapat ditulis:
 
 ```bash
 chmod -R 775 storage bootstrap/cache
 ```
 
-### Composer install fails
+### Composer install gagal
 
-Ensure your PHP version is 8.2+. Check with `php -v`.
+Pastikan PHP version Anda 8.2+. Cek dengan `php -v`.
 
-## Getting Help
+### Frontend errors
 
-If you encounter issues:
+1. Install Node dependencies: `npm install`
+2. Rebuild assets: `npm run build`
+3. Check browser console untuk errors
 
-1. Check the troubleshooting section above
-2. Review browser console for frontend errors
-3. Check Laravel logs at `storage/logs/laravel.log`
-4. Run `php artisan pail` to view application logs in real-time
+### General issues
 
-Happy coding! 🚀
+1. Clear cache: `php artisan config:clear` dan `php artisan cache:clear`
+2. Check logs di `storage/logs/laravel.log`
+3. Run `php artisan pail` untuk view logs aplikasi secara real-time
+
+## Mendapatkan Bantuan
+
+Jika Anda mengalami issues:
+
+1. Cek troubleshooting section di atas
+2. Review dokumentasi [How-to Guides](#how-to-guides)
+3. Cek Laravel logs di `storage/logs/laravel.log`
+4. Jalankan `php artisan pail` untuk view aplikasi logs secara real-time
+
+Happy coding!
