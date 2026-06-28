@@ -1,220 +1,126 @@
 # PayTo POS
 
-PayTo adalah aplikasi Point of Sale (POS) berbasis **Laravel 12 + React (Inertia)** dengan fokus pada operasional kasir, manajemen admin, dukungan PWA, sinkronisasi transaksi offline, dan notifikasi push.
+**Sistem Point of Sale modern berbasis web dengan dukungan offline dan Progressive Web App**
 
-Dokumen ini adalah **dokumentasi teknis project** untuk developer.
+PayTo adalah aplikasi kasir digital yang dirancang untuk memudahkan operasional toko, warung, atau bisnis retail. Dibangun dengan teknologi web modern, PayTo dapat berjalan di browser namun tetap berfungsi seperti aplikasi native dengan kemampuan bekerja secara offline.
 
-Untuk dokumentasi aplikasi (product overview + galeri), lihat README terpisah di luar folder project.
+---
 
-## Ringkasan Fitur
+## Fitur Utama
 
-- POS kasir (checkout, histori transaksi, profil kasir)
-- Login dengan **username/password** atau **PIN 6 digit**
-- Dashboard admin (ringkasan penjualan, aktivitas terbaru, low stock)
-- CRUD produk dan manajemen stok
-- Rekomendasi restock berbasis penjualan 7 hari
-- Approval/refund flow (supervisor approval)
-- Manajemen staf (cashier/supervisor) dan reset PIN
-- Pengaturan struk & pengaturan printer
-- PWA + offline queue sync (`/api/pos/sync/batches`)
-- Web Push Notification (VAPID)
+### Untuk Kasir
+- **Checkout Cepat** - Interface sederhana untuk proses transaksi yang efisien
+- **Keranjang Belanja** - Tambah, ubah jumlah, dan hapus item dengan mudah
+- **Pembayaran Fleksibel** - Mendukung Cash dan E-Wallet
+- **Riwayat Transaksi** - Lihat semua transaksi yang telah dilakukan
+- **Login dengan PIN** - Login cepat menggunakan PIN 6 digit untuk kasir
 
-## Tech Stack
+### Untuk Admin dan Supervisor
+- **Dashboard Lengkap** - Ringkasan penjualan, aktivitas terbaru, dan stok menipis
+- **Manajemen Produk** - CRUD produk lengkap dengan kategori dan manajemen stok
+- **Rekomendasi Restock** - Saran restok otomatis berdasarkan penjualan 7 hari terakhir
+- **Approval Refund** - Sistem approval untuk refund yang memerlukan persetujuan supervisor
+- **Manajemen Staf** - Kelola kasir dan supervisor, termasuk reset PIN
+- **Pengaturan Struk** - Kustomisasi header dan footer struk
 
-- Backend: Laravel 12, PHP 8.2+
-- Frontend: React 19, Inertia.js React, TypeScript
-- Build Tool: Vite 7
-- Styling: Tailwind CSS v4
-- HTTP Client: Axios
-- Push: `minishlink/web-push`
-- DB default: SQLite (bisa diganti ke MySQL/PostgreSQL)
+### Teknologi Modern
+- **Progressive Web App (PWA)** - Install seperti aplikasi native di perangkat apapun
+- **Offline-First** - Tetap bisa bertransaksi meski internet mati
+- **Auto Sync** - Transaksi offline otomatis tersinkronisasi ketika online
+- **Push Notification** - Notifikasi real-time untuk approval dan update penting
+- **Responsive Design** - Tampil sempurna di desktop, tablet, dan smartphone
 
-## Arsitektur Singkat
+---
 
-- `routes/web.php`: route halaman Inertia (`/`, `/login`, `/kasir`, `/admin`)
-- `routes/api.php`: endpoint data POS/Admin/Push
-- `resources/js/Pages`: UI page-level (landing, login, kasir, admin)
-- `app/Http/Controllers/Api`: endpoint bisnis admin/POS
-- `app/Services/Pos/CheckoutProcessor.php`: core logic checkout
-- `resources/js/pwa`: service worker registration, offline queue, push subscribe
+## Galeri Aplikasi
 
-## Prasyarat
+### Halaman Landing
+![Landing Page](docs/gallery/landing.png)
+*Halaman utama PayTo POS*
 
-- PHP `>= 8.2`
-- Composer `>= 2.x`
-- Node.js `>= 20` + npm
-- Ekstensi PHP umum Laravel (pdo, mbstring, openssl, dll)
+### Login
+![Login Page](docs/gallery/login.png)
+*Login dengan username/password atau PIN 6 digit*
 
-## Setup Lokal
+### Dashboard Admin
+![Admin Dashboard](docs/gallery/admin.png)
+*Dashboard admin dengan ringkasan penjualan dan stok*
 
-1. Install dependency backend dan frontend:
+### Interface Kasir
+![Kasir Interface](docs/gallery/kasir.png)
+*Interface kasir untuk proses checkout yang cepat dan mudah*
 
-```bash
-composer install
-npm install
-```
+---
 
-1. Siapkan environment:
+## Keunggulan PayTo
 
-```bash
-cp .env.example .env
-php artisan key:generate
-```
+| Fitur | Deskripsi |
+|-------|-----------|
+| **Offline-First** | Transaksi tetap berjalan tanpa internet, data tersimpan lokal dan sync otomatis |
+| **Dual Authentication** | Login dengan username/password atau PIN 6 digit untuk kecepatan |
+| **Role-Based Access** | Akses berbeda untuk Cashier dan Supervisor |
+| **Inventory Intelligence** | Rekomendasi restock otomatis berdasarkan data penjualan |
+| **Approval Workflow** | Sistem approval untuk transaksi refund |
+| **Work Time Tracking** | Otomatis mencatat jam kerja kasir |
+| **Cross-Platform** | Berjalan di Windows, Mac, Linux, Android, dan iOS |
 
-1. Siapkan database (default SQLite):
+---
 
-```bash
-touch database/database.sqlite
-php artisan migrate --seed
-```
+## Mulai Menggunakan PayTo
 
-1. Jalankan aplikasi (disarankan):
+### Untuk Pengguna
 
-```bash
-composer dev
-```
+1. **Akses Aplikasi** - Buka aplikasi PayTo di browser atau install sebagai PWA
+2. **Login** - Masuk menggunakan username/password atau PIN yang diberikan admin
+3. **Mulai Transaksi** - Pilih produk, masukkan ke keranjang, dan checkout
+4. **Offline Mode** - Jika internet mati, transaksi tetap tercatat dan akan sync otomatis
 
-Perintah di atas menjalankan:
+### Untuk Developer
 
-- `php artisan serve`
-- `npm run dev`
-- `php artisan queue:listen`
+Ingin mengembangkan atau berkontribusi pada PayTo? Lihat dokumentasi lengkap kami:
 
-Alternatif manual:
+**[Dokumentasi Lengkap](docs/index.md)** - Panduan instalasi, API reference, dan arsitektur sistem
 
-```bash
-php artisan serve
-npm run dev
-```
+Dokumentasi mencakup:
+- **Tutorial** - Panduan step-by-step untuk developer baru
+- **How-to Guides** - Panduan untuk tugas-tugas spesifik
+- **API Reference** - Dokumentasi lengkap 41 API endpoints
+- **Explanation** - Penjelasan mendalam tentang arsitektur dan konsep sistem
 
-## Script Penting
+---
 
-- `composer setup`: bootstrap cepat untuk environment production-like
-- `composer dev`: jalankan server + queue + vite secara paralel
-- `composer test`: clear config lalu jalankan test suite
-- `npm run dev`: vite dev server
-- `npm run build`: build asset production
+## Teknologi yang Digunakan
 
-## Variabel Environment Penting
+- **Backend**: Laravel 12 (PHP 8.2+)
+- **Frontend**: React 19 + Inertia.js v2
+- **Styling**: Tailwind CSS v4
+- **Database**: MySQL
+- **PWA**: Service Worker + Web App Manifest
+- **Push Notifications**: Web Push API (VAPID)
+- **Offline Storage**: IndexedDB
 
-Lihat `.env.example` untuk nilai default. Yang paling relevan:
+---
 
-- `APP_NAME`, `APP_ENV`, `APP_URL`
-- `DB_CONNECTION` (+ host/port/name/user/pass jika non-sqlite)
-- `SESSION_DRIVER`, `QUEUE_CONNECTION`, `CACHE_STORE`
-- `WEBPUSH_VAPID_SUBJECT`
-- `WEBPUSH_VAPID_PUBLIC_KEY`
-- `WEBPUSH_VAPID_PRIVATE_KEY`
+## Lisensi
 
-Catatan push notification:
+Aplikasi PayTo POS menggunakan lisensi MIT. Lihat file [LICENSE](LICENSE) untuk detail.
 
-- Public key disuntik ke `<meta name="webpush-public-key">` di `resources/views/app.blade.php`
-- Service worker di `public/sw.js`
+---
 
-## Peta Endpoint
+## Kontribusi
 
-### Web
+Kontribusi sangat diterima! Silakan baca panduan kontribusi kami di:
 
-- `GET /` -> landing page
-- `GET /login` -> halaman login
-- `POST /login` -> proses login POS
-- `GET /kasir` -> halaman kasir
-- `GET /admin` -> halaman admin
+**[Panduan Kontribusi](docs/index.md)** - Cara berkontribusi pada kode sumber
 
-### API Admin (contoh utama)
+---
 
-- `GET /api/admin/dashboard`
-- `GET|POST|PUT|DELETE /api/admin/products[/{product}]`
-- `GET /api/admin/inventory/recommendations`
-- `GET|PUT /api/admin/receipt-settings`
-- `GET /api/admin/approvals`
-- `POST /api/admin/approvals/{approval}/approve`
-- `POST /api/admin/approvals/{approval}/reject`
-- `GET|POST|PUT|DELETE /api/admin/staff[/{user}]`
-- `POST /api/admin/staff/{user}/reset-pin`
+## Dukungan
 
-### API POS / PWA
+Jika Anda memiliki pertanyaan, menemukan bug, atau ingin meminta fitur baru:
 
-- `GET /api/pos/products`
-- `GET /api/pos/history`
-- `GET /api/pos/profile`
-- `POST /api/pos/checkout`
-- `POST /api/pos/refunds`
-- `POST /api/pos/logout`
-- `GET /api/pos/settings`
-- `POST /api/pos/settings/printer`
-- `POST /api/pos/settings/printer/test`
-- `POST /api/pos/settings/refresh`
-- `POST /api/pos/sync/batches`
+**[Dokumentasi Dukungan](docs/index.md)** - Panduan pelaporan isu dan dukungan
 
-### API Push
+---
 
-- `POST /api/push/subscriptions`
-- `DELETE /api/push/subscriptions`
-- `POST /api/push/test`
-
-## Testing
-
-Jalankan semua test feature/unit:
-
-```bash
-composer test
-```
-
-Beberapa cakupan test yang sudah ada:
-
-- Dashboard admin metrics
-- CRUD produk + stok
-- Sync batch idempotency (`PROCESSED`/`DUPLICATE`/`FAILED`)
-- Refund + approval flow
-- Receipt settings
-- Staff management + reset PIN
-- Push subscription
-
-## Build Production
-
-```bash
-composer install --no-dev --optimize-autoloader
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-npm run build
-```
-
-Pastikan:
-
-- environment production sudah benar
-- worker queue aktif (untuk proses async jika dibutuhkan)
-- kunci VAPID terpasang bila fitur push dipakai
-
-## Struktur Folder Inti
-
-```text
-app/
-  Http/
-  Models/
-  Services/Pos/
-resources/
-  js/
-    Pages/
-    pwa/
-  views/
-routes/
-  web.php
-  api.php
-public/
-  sw.js
-  manifest.json
-database/
-  migrations/
-  seeders/
-tests/
-  Feature/
-```
-
-## Catatan
-
-- Dokumentasi ini fokus untuk pengembangan dan operasional project.
-- Dokumentasi aplikasi (non-teknis + galeri) dipisah pada README di luar folder project agar konteks tidak tercampur.
-- **Aplikasi ini masih dalam tahap pengembangan, jadi beberapa fitur mungkin belum lengkap atau masih dalam iterasi. Dokumentasi akan terus diperbarui seiring perkembangan project.**
-- **Untuk pertanyaan atau kontribusi, silakan hubungi tim pengembang melalui issue atau pull request di repository.**
+Dibuat dengan Laravel dan React.
