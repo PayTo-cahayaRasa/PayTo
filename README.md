@@ -32,6 +32,20 @@ PayTo adalah aplikasi kasir digital yang dirancang untuk memudahkan operasional 
 
 ---
 
+## Fitur yang Akan Datang
+
+Kami terus mengembangkan PayTo untuk memberikan pengalaman yang lebih baik. Berikut adalah fitur-fitur yang sedang dalam pengembangan:
+
+### Guest Mode dan Katalog Online
+- **Akses Tamu** - Pengunjung dapat melihat katalog produk tanpa login
+- **Katalog Interaktif** - Tampilan produk dengan foto, harga, dan ketersediaan stok
+- **Landing Page Dinamis** - Halaman depan yang menampilkan produk unggulan
+
+### Integrasi WhatsApp
+- **Pemesanan via WhatsApp** - Pelanggan dapat memesan produk langsung melalui WhatsApp
+
+---
+
 ## Galeri Aplikasi
 
 ### Halaman Landing
