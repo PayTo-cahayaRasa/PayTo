@@ -23,6 +23,15 @@ class CheckoutProcessor
         $items = $payload['items'] ?? [];
         $paymentMethod = (string) ($payload['payment_method'] ?? '');
         $cashReceived = (float) ($payload['cash_received'] ?? 0);
+        $source = ($payload['source'] ?? 'WALK_IN');
+        $customerName = $payload['customer_name'] ?? null;
+        $customerPhone = $payload['customer_phone'] ?? null;
+
+        // Normalize phone to digit-only (remove +, space, dash)
+        if ($customerPhone) {
+            $customerPhone = preg_replace('/[^0-9]/', '', $customerPhone);
+        }
+
         $localTransactionUuid = isset($payload['local_txn_uuid'])
             ? (string) $payload['local_txn_uuid']
             : (string) Str::uuid();
@@ -104,11 +113,14 @@ class CheckoutProcessor
         $paidTotal = $paymentMethod === 'CASH' ? $cashReceived : $grandTotal;
         $changeTotal = $paymentMethod === 'CASH' ? ($cashReceived - $grandTotal) : 0;
 
-        $sale = DB::transaction(function () use ($cashier, $lineItems, $paymentMethod, $paidTotal, $changeTotal, $taxTotal, $subtotal, $discountTotal, $grandTotal, $payload, $localTransactionUuid, $occurredAt) {
+        $sale = DB::transaction(function () use ($cashier, $lineItems, $paymentMethod, $paidTotal, $changeTotal, $taxTotal, $subtotal, $discountTotal, $grandTotal, $payload, $localTransactionUuid, $occurredAt, $source, $customerName, $customerPhone) {
             $sale = Sale::query()->create([
                 'server_invoice_no' => null,
                 'local_txn_uuid' => $localTransactionUuid,
                 'status' => 'PAID',
+                'source' => $source,
+                'customer_name' => $customerName,
+                'customer_phone' => $customerPhone,
                 'cashier_id' => $cashier->id,
                 'subtotal' => $subtotal,
                 'discount_total' => $discountTotal,

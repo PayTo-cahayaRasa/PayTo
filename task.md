@@ -280,24 +280,24 @@ Placeholder template yang diizinkan hanya `{product_name}`, `{price}`, dan `{qty
 
 ### P3.1 — Schema sumber transaksi
 
-- [ ] Tambahkan `sales.source` sebagai string terindeks dengan default `WALK_IN`.
-- [ ] Tambahkan `sales.customer_name` nullable.
-- [ ] Tambahkan `sales.customer_phone` nullable.
-- [ ] Gunakan PHP backed enum `SaleSource` dengan case `WalkIn = 'WALK_IN'` dan `WhatsApp = 'WHATSAPP'`.
-- [ ] Tambahkan cast enum pada model `Sale`.
-- [ ] Pertahankan seluruh sale lama sebagai `WALK_IN` saat migration dijalankan.
-- [ ] Jangan menambahkan nilai `ONLINE` sebelum ada checkout online di dalam sistem.
+- [x] Tambahkan `sales.source` sebagai string terindeks dengan default `WALK_IN`.
+- [x] Tambahkan `sales.customer_name` nullable.
+- [x] Tambahkan `sales.customer_phone` nullable.
+- [x] Gunakan PHP backed enum `SaleSource` dengan case `WalkIn = 'WALK_IN'` dan `WhatsApp = 'WHATSAPP'`.
+- [x] Tambahkan cast enum pada model `Sale`.
+- [x] Pertahankan seluruh sale lama sebagai `WALK_IN` saat migration dijalankan.
+- [x] Jangan menambahkan nilai `ONLINE` sebelum ada checkout online di dalam sistem.
 
 ### P3.2 — Kontrak checkout
 
-- [ ] Perluas `POST /api/pos/checkout` dengan field opsional `source`, `customer_name`, dan `customer_phone`.
-- [ ] Default `source` menjadi `WALK_IN` bila client lama tidak mengirim field tersebut.
-- [ ] Wajibkan `customer_name` dan `customer_phone` hanya jika `source=WHATSAPP`.
-- [ ] Normalisasi nomor pelanggan menjadi digit-only tanpa mengubah nomor kosong untuk walk-in.
-- [ ] Tolak source selain `WALK_IN` dan `WHATSAPP`.
-- [ ] Simpan source serta data pelanggan di dalam transaction checkout yang sama dengan sale, item, dan payment.
-- [ ] Jangan menerima `cashier_id`, total, harga akhir, atau diskon hasil kalkulasi client sebagai sumber kebenaran.
-- [ ] Pertahankan kalkulasi promo diskon produk di backend untuk kedua source.
+- [x] Perluas `POST /api/pos/checkout` dengan field opsional `source`, `customer_name`, dan `customer_phone`.
+- [x] Default `source` menjadi `WALK_IN` bila client lama tidak mengirim field tersebut.
+- [x] Wajibkan `customer_name` dan `customer_phone` hanya jika `source=WHATSAPP`.
+- [x] Normalisasi nomor pelanggan menjadi digit-only tanpa mengubah nomor kosong untuk walk-in.
+- [x] Tolak source selain `WALK_IN` dan `WHATSAPP`.
+- [x] Simpan source serta data pelanggan di dalam transaction checkout yang sama dengan sale, item, dan payment.
+- [x] Jangan menerima `cashier_id`, total, harga akhir, atau diskon hasil kalkulasi client sebagai sumber kebenaran.
+- [x] Pertahankan kalkulasi promo diskon produk di backend untuk kedua source.
 
 **Contoh payload WhatsApp:**
 

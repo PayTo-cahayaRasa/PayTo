@@ -21,7 +21,7 @@ class PosCheckoutRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'payment_method' => ['required', 'string', 'in:CASH,EWALLET'],
             'cash_received' => ['required_if:payment_method,CASH', 'numeric', 'min:0'],
             'reference' => ['nullable', 'string', 'max:255'],
@@ -29,7 +29,12 @@ class PosCheckoutRequest extends FormRequest
             'items.*.product_id' => ['required', 'integer', 'exists:products,id'],
             'items.*.qty' => ['required', 'numeric', 'min:0.001'],
             'items.*.discount_amount' => ['nullable', 'numeric', 'min:0'],
+            'source' => ['nullable', 'string', 'in:WALK_IN,WHATSAPP'],
+            'customer_name' => ['required_if:source,WHATSAPP', 'nullable', 'string', 'max:255'],
+            'customer_phone' => ['required_if:source,WHATSAPP', 'nullable', 'regex:/^[0-9]{8,15}$/'],
         ];
+
+        return $rules;
     }
 
     public function messages(): array
@@ -43,6 +48,10 @@ class PosCheckoutRequest extends FormRequest
             'items.*.product_id.exists' => 'Produk tidak ditemukan.',
             'items.*.qty.min' => 'Jumlah item tidak valid.',
             'items.*.discount_amount.min' => 'Diskon tidak valid.',
+            'source.in' => 'Sumber transaksi tidak valid. Gunakan WALK_IN atau WHATSAPP.',
+            'customer_name.required_if' => 'Nama pelanggan wajib diisi untuk pesanan WhatsApp.',
+            'customer_phone.required_if' => 'Nomor WhatsApp pelanggan wajib diisi.',
+            'customer_phone.regex' => 'Nomor WhatsApp harus berupa 8-15 digit angka tanpa +, spasi, atau tanda hubung.',
         ];
     }
 }
