@@ -13,6 +13,11 @@ class StaffManagementApiTest extends TestCase
 
     public function test_staff_crud_and_reset_pin_flow(): void
     {
+        $supervisor = User::factory()->create([
+            'role' => 'SUPERVISOR',
+            'is_active' => true,
+        ]);
+
         $payload = [
             'name' => 'Staf Baru',
             'username' => 'staf.baru',
@@ -22,24 +27,24 @@ class StaffManagementApiTest extends TestCase
             'pin' => '123456',
         ];
 
-        $createResponse = $this->postJson('/api/admin/staff', $payload)
+        $createResponse = $this->actingAs($supervisor)->postJson('/api/admin/staff', $payload)
             ->assertCreated()
             ->assertJsonPath('data.username', 'staf.baru');
 
         $staffId = $createResponse->json('data.id');
 
-        $this->getJson('/api/admin/staff')
+        $this->actingAs($supervisor)->getJson('/api/admin/staff')
             ->assertOk()
             ->assertJsonFragment([
                 'id' => $staffId,
                 'username' => 'staf.baru',
             ]);
 
-        $this->getJson("/api/admin/staff/{$staffId}")
+        $this->actingAs($supervisor)->getJson("/api/admin/staff/{$staffId}")
             ->assertOk()
             ->assertJsonPath('data.name', 'Staf Baru');
 
-        $this->putJson("/api/admin/staff/{$staffId}", [
+        $this->actingAs($supervisor)->putJson("/api/admin/staff/{$staffId}", [
             'name' => 'Staf Update',
             'is_active' => false,
         ])
@@ -47,7 +52,7 @@ class StaffManagementApiTest extends TestCase
             ->assertJsonPath('data.name', 'Staf Update')
             ->assertJsonPath('data.status', 'INACTIVE');
 
-        $this->postJson("/api/admin/staff/{$staffId}/reset-pin", [
+        $this->actingAs($supervisor)->postJson("/api/admin/staff/{$staffId}/reset-pin", [
             'pin' => '654321',
         ])
             ->assertOk();
@@ -57,7 +62,7 @@ class StaffManagementApiTest extends TestCase
         $this->assertNotNull($user);
         $this->assertTrue(Hash::check('654321', $user->pin_hash));
 
-        $this->deleteJson("/api/admin/staff/{$staffId}")
+        $this->actingAs($supervisor)->deleteJson("/api/admin/staff/{$staffId}")
             ->assertOk();
 
         $this->assertDatabaseMissing('users', [
@@ -67,6 +72,11 @@ class StaffManagementApiTest extends TestCase
 
     public function test_staff_validation_rejects_duplicate_username_and_invalid_pin(): void
     {
+        $supervisor = User::factory()->create([
+            'role' => 'SUPERVISOR',
+            'is_active' => true,
+        ]);
+
         $user = new User;
         $user->name = 'Existing';
         $user->username = 'dupe.user';
@@ -75,7 +85,7 @@ class StaffManagementApiTest extends TestCase
         $user->is_active = true;
         $user->save();
 
-        $this->postJson('/api/admin/staff', [
+        $this->actingAs($supervisor)->postJson('/api/admin/staff', [
             'name' => 'Dup',
             'username' => 'dupe.user',
             'role' => 'CASHIER',
@@ -85,7 +95,7 @@ class StaffManagementApiTest extends TestCase
             ->assertStatus(422)
             ->assertJsonValidationErrors(['username']);
 
-        $this->postJson("/api/admin/staff/{$user->id}/reset-pin", [
+        $this->actingAs($supervisor)->postJson("/api/admin/staff/{$user->id}/reset-pin", [
             'pin' => '12',
         ])
             ->assertStatus(422)

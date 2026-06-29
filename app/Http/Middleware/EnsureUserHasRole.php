@@ -15,18 +15,26 @@ class EnsureUserHasRole
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        if (! $request->user()) {
+        $user = $request->user();
+
+        if (! $user) {
             return response()->json([
                 'message' => 'Unauthorized. Authentication required.',
             ], 401);
         }
 
-        $userRole = $request->user()->role;
+        if (! $user->is_active) {
+            return response()->json([
+                'message' => 'Forbidden. User account is inactive.',
+            ], 403);
+        }
 
-        // Convert string roles to enum cases for comparison
-        $allowedRoles = array_map(fn ($role) => strtoupper($role), $roles);
+        $allowedRoles = array_map(
+            static fn (string $role): string => strtoupper($role),
+            $roles,
+        );
 
-        if (! in_array(strtoupper($userRole), $allowedRoles, true)) {
+        if (! in_array(strtoupper((string) $user->role), $allowedRoles, true)) {
             return response()->json([
                 'message' => 'Forbidden. Insufficient permissions.',
             ], 403);

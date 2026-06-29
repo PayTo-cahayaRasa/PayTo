@@ -55,6 +55,7 @@ class User extends Authenticatable
             'last_logout_at' => 'datetime',
             'work_date' => 'date',
             'work_seconds' => 'integer',
+            'is_active' => 'boolean',
             'password' => 'hashed',
             'password_hash' => 'hashed',
             'pin_hash' => 'hashed',

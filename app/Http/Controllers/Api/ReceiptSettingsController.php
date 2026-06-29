@@ -11,7 +11,7 @@ class ReceiptSettingsController extends Controller
 {
     private const SETTING_KEY = 'receipt.settings';
 
-    private const DEFAULT_HEADER = "TOKO CABANG PUSAT\nJl. Sudirman No. 45, Jakarta";
+    private const DEFAULT_HEADER = "NAMA TOKO\nAlamat Toko";
 
     private const DEFAULT_FOOTER = "Terima kasih atas kunjungan Anda\nFollow IG: @tokokopi";
 

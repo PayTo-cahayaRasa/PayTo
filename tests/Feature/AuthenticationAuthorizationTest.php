@@ -174,13 +174,50 @@ class AuthenticationAuthorizationTest extends TestCase
     }
 
     /**
+     * Test session hasil login dapat mengautentikasi API internal.
+     */
+    public function test_login_session_authenticates_internal_api(): void
+    {
+        $supervisor = User::factory()->create([
+            'role' => 'SUPERVISOR',
+            'is_active' => true,
+        ]);
+
+        $this->postJson('/login', [
+            'login_method' => 'CREDENTIALS',
+            'username' => $supervisor->username,
+            'password' => 'password',
+        ])->assertOk();
+
+        $this->getJson('/api/admin/profile')->assertOk();
+    }
+
+    /**
+     * Test akun nonaktif tidak dapat menggunakan route internal.
+     */
+    public function test_inactive_user_cannot_access_internal_api(): void
+    {
+        $cashier = User::factory()->create([
+            'role' => 'CASHIER',
+            'is_active' => false,
+        ]);
+
+        $this->actingAs($cashier)
+            ->getJson('/api/pos/products')
+            ->assertForbidden()
+            ->assertJson([
+                'message' => 'Forbidden. User account is inactive.',
+            ]);
+    }
+
+    /**
      * Test rate limiting pada login.
      */
     public function test_login_rate_limiting(): void
     {
-        // Attempt login 6 times (rate limit is 5 per minute)
         for ($i = 0; $i < 6; $i++) {
             $response = $this->postJson('/login', [
+                'login_method' => 'CREDENTIALS',
                 'username' => 'test',
                 'password' => 'wrong',
             ]);
@@ -189,6 +226,27 @@ class AuthenticationAuthorizationTest extends TestCase
                 $response->assertStatus(422);
             } else {
                 $response->assertStatus(429);
+            }
+        }
+    }
+
+    /**
+     * Test rate limiting pada checkout.
+     */
+    public function test_checkout_rate_limiting(): void
+    {
+        $cashier = User::factory()->create([
+            'role' => 'CASHIER',
+            'is_active' => true,
+        ]);
+
+        for ($i = 0; $i < 31; $i++) {
+            $response = $this->actingAs($cashier)->postJson('/api/pos/checkout', []);
+
+            if ($i < 30) {
+                $response->assertUnprocessable();
+            } else {
+                $response->assertTooManyRequests();
             }
         }
     }

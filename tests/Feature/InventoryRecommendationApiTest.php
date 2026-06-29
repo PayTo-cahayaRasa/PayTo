@@ -18,6 +18,11 @@ class InventoryRecommendationApiTest extends TestCase
 
     public function test_inventory_recommendation_returns_low_stock_items(): void
     {
+        $supervisor = User::factory()->create([
+            'role' => 'SUPERVISOR',
+            'is_active' => true,
+        ]);
+
         $cashier = new User;
         $cashier->name = 'Kasir';
         $cashier->username = 'kasir.inv';
@@ -77,7 +82,7 @@ class InventoryRecommendationApiTest extends TestCase
             'line_total' => 350000,
         ]);
 
-        $response = $this->getJson('/api/admin/inventory/recommendations');
+        $response = $this->actingAs($supervisor)->getJson('/api/admin/inventory/recommendations');
 
         $response
             ->assertOk()

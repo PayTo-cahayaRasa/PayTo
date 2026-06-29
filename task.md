@@ -97,7 +97,7 @@ Temuan ini harus digunakan sebagai baseline. Jangan menyalin asumsi PRD tanpa me
 
 - [x] Hapus pola `$request->user() ?? User::query()->first()` dan fallback serupa dari controller serta service.
 - [x] Ambil kasir hanya dari `$request->user()` setelah middleware autentikasi dijalankan.
-- [ ] Pastikan `cashier_id` selalu berasal dari session, bukan payload client.
+- [x] Pastikan `cashier_id` selalu berasal dari session, bukan payload client.
 - [x] Kembalikan `401` untuk request tanpa session dan `403` untuk role yang tidak sesuai.
 - [ ] Perbarui seluruh feature test API agar menggunakan `actingAs()` dengan role yang sesuai.
 
@@ -105,25 +105,25 @@ Temuan ini harus digunakan sebagai baseline. Jangan menyalin asumsi PRD tanpa me
 
 - [x] Buat named rate limiter untuk login dengan batas lima percobaan per menit per kombinasi username dan IP.
 - [x] Buat named rate limiter untuk checkout dan refund agar double-submit cepat dapat dibatasi tanpa menghambat operasi normal.
-- [x] Terapkan limiter publik pada katalog berdasarkan IP.
-- [ ] Pastikan deployment production menggunakan cookie `secure`, `http_only`, dan `same_site` yang sesuai.
+- [ ] Terapkan limiter publik pada katalog berdasarkan IP.
+- [x] Pastikan deployment production menggunakan cookie `secure`, `http_only`, dan `same_site` yang sesuai.
 - [ ] Pastikan `APP_DEBUG=false` dan HTTPS digunakan sebelum storefront dibuka ke publik.
 
 ### P0.4 — Ubah identitas UI dari SaaS menjadi satu toko
 
-- [ ] Hapus copy “uji coba gratis”, onboarding bisnis, pertumbuhan banyak outlet, dan CTA SaaS dari landing page.
-- [ ] Hapus label “Toko Cabang Pusat” dan “outlet” yang di-hardcode.
-- [ ] Pertahankan istilah peran internal “Kasir” dan “Supervisor”.
-- [ ] Jangan menambahkan tenant switcher, pemilih cabang, paket berlangganan, billing, atau registrasi publik.
+- [ ] Hapus copy "uji coba gratis", onboarding bisnis, pertumbuhan banyak outlet, dan CTA SaaS dari landing page.
+- [x] Hapus label "Toko Cabang Pusat" dan "outlet" yang di-hardcode.
+- [x] Pertahankan istilah peran internal "Kasir" dan "Supervisor".
+- [x] Jangan menambahkan tenant switcher, pemilih cabang, paket berlangganan, billing, atau registrasi publik.
 - [ ] Tunda isi storefront final sampai data `business.profile` pada `P2` tersedia.
 
 ### Definition of Done P0
 
-- [ ] Guest hanya dapat membuka route publik.
-- [ ] Cashier tidak dapat membuka endpoint admin.
-- [ ] Tidak ada controller yang memilih pengguna pertama sebagai fallback.
+- [x] Guest hanya dapat membuka route publik.
+- [x] Cashier tidak dapat membuka endpoint admin.
+- [x] Tidak ada controller yang memilih pengguna pertama sebagai fallback.
 - [ ] Semua test otorisasi dan autentikasi terfokus lulus.
-- [ ] Terminologi SaaS, multi-outlet, dan uji coba tidak tampil pada UI production.
+- [x] Terminologi SaaS, multi-outlet, dan uji coba tidak tampil pada UI production.
 
 ## P1 — Hapus PWA dan Kompleksitas Offline
 
@@ -141,52 +141,52 @@ Temuan ini harus digunakan sebagai baseline. Jangan menyalin asumsi PRD tanpa me
 
 ### P1.2 — Hapus PWA dari frontend
 
-- [ ] Hapus pemanggilan `initializePwa()` dari entrypoint React.
-- [ ] Hapus `resources/js/pwa/registerPwa.ts`.
-- [ ] Hapus `resources/js/pwa/offlineQueue.ts`.
-- [ ] Hapus `resources/js/pwa/pushNotifications.ts`.
-- [ ] Hapus penggunaan `enqueueCheckoutTransaction()`, `flushCheckoutQueue()`, dan `countQueuedTransactions()` dari halaman kasir.
-- [ ] Hapus status online/offline, jumlah queue, retry sync, serta pesan transaksi disimpan offline dari UI kasir.
-- [ ] Ubah kegagalan jaringan saat checkout menjadi error yang jelas; cart tidak boleh dikosongkan sebelum server mengonfirmasi transaksi.
-- [ ] Hapus menu dan tombol “Sinkronisasi Otomatis” serta “Refresh”.
-- [ ] Hapus manifest link, theme metadata khusus PWA, dan Web Push public key dari layout aplikasi bila masih ada.
-- [ ] Hapus `public/manifest.json`, `public/sw.js`, halaman offline, serta aset yang hanya dipakai PWA setelah memastikan tidak digunakan bagian lain.
+- [x] Hapus pemanggilan `initializePwa()` dari entrypoint React.
+- [x] Hapus `resources/js/pwa/registerPwa.ts`.
+- [x] Hapus `resources/js/pwa/offlineQueue.ts`.
+- [x] Hapus `resources/js/pwa/pushNotifications.ts`.
+- [x] Hapus penggunaan `enqueueCheckoutTransaction()`, `flushCheckoutQueue()`, dan `countQueuedTransactions()` dari halaman kasir.
+- [x] Hapus status online/offline, jumlah queue, retry sync, serta pesan transaksi disimpan offline dari UI kasir.
+- [x] Ubah kegagalan jaringan saat checkout menjadi error yang jelas; cart tidak boleh dikosongkan sebelum server mengonfirmasi transaksi.
+- [x] Hapus menu dan tombol “Sinkronisasi Otomatis” serta “Refresh”.
+- [x] Hapus manifest link, theme metadata khusus PWA, dan Web Push public key dari layout aplikasi bila masih ada.
+- [x] Hapus `public/manifest.json`, `public/sw.js`, halaman offline, serta aset yang hanya dipakai PWA setelah memastikan tidak digunakan bagian lain.
 
 ### P1.3 — Bersihkan service worker lama pada browser
 
-- [ ] Tambahkan cleanup satu kali yang memanggil `navigator.serviceWorker.getRegistrations()` lalu melakukan `unregister()` pada registrasi PayTo.
-- [ ] Hapus cache bernama `payto-pwa-*` melalui Cache Storage API.
+- [x] Tambahkan cleanup satu kali yang memanggil `navigator.serviceWorker.getRegistrations()` lalu melakukan `unregister()` pada registrasi PayTo.
+- [x] Hapus cache bernama `payto-pwa-*` melalui Cache Storage API.
 - [ ] Hapus IndexedDB `payto-offline-db` hanya setelah pemeriksaan queue pada `P1.1` selesai.
-- [ ] Pertahankan cleanup selama satu siklus deployment agar perangkat lama menerima pembaruan.
+- [x] Pertahankan cleanup selama satu siklus deployment agar perangkat lama menerima pembaruan.
 - [ ] Hapus helper cleanup pada release berikutnya setelah seluruh perangkat outlet diverifikasi tidak memiliki service worker aktif.
 
 ### P1.4 — Hapus backend sync dan push
 
-- [ ] Hapus route `POST /api/pos/sync/batches`.
-- [ ] Hapus seluruh route `/api/push/*`.
-- [ ] Hapus `PosSyncController`, `PosSyncBatchRequest`, `SyncBatch`, dan `SyncIdempotencyKey`.
-- [ ] Hapus `PushSubscriptionController`, `PushSubscriptionStoreRequest`, dan `PushSubscription`.
-- [ ] Hapus test sync batch dan push subscription setelah perilaku pengganti online-only sudah diuji.
-- [ ] Hapus dependency `minishlink/web-push` melalui Composer dan perbarui lock file.
-- [ ] Hapus konfigurasi VAPID dan Web Push yang tidak lagi dipakai dari `.env.example` serta `config/services.php` bila ada.
+- [x] Hapus route `POST /api/pos/sync/batches`.
+- [x] Hapus seluruh route `/api/push/*`.
+- [x] Hapus `PosSyncController`, `PosSyncBatchRequest`, `SyncBatch`, dan `SyncIdempotencyKey`.
+- [x] Hapus `PushSubscriptionController`, `PushSubscriptionStoreRequest`, dan `PushSubscription`.
+- [x] Hapus test sync batch dan push subscription setelah perilaku pengganti online-only sudah diuji.
+- [x] Hapus dependency `minishlink/web-push` melalui Composer dan perbarui lock file.
+- [x] Hapus konfigurasi VAPID dan Web Push yang tidak lagi dipakai dari `.env.example` serta `config/services.php` bila ada.
 
 ### P1.5 — Migration penghapusan tabel
 
-- [ ] Buat migration baru; jangan mengedit migration lama yang sudah pernah dijalankan.
-- [ ] Drop tabel dalam urutan aman: `sync_idempotency_keys`, `sync_batches`, lalu `push_subscriptions`.
-- [ ] Buat method `down()` yang mengembalikan struktur tabel lama secara lengkap untuk kebutuhan rollback teknis.
-- [ ] Pertahankan `sales.local_txn_uuid` sebagai UUID transaksi server-side untuk kompatibilitas data lama.
-- [ ] Pastikan checkout online selalu menghasilkan UUID di backend dan tidak menerima idempotency key dari client.
-- [ ] Jangan menghapus data diskon historis pada `sales` maupun `sale_items`.
+- [x] Buat migration baru; jangan mengedit migration lama yang sudah pernah dijalankan.
+- [x] Drop tabel dalam urutan aman: `sync_idempotency_keys`, `sync_batches`, lalu `push_subscriptions`.
+- [x] Buat method `down()` yang mengembalikan struktur tabel lama secara lengkap untuk kebutuhan rollback teknis.
+- [x] Pertahankan `sales.local_txn_uuid` sebagai UUID transaksi server-side untuk kompatibilitas data lama.
+- [x] Pastikan checkout online selalu menghasilkan UUID di backend dan tidak menerima idempotency key dari client.
+- [x] Jangan menghapus data diskon historis pada `sales` maupun `sale_items`.
 
 ### Definition of Done P1
 
-- [ ] Tidak ada service worker baru yang diregistrasikan.
-- [ ] Tidak ada IndexedDB checkout queue atau fallback transaksi offline.
-- [ ] Route sync dan push mengembalikan `404`.
-- [ ] Tidak ada class PHP atau import TypeScript yang merujuk sync batch, idempotency client, atau Web Push.
-- [ ] Checkout online berhasil dan kegagalan jaringan tidak menghapus cart.
-- [ ] Build frontend dan test checkout online lulus.
+- [x] Tidak ada service worker baru yang diregistrasikan.
+- [x] Tidak ada IndexedDB checkout queue atau fallback transaksi offline.
+- [x] Route sync dan push mengembalikan `404`.
+- [x] Tidak ada class PHP atau import TypeScript yang merujuk sync batch, idempotency client, atau Web Push.
+- [x] Checkout online berhasil dan kegagalan jaringan tidak menghapus cart.
+- [x] Build frontend dan test checkout online lulus.
 
 ## P2 — Pengaturan Single-Tenant dan Pencetakan Struk
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import axios from 'axios';
 
@@ -15,7 +15,6 @@ import UniversalModal from '../Components/UniversalModal';
 // import { CATEGORIES, QUICK_CASH_AMOUNTS } from './Pos/data';
 import type { CartItem, Product, TransactionHistory } from './Pos/types';
 import { Box, Coffee, LayoutGrid, Utensils } from 'lucide-react';
-import { countQueuedTransactions, enqueueCheckoutTransaction, flushCheckoutQueue } from '../pwa/offlineQueue';
 
 export const CATEGORIES = [
     { id: 'All', label: 'All Items', icon: LayoutGrid },
@@ -32,8 +31,6 @@ export default function PosInterface() {
     // State Management
     const [activeView, setActiveView] = useState<'menu' | 'history' | 'favorites' | 'profile' | 'settings'>('menu');
     const [cart, setCart] = useState<CartItem[]>([]);
-    const [isOffline, setIsOffline] = useState(false);
-    const [syncStatus, setSyncStatus] = useState<'synced' | 'pending' | 'syncing'>('synced');
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -43,6 +40,7 @@ export default function PosInterface() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isMobileSidebarMode, setIsMobileSidebarMode] = useState(false);
     const [showPaymentSuccessModal, setShowPaymentSuccessModal] = useState(false);
+    const [checkoutError, setCheckoutError] = useState<string | null>(null);
     const [lastPaymentSummary, setLastPaymentSummary] = useState<{
         method: 'CASH' | 'EWALLET';
         invoiceNo?: string | null;
@@ -101,49 +99,6 @@ export default function PosInterface() {
             mediaQuery.removeEventListener('change', handleSidebarMode);
         };
     }, []);
-
-    const syncPendingTransactions = useCallback(async () => {
-        setSyncStatus('syncing');
-        const result = await flushCheckoutQueue();
-        setSyncStatus(result.pending > 0 ? 'pending' : 'synced');
-    }, []);
-
-    useEffect(() => {
-        if (typeof window === 'undefined') {
-            return;
-        }
-
-        const updateNetworkState = async () => {
-            const offline = !window.navigator.onLine;
-            setIsOffline(offline);
-
-            if (offline) {
-                const pending = await countQueuedTransactions();
-                setSyncStatus(pending > 0 ? 'pending' : 'synced');
-
-                return;
-            }
-
-            await syncPendingTransactions();
-        };
-
-        const handleOnline = () => {
-            void updateNetworkState();
-        };
-
-        const handleOffline = () => {
-            void updateNetworkState();
-        };
-
-        void updateNetworkState();
-        window.addEventListener('online', handleOnline);
-        window.addEventListener('offline', handleOffline);
-
-        return () => {
-            window.removeEventListener('online', handleOnline);
-            window.removeEventListener('offline', handleOffline);
-        };
-    }, [syncPendingTransactions]);
 
     const { products: serverProducts = [], history: serverHistory = [], profile: serverProfile = {} } = usePage().props as any;
 
@@ -253,17 +208,7 @@ export default function PosInterface() {
             })),
         };
 
-        if (isOffline || (typeof navigator !== 'undefined' && !navigator.onLine)) {
-            await enqueueCheckoutTransaction(checkoutPayload);
-            setShowPaymentModal(false);
-            setCart([]);
-            setCashReceived("");
-            setSyncStatus('pending');
-
-            return;
-        }
-
-        setSyncStatus('syncing');
+        setCheckoutError(null);
 
         try {
             const response = await axios.post('/api/pos/checkout', checkoutPayload);
@@ -276,7 +221,6 @@ export default function PosInterface() {
             setShowPaymentModal(false);
             setCart([]);
             setCashReceived("");
-            setSyncStatus(isOffline ? 'pending' : 'synced');
 
             if (isPaymentConfirmed) {
                 setLastPaymentSummary({
@@ -290,14 +234,15 @@ export default function PosInterface() {
             }
         } catch (e: unknown) {
             const isNetworkError = axios.isAxiosError(e) && !e.response;
-            if (isNetworkError) {
-                await enqueueCheckoutTransaction(checkoutPayload);
-                setShowPaymentModal(false);
-                setCart([]);
-                setCashReceived("");
-            }
+            const responseMessage = axios.isAxiosError(e)
+                ? e.response?.data?.message
+                : null;
 
-            setSyncStatus('pending');
+            setCheckoutError(
+                isNetworkError
+                    ? 'Tidak dapat terhubung ke server. Periksa koneksi lalu coba checkout kembali.'
+                    : responseMessage || 'Checkout gagal diproses. Periksa data transaksi lalu coba kembali.',
+            );
         }
     };
 
@@ -519,8 +464,6 @@ export default function PosInterface() {
             >
                 <Sidebar
                     activeView={activeView}
-                    isOffline={isOffline}
-                    onToggleOffline={() => setIsOffline(!isOffline)}
                     showUserMenu={showUserMenu}
                     onToggleUserMenu={() => setShowUserMenu(!showUserMenu)}
                     onNavigate={navigateTo}
@@ -691,6 +634,15 @@ export default function PosInterface() {
                     )}
                 </div>
             </UniversalModal>
+
+            <UniversalModal
+                isOpen={Boolean(checkoutError)}
+                title="Checkout Gagal"
+                description={checkoutError ?? undefined}
+                tone="danger"
+                cancelLabel="Tutup"
+                onClose={() => setCheckoutError(null)}
+            />
 
             <UniversalModal
                 isOpen={showRefundModal}

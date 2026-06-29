@@ -21,7 +21,7 @@ import UniversalModal from '../../Components/UniversalModal';
 export default function AdminPage() {
     const [activeTab, setActiveTab] = useState<AdminTab>('DASHBOARD');
 
-    const [storeName, setStoreName] = useState("Toko Cabang Pusat");
+    const [storeName, setStoreName] = useState("PayTo");
     const [discountLimit, setDiscountLimit] = useState(20);
     const [allowNegativeStock, setAllowNegativeStock] = useState(false);
 

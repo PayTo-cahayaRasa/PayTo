@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { AlertTriangle, Save, Settings, ShieldCheck, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Save, Settings, ShieldCheck, ToggleLeft, ToggleRight } from 'lucide-react';
 
 type SettingsTabProps = {
     storeName: string;
@@ -84,15 +84,6 @@ export default function SettingsTab({
                         </button>
                     </div>
 
-                    <div className="p-4 bg-rose-50 rounded-2xl border border-rose-100 mt-4">
-                        <h4 className="font-bold text-sm text-rose-700 mb-1 flex items-center gap-2">
-                            <AlertTriangle size={16} /> Danger Zone
-                        </h4>
-                        <p className="text-xs text-rose-600 mb-3">Menghapus semua data transaksi lokal yang belum tersinkron.</p>
-                        <button className="w-full py-2.5 bg-white border border-rose-200 text-rose-600 font-bold text-xs rounded-xl hover:bg-rose-100">
-                            Factory Reset Local Data
-                        </button>
-                    </div>
                 </div>
             </div>
 

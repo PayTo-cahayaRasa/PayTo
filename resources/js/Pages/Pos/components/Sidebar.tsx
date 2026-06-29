@@ -1,10 +1,8 @@
 import React from 'react';
-import { Clock, LayoutGrid, LogOut, Settings, Star, User, Wifi, WifiOff } from 'lucide-react';
+import { Clock, LayoutGrid, LogOut, Settings, Star, User } from 'lucide-react';
 
 type SidebarProps = {
     activeView: 'menu' | 'history' | 'favorites' | 'profile' | 'settings';
-    isOffline: boolean;
-    onToggleOffline: () => void;
     showUserMenu: boolean;
     onToggleUserMenu: () => void;
     onNavigate: (view: SidebarProps['activeView']) => void;
@@ -14,8 +12,6 @@ type SidebarProps = {
 
 export default function Sidebar({
     activeView,
-    isOffline,
-    onToggleOffline,
     showUserMenu,
     onToggleUserMenu,
     onNavigate,
@@ -64,14 +60,6 @@ export default function Sidebar({
             </div>
 
             <div className="mt-auto flex flex-col gap-4 mb-2 items-center">
-                <button
-                    onClick={onToggleOffline}
-                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isOffline ? 'bg-amber-100 text-amber-500' : 'bg-emerald-100 text-emerald-500'}`}
-                    title="Toggle Offline Status"
-                >
-                    {isOffline ? <WifiOff size={18} /> : <Wifi size={18} />}
-                </button>
-
                 <div className="relative" ref={userMenuRef}>
                     <button
                         onClick={onToggleUserMenu}

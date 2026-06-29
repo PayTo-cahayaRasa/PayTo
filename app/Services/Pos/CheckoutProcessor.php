@@ -117,7 +117,6 @@ class CheckoutProcessor
                 'paid_total' => $paidTotal,
                 'change_total' => $changeTotal,
                 'occurred_at' => $occurredAt,
-                'synced_at' => now(),
             ]);
 
             $invoiceNumber = 'INV-'.now()->format('Ymd').'-'.str_pad((string) $sale->id, 6, '0', STR_PAD_LEFT);

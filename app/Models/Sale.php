@@ -21,7 +21,6 @@ class Sale extends Model
         'paid_total',
         'change_total',
         'occurred_at',
-        'synced_at',
     ];
 
     protected function casts(): array
@@ -34,7 +33,6 @@ class Sale extends Model
             'paid_total' => 'decimal:2',
             'change_total' => 'decimal:2',
             'occurred_at' => 'datetime',
-            'synced_at' => 'datetime',
         ];
     }
 

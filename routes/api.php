@@ -8,16 +8,14 @@ use App\Http\Controllers\Api\PosApiController;
 use App\Http\Controllers\Api\PosCheckoutController;
 use App\Http\Controllers\Api\PosRefundController;
 use App\Http\Controllers\Api\PosSettingsController;
-use App\Http\Controllers\Api\PosSyncController;
 use App\Http\Controllers\Api\ProductQueryController;
-use App\Http\Controllers\Api\PushSubscriptionController;
 use App\Http\Controllers\Api\ReceiptSettingsController;
 use App\Http\Controllers\Api\StaffManagementController;
 use App\Http\Controllers\Auth\PosLogoutController;
 use Illuminate\Support\Facades\Route;
 
 // Admin API endpoints - Supervisor only
-Route::middleware(['auth', 'role:SUPERVISOR'])->prefix('admin')->name('api.admin.')->group(function () {
+Route::middleware(['web', 'auth', 'role:SUPERVISOR'])->prefix('admin')->name('api.admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [AdminProfileController::class, 'show'])->name('profile');
 
@@ -50,7 +48,7 @@ Route::middleware(['auth', 'role:SUPERVISOR'])->prefix('admin')->name('api.admin
 });
 
 // POS API endpoints - Cashier and Supervisor
-Route::middleware(['auth', 'role:CASHIER,SUPERVISOR'])->prefix('pos')->name('api.pos.')->group(function () {
+Route::middleware(['web', 'auth', 'role:CASHIER,SUPERVISOR'])->prefix('pos')->name('api.pos.')->group(function () {
     Route::get('/products', [PosApiController::class, 'products'])->name('products');
     Route::get('/history', [PosApiController::class, 'history'])->name('history');
     Route::get('/profile', [PosApiController::class, 'profile'])->name('profile');
@@ -62,15 +60,4 @@ Route::middleware(['auth', 'role:CASHIER,SUPERVISOR'])->prefix('pos')->name('api
     Route::get('/settings', [PosSettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings/printer', [PosSettingsController::class, 'updatePrinter'])->name('settings.printer');
     Route::post('/settings/printer/test', [PosSettingsController::class, 'testPrinter'])->name('settings.printer.test');
-    Route::post('/settings/refresh', [PosSettingsController::class, 'refreshSync'])->name('settings.refresh');
-
-    // PWA sync and push (to be removed in P1)
-    Route::post('/sync/batches', [PosSyncController::class, 'store'])->name('sync.batches');
-});
-
-// Push subscription endpoints (to be removed in P1)
-Route::middleware(['auth'])->prefix('push')->name('api.push.')->group(function () {
-    Route::post('/subscriptions', [PushSubscriptionController::class, 'store'])->name('subscriptions.store');
-    Route::delete('/subscriptions', [PushSubscriptionController::class, 'destroy'])->name('subscriptions.destroy');
-    Route::post('/test', [PushSubscriptionController::class, 'sendTest'])->name('test');
 });
