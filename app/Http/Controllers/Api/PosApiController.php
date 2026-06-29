@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Pos\HistoryQueryController;
 use App\Http\Controllers\Pos\ProductQueryController;
 use App\Http\Controllers\Pos\ProfileQueryController;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class PosApiController extends Controller
@@ -25,7 +24,7 @@ class PosApiController extends Controller
         $perPage = (int) $request->query('per_page', 10);
         $startDate = $request->query('start_date');
         $endDate = $request->query('end_date');
-        $userId = $request->user()?->id ?? User::query()->where('role', 'CASHIER')->orderBy('id')->value('id');
+        $userId = $request->user()->id;
 
         $result = $controller->fetchPaginated($page, $perPage, [
             'userId' => $userId,

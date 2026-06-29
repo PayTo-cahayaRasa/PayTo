@@ -14,10 +14,7 @@ class PosCheckoutController extends Controller
 
     public function store(PosCheckoutRequest $request): JsonResponse
     {
-        $user = $request->user() ?? \App\Models\User::query()->first();
-        if (! $user) {
-            return response()->json(['message' => 'Kasir tidak ditemukan.'], 422);
-        }
+        $user = $request->user();
 
         try {
             $result = $this->checkoutProcessor->process($request->validated(), $user);
