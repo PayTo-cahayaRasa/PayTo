@@ -29,4 +29,16 @@ class KatalogPageTest extends TestCase
             ->where('productId', 1)
         );
     }
+
+    public function test_missing_public_catalog_detail_page_still_renders_the_detail_shell(): void
+    {
+        $response = $this->get('/katalog/999');
+
+        $response->assertOk();
+        $response->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('katalogDetailPage')
+            ->url('/katalog/999')
+            ->where('productId', 999)
+        );
+    }
 }

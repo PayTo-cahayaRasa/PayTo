@@ -1,11 +1,47 @@
 @import 'tailwindcss';
 
+html {
+    scroll-behavior: smooth;
+}
+
+@keyframes blob-rotate {
+    0%,
+    100% {
+        transform: rotate(0deg) scale(1) translate3d(0, 0, 0);
+    }
+
+    50% {
+        transform: rotate(180deg) scale(1.05) translate3d(8px, -6px, 0);
+    }
+}
+
+@keyframes float {
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-12px);
+    }
+}
+
+@keyframes orbit {
+    from {
+        transform: rotate(0deg) translateX(20px) rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg) translateX(20px) rotate(-360deg);
+    }
+}
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Aptos', 'Arial Nova', 'Segoe UI', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
 }

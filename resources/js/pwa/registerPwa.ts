@@ -1,8 +1,37 @@
 import { flushCheckoutQueue } from './offlineQueue';
 import { subscribePushNotifications } from './pushNotifications';
 
+async function unregisterDevelopmentServiceWorkers(): Promise<void> {
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
+        return;
+    }
+
+    const registrations = await navigator.serviceWorker.getRegistrations();
+
+    await Promise.all(registrations.map((registration) => registration.unregister()));
+
+    if (!('caches' in window)) {
+        return;
+    }
+
+    const cacheKeys = await window.caches.keys();
+
+    await Promise.all(
+        cacheKeys
+            .filter((cacheKey) => cacheKey.startsWith('payto-'))
+            .map((cacheKey) => window.caches.delete(cacheKey)),
+    );
+}
+
 export function initializePwa(): void {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
+        return;
+    }
+
+    const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+    if (import.meta.env.DEV || isLocalHost) {
+        void unregisterDevelopmentServiceWorkers();
         return;
     }
 

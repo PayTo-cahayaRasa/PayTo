@@ -10,6 +10,8 @@ export type PublicCatalogProduct = {
     imageColor?: string;
 };
 
+export type PublicCatalogFilterId = 'new-arrival' | 'best-seller' | 'on-discount' | null;
+
 export const PUBLIC_CATEGORIES = [
     { id: 'All', label: 'Semua' },
     { id: 'Minuman', label: 'Minuman' },
@@ -143,4 +145,23 @@ export function formatRupiah(amount: number): string {
         currency: 'IDR',
         minimumFractionDigits: 0,
     }).format(amount);
+}
+
+export function applyPublicCatalogFilter(
+    products: PublicCatalogProduct[],
+    filterId: PublicCatalogFilterId,
+): PublicCatalogProduct[] {
+    if (filterId === 'new-arrival') {
+        return [...products].sort((leftProduct, rightProduct) => rightProduct.id - leftProduct.id);
+    }
+
+    if (filterId === 'best-seller') {
+        return [...products].sort((leftProduct, rightProduct) => rightProduct.stock - leftProduct.stock);
+    }
+
+    if (filterId === 'on-discount') {
+        return products.filter((product) => [1, 3, 6, 8, 10].includes(product.id));
+    }
+
+    return products;
 }
