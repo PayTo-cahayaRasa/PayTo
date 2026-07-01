@@ -6,6 +6,16 @@ Route::get('/', function () {
     return inertia('landingPage');
 });
 
+Route::get('/katalog', function () {
+    return inertia('katalogPage');
+});
+
+Route::get('/katalog/{product}', function (int $product) {
+    return inertia('katalogDetailPage', [
+        'productId' => $product,
+    ]);
+})->whereNumber('product');
+
 Route::get('/login', function () {
     return inertia('login');
 });
