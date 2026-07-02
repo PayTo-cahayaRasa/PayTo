@@ -38,7 +38,7 @@ class AppServiceProvider extends ServiceProvider
     {
         RateLimiter::for('login', function (Request $request) {
             if (strtoupper((string) $request->input('login_method')) === 'PIN') {
-                return Limit::perMinute(5, 5)->by('pin-login:'.$request->ip());
+                return Limit::perMinutes(5, 5)->by('pin-login:'.$request->ip());
             }
 
             return Limit::perMinute(5)->by((string) $request->input('username').'|'.$request->ip());
@@ -53,11 +53,25 @@ class AppServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('sensitive-action', function (Request $request) {
-            return Limit::perMinute(5, 5)->by('sensitive-action:'.($request->user()?->getAuthIdentifier() ?: $request->ip()));
+            return Limit::perMinutes(5, 5)->by('sensitive-action:'.($request->user()?->getAuthIdentifier() ?: $request->ip()));
         });
 
         RateLimiter::for('catalog', function (Request $request) {
             return Limit::perMinute(60)->by($request->ip());
+        });
+
+        // Admin API rate limiting - prevents abuse of admin endpoints
+        RateLimiter::for('admin-api', function (Request $request) {
+            return Limit::perMinute(60)->by(
+                'admin:'.($request->user()?->getAuthIdentifier() ?: $request->ip())
+            );
+        });
+
+        // Admin write operations - stricter rate limiting
+        RateLimiter::for('admin-write', function (Request $request) {
+            return Limit::perMinutes(5, 10)->by(
+                'admin-write:'.($request->user()?->getAuthIdentifier() ?: $request->ip())
+            );
         });
     }
 }
