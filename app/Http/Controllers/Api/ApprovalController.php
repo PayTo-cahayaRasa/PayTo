@@ -132,7 +132,7 @@ class ApprovalController extends Controller
      */
     private function processRefundApproval(Approval $approval, User $approver): array
     {
-        $sale = Sale::query()->with(['items'])->find($approval->sale_id);
+        $sale = Sale::query()->with(['items'])->find((int) $approval->sale_id);
         if (! $sale) {
             return ['status' => 'error', 'message' => 'Transaksi penjualan tidak ditemukan.'];
         }

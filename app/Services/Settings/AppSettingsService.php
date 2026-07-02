@@ -3,6 +3,7 @@
 namespace App\Services\Settings;
 
 use App\Models\AppSetting;
+use Illuminate\Support\Facades\DB;
 
 class AppSettingsService
 {
@@ -79,7 +80,7 @@ class AppSettingsService
      */
     public function updateBusinessSettings(array $businessProfile, array $catalogSettings): void
     {
-        \DB::transaction(function () use ($businessProfile, $catalogSettings) {
+        DB::transaction(function () use ($businessProfile, $catalogSettings) {
             AppSetting::query()->updateOrCreate(
                 ['key' => self::KEY_BUSINESS_PROFILE],
                 ['value' => $businessProfile]
