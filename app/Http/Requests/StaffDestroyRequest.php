@@ -3,10 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Rules\CurrentUserCredential;
-use App\Rules\SecurePin;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StaffResetPinRequest extends FormRequest
+class StaffDestroyRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +23,6 @@ class StaffResetPinRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'pin' => ['required', 'string', 'digits:6', new SecurePin],
             'current_credential' => ['required', 'string', 'max:255', new CurrentUserCredential($this->user())],
         ];
     }
@@ -35,8 +33,6 @@ class StaffResetPinRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'pin.required' => 'PIN wajib diisi.',
-            'pin.digits' => 'PIN harus 6 digit.',
             'current_credential.required' => 'Password atau PIN supervisor wajib dikonfirmasi.',
         ];
     }

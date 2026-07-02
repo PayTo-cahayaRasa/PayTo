@@ -28,7 +28,10 @@ class BusinessSettingsApiTest extends TestCase
 
     public function test_supervisor_can_update_business_settings(): void
     {
-        $supervisor = User::factory()->create(['role' => 'SUPERVISOR']);
+        $supervisor = User::factory()->create([
+            'role' => 'SUPERVISOR',
+            'is_active' => true,
+        ]);
 
         $payload = [
             'business' => [

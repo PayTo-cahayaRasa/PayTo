@@ -46,9 +46,9 @@ Route::middleware(['web', 'auth', 'role:SUPERVISOR'])->prefix('admin')->name('ap
     Route::get('/staff', [StaffManagementController::class, 'index'])->name('staff.index');
     Route::post('/staff', [StaffManagementController::class, 'store'])->name('staff.store');
     Route::get('/staff/{user}', [StaffManagementController::class, 'show'])->name('staff.show');
-    Route::put('/staff/{user}', [StaffManagementController::class, 'update'])->name('staff.update');
-    Route::delete('/staff/{user}', [StaffManagementController::class, 'destroy'])->name('staff.destroy');
-    Route::post('/staff/{user}/reset-pin', [StaffManagementController::class, 'resetPin'])->name('staff.reset-pin');
+    Route::put('/staff/{user}', [StaffManagementController::class, 'update'])->middleware('throttle:sensitive-action')->name('staff.update');
+    Route::delete('/staff/{user}', [StaffManagementController::class, 'destroy'])->middleware('throttle:sensitive-action')->name('staff.destroy');
+    Route::post('/staff/{user}/reset-pin', [StaffManagementController::class, 'resetPin'])->middleware('throttle:sensitive-action')->name('staff.reset-pin');
 });
 
 // POS API endpoints - Cashier and Supervisor

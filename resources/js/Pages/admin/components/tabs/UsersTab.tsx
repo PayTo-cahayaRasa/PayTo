@@ -26,6 +26,17 @@ const defaultFormState: StaffFormState = {
     pin: '',
 };
 
+const getRequestErrorMessage = (error: unknown, fallback: string): string => {
+    if (!axios.isAxiosError(error)) {
+        return fallback;
+    }
+
+    const validationErrors = error.response?.data?.errors as Record<string, string[]> | undefined;
+    const firstValidationError = validationErrors ? Object.values(validationErrors)[0]?.[0] : null;
+
+    return firstValidationError || error.response?.data?.message || fallback;
+};
+
 export default function UsersTab() {
     const [staff, setStaff] = useState<StaffMember[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -36,9 +47,11 @@ export default function UsersTab() {
     const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
     const [formState, setFormState] = useState<StaffFormState>(defaultFormState);
     const [pinValue, setPinValue] = useState('');
+    const [currentCredential, setCurrentCredential] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
     const sortedStaff = useMemo(() => staff, [staff]);
+    const isCredentialChange = Boolean(selectedStaff && (formState.password.trim() || formState.pin.trim()));
 
     useEffect(() => {
         let isActive = true;
@@ -72,6 +85,8 @@ export default function UsersTab() {
     const handleOpenCreate = () => {
         setSelectedStaff(null);
         setFormState(defaultFormState);
+        setCurrentCredential('');
+        setErrorMessage(null);
         setShowFormModal(true);
     };
 
@@ -85,13 +100,24 @@ export default function UsersTab() {
             password: '',
             pin: '',
         });
+        setCurrentCredential('');
+        setErrorMessage(null);
         setShowFormModal(true);
     };
 
     const handleOpenResetPin = (user: StaffMember) => {
         setSelectedStaff(user);
         setPinValue('');
+        setCurrentCredential('');
+        setErrorMessage(null);
         setShowResetPinModal(true);
+    };
+
+    const handleOpenDelete = (user: StaffMember) => {
+        setSelectedStaff(user);
+        setCurrentCredential('');
+        setErrorMessage(null);
+        setShowDeleteModal(true);
     };
 
     const handleChange = (field: keyof StaffFormState) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -125,6 +151,10 @@ export default function UsersTab() {
             payload.pin = formState.pin.trim();
         }
 
+        if (isCredentialChange) {
+            payload.current_credential = currentCredential;
+        }
+
         try {
             if (selectedStaff) {
                 const response = await axios.put(`/api/admin/staff/${selectedStaff.id}`, payload);
@@ -138,7 +168,7 @@ export default function UsersTab() {
 
             setShowFormModal(false);
         } catch (error) {
-            setErrorMessage('Gagal menyimpan data staf.');
+            setErrorMessage(getRequestErrorMessage(error, 'Gagal menyimpan data staf.'));
         } finally {
             setIsSaving(false);
         }
@@ -155,12 +185,13 @@ export default function UsersTab() {
         try {
             const response = await axios.post(`/api/admin/staff/${selectedStaff.id}/reset-pin`, {
                 pin: pinValue,
+                current_credential: currentCredential,
             });
             const updated = response.data?.data;
             setStaff(items => items.map(item => (item.id === updated.id ? updated : item)));
             setShowResetPinModal(false);
         } catch (error) {
-            setErrorMessage('Gagal reset PIN staf.');
+            setErrorMessage(getRequestErrorMessage(error, 'Gagal reset PIN staf.'));
         } finally {
             setIsSaving(false);
         }
@@ -175,11 +206,13 @@ export default function UsersTab() {
         setErrorMessage(null);
 
         try {
-            await axios.delete(`/api/admin/staff/${selectedStaff.id}`);
+            await axios.delete(`/api/admin/staff/${selectedStaff.id}`, {
+                data: { current_credential: currentCredential },
+            });
             setStaff(items => items.filter(item => item.id !== selectedStaff.id));
             setShowDeleteModal(false);
         } catch (error) {
-            setErrorMessage('Gagal menghapus staf.');
+            setErrorMessage(getRequestErrorMessage(error, 'Gagal menghapus staf.'));
         } finally {
             setIsSaving(false);
         }
@@ -252,7 +285,7 @@ export default function UsersTab() {
                                     <Edit size={16} />
                                 </button>
                                 <button
-                                    onClick={() => { setSelectedStaff(user); setShowDeleteModal(true); }}
+                                    onClick={() => handleOpenDelete(user)}
                                     className="shrink-0 py-2.5 px-3 rounded-xl bg-white border border-slate-200 text-rose-500 hover:text-rose-600 hover:bg-rose-50"
                                 >
                                     <Trash2 size={16} />
@@ -281,6 +314,11 @@ export default function UsersTab() {
                         </div>
 
                         <div className="p-8 overflow-y-auto custom-scrollbar-light space-y-6">
+                            {errorMessage ? (
+                                <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600">
+                                    {errorMessage}
+                                </div>
+                            ) : null}
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                 <div className="sm:col-span-2">
                                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Staf</label>
@@ -323,7 +361,7 @@ export default function UsersTab() {
                                         value={formState.password}
                                         onChange={handleChange('password')}
                                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
-                                        placeholder="Minimal 6 karakter"
+                                        placeholder="Min. 8 karakter, huruf besar, angka, simbol"
                                     />
                                 </div>
 
@@ -337,6 +375,22 @@ export default function UsersTab() {
                                         placeholder="6 digit"
                                     />
                                 </div>
+
+                                {isCredentialChange ? (
+                                    <div className="sm:col-span-2">
+                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                                            Konfirmasi Supervisor
+                                        </label>
+                                        <input
+                                            type="password"
+                                            value={currentCredential}
+                                            onChange={(event) => setCurrentCredential(event.target.value)}
+                                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+                                            placeholder="Password atau PIN Anda saat ini"
+                                            autoComplete="current-password"
+                                        />
+                                    </div>
+                                ) : null}
 
                                 <div className="sm:col-span-2 flex items-center gap-3">
                                     <label className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600">
@@ -361,7 +415,7 @@ export default function UsersTab() {
                             </button>
                             <button
                                 onClick={handleSave}
-                                disabled={isSaving}
+                                disabled={isSaving || (isCredentialChange && !currentCredential.trim())}
                                 className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-lg hover:bg-indigo-700 transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                             >
                                 <Save size={18} /> {isSaving ? 'Menyimpan...' : 'Simpan'}
@@ -385,14 +439,32 @@ export default function UsersTab() {
                         </div>
 
                         <div className="p-8 space-y-4">
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">PIN Baru</label>
-                            <input
-                                type="text"
-                                value={pinValue}
-                                onChange={(event) => setPinValue(event.target.value)}
-                                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-mono focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
-                                placeholder="6 digit"
-                            />
+                            {errorMessage ? (
+                                <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600">
+                                    {errorMessage}
+                                </div>
+                            ) : null}
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">PIN Baru</label>
+                                <input
+                                    type="text"
+                                    value={pinValue}
+                                    onChange={(event) => setPinValue(event.target.value)}
+                                    className="mt-2 w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-mono focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+                                    placeholder="6 digit yang tidak berulang atau berurutan"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Konfirmasi Supervisor</label>
+                                <input
+                                    type="password"
+                                    value={currentCredential}
+                                    onChange={(event) => setCurrentCredential(event.target.value)}
+                                    className="mt-2 w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+                                    placeholder="Password atau PIN Anda saat ini"
+                                    autoComplete="current-password"
+                                />
+                            </div>
                         </div>
 
                         <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
@@ -404,7 +476,7 @@ export default function UsersTab() {
                             </button>
                             <button
                                 onClick={handleResetPin}
-                                disabled={isSaving}
+                                disabled={isSaving || pinValue.length !== 6 || !currentCredential.trim()}
                                 className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-lg hover:bg-indigo-700 transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                             >
                                 <Save size={18} /> {isSaving ? 'Menyimpan...' : 'Reset PIN'}
@@ -423,9 +495,26 @@ export default function UsersTab() {
                 cancelLabel="Batal"
                 onClose={() => setShowDeleteModal(false)}
                 onConfirm={handleConfirmDelete}
-                isConfirmDisabled={isSaving}
+                isConfirmDisabled={isSaving || !currentCredential.trim()}
                 isLoading={isSaving}
-            />
+            >
+                <div className="space-y-3">
+                    {errorMessage ? (
+                        <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600">
+                            {errorMessage}
+                        </div>
+                    ) : null}
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Konfirmasi Supervisor</label>
+                    <input
+                        type="password"
+                        value={currentCredential}
+                        onChange={(event) => setCurrentCredential(event.target.value)}
+                        className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                        placeholder="Password atau PIN Anda saat ini"
+                        autoComplete="current-password"
+                    />
+                </div>
+            </UniversalModal>
         </div>
     );
 }
