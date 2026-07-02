@@ -13,22 +13,47 @@ use App\Models\AppSetting;
 use App\Models\Refund;
 use App\Models\RefundItem;
 use App\Models\Sale;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class PosRefundController extends Controller
 {
+    /**
+     * Determine if the given user can request a refund for the given sale.
+     * Cashiers can only refund their own transactions.
+     * Supervisors can refund any transaction (special cases).
+     */
+    private function canRequestRefund(Sale $sale, User $user): bool
+    {
+        // Supervisors can request refunds for any sale
+        if ($user->role === 'SUPERVISOR') {
+            return true;
+        }
+
+        // Cashiers can only refund their own transactions
+        return $sale->cashier_id === $user->id;
+    }
+
     public function store(PosRefundRequest $request): JsonResponse
     {
         $payload = $request->validated();
+        $cashier = $request->user();
 
         $sale = Sale::query()
-            ->with(['items'])
-            ->find($payload['sale_id']);
+            ->with(['items', 'cashier'])
+            ->find((int) $payload['sale_id']);
 
         if (! $sale) {
             return response()->json(['message' => 'Transaksi penjualan tidak ditemukan.'], 404);
+        }
+
+        // ✅ IDOR FIX: Verify ownership before proceeding
+        if (! $this->canRequestRefund($sale, $cashier)) {
+            return response()->json([
+                'message' => 'Anda tidak memiliki akses untuk merefund transaksi ini.',
+            ], 403);
         }
 
         if ($sale->status !== 'PAID') {
@@ -45,8 +70,6 @@ class PosRefundController extends Controller
         if (now()->greaterThan($refundDeadline)) {
             return response()->json(['message' => 'Masa garansi refund sudah berakhir.'], 422);
         }
-
-        $cashier = $request->user();
 
         $hasPendingApproval = Approval::query()
             ->where('sale_id', $sale->id)
@@ -131,6 +154,9 @@ class PosRefundController extends Controller
                     ])->values()->all(),
                     'total' => $refundTotal,
                     'window_days' => $windowDays,
+                    // ✅ Include cashier info for supervisor visibility
+                    'cashier_name' => $cashier->name,
+                    'cashier_role' => $cashier->role,
                 ],
                 'occurred_at' => now(),
             ]);

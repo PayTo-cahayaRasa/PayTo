@@ -28,11 +28,39 @@ class ApprovalController extends Controller
     public function index(Request $request): JsonResponse
     {
         $status = $request->query('status');
+        $user = $request->user();
 
         $approvals = Approval::query()
             ->with(['requester', 'approver', 'sale'])
             ->when($status, fn ($query) => $query->where('status', strtoupper((string) $status)))
+            ->when(
+                $user->role !== 'SUPERVISOR',
+                fn ($query) => $query->where('requested_by', $user->id)
+            )
             ->orderByDesc('created_at')
+            ->get();
+
+        return response()->json([
+            'data' => $approvals->map(fn (Approval $approval) => $this->formatApproval($approval))->values()->all(),
+        ]);
+    }
+
+    /**
+     * Get pending approvals (supervisor only)
+     */
+    public function pending(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Only supervisors can view all pending approvals
+        if ($user->role !== 'SUPERVISOR') {
+            return response()->json(['message' => 'Akses ditolak.'], 403);
+        }
+
+        $approvals = Approval::query()
+            ->with(['requester', 'sale'])
+            ->where('status', 'PENDING')
+            ->orderBy('created_at')
             ->get();
 
         return response()->json([
@@ -106,19 +134,39 @@ class ApprovalController extends Controller
             ? $approval->occurred_at->locale('id')->diffForHumans()
             : $approval->created_at?->locale('id')->diffForHumans();
 
+        // ✅ Enhanced requester visibility
+        $requester = $approval->requester;
+        $sale = $approval->sale;
+
         return [
             'id' => $approval->id,
             'action' => $approval->action,
             'status' => $approval->status ?? 'PENDING',
-            'cashier' => $approval->requester?->name ?? 'Kasir',
+            // Basic info
+            'cashier' => $requester?->name ?? 'Kasir',
             'approver' => $approval->approver?->name,
             'reason' => $approval->reason,
             'time' => $time,
-            'saleInvoice' => $approval->sale
-                ? ($approval->sale->server_invoice_no ?: '#'.$approval->sale->id)
-                : null,
+            // ✅ Enhanced: Full requester details for supervisor visibility
+            'requester' => [
+                'id' => $requester?->id,
+                'name' => $requester?->name ?? 'Unknown',
+                'role' => $requester?->role ?? 'UNKNOWN',
+                'employee_id' => $requester ? sprintf('KSR-%03d', $requester->id) : null,
+            ],
+            // ✅ Enhanced: Sale details for cross-verification
+            'sale' => $sale ? [
+                'id' => $sale->id,
+                'invoice_no' => $sale->server_invoice_no ?: '#'.$sale->id,
+                'cashier_id' => $sale->cashier_id,
+                'total' => (float) $sale->grand_total,
+                'occurred_at' => $sale->occurred_at?->format('d/m/Y H:i'),
+            ] : null,
+            // Transaction details
             'total' => $total,
-            'itemsCount' => $itemsCount,
+            'items_count' => $itemsCount,
+            // ✅ Flag if requester is different from sale cashier (for audit)
+            'is_cross_cashier_request' => $sale && $requester && $sale->cashier_id !== $requester->id,
         ];
     }
 
