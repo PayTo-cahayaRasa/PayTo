@@ -39,6 +39,7 @@ Route::middleware(['web', 'auth', 'role:SUPERVISOR'])->prefix('admin')->name('ap
 
     // Approvals
     Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
+    Route::get('/approvals/pending', [ApprovalController::class, 'pending'])->name('approvals.pending');
     Route::post('/approvals/{approval}/approve', [ApprovalController::class, 'approve'])->name('approvals.approve');
     Route::post('/approvals/{approval}/reject', [ApprovalController::class, 'reject'])->name('approvals.reject');
 
