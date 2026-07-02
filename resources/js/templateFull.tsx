@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-    Search, Wifi, WifiOff, RefreshCw,
+    Search,
     Trash2, Plus, Minus, CreditCard, Banknote,
     ChevronRight, ShieldCheck, Printer, LogOut,
     Coffee, Utensils, Box, Zap, ShoppingBag,
     Menu, X, ArrowRight, LayoutGrid, Clock, Star,
-    Grid, ListFilter, Tag, Calendar, CheckCircle, XCircle,
-    User, Settings, Smartphone, Database, Bell, Lock, ChevronLeft
+    Grid, ListFilter, Tag, Calendar, XCircle,
+    User, Settings, Smartphone, Bell, Lock, ChevronLeft
 } from 'lucide-react';
 
 // --- Types ---
@@ -31,7 +31,6 @@ type TransactionHistory = {
     total: number;
     paymentMethod: 'CASH' | 'EWALLET';
     status: 'PAID' | 'VOID';
-    syncStatus: 'SYNCED' | 'PENDING';
 };
 
 // --- Mock Data ---
@@ -49,10 +48,10 @@ const MOCK_PRODUCTS: Product[] = [
 ];
 
 const MOCK_HISTORY: TransactionHistory[] = [
-    { id: 'tx-001', invoiceNo: '#INV-2048', time: '10:45', items: 3, total: 54000, paymentMethod: 'CASH', status: 'PAID', syncStatus: 'SYNCED' },
-    { id: 'tx-002', invoiceNo: '#INV-2047', time: '10:30', items: 1, total: 18000, paymentMethod: 'EWALLET', status: 'PAID', syncStatus: 'SYNCED' },
-    { id: 'tx-003', invoiceNo: '#INV-2046', time: '09:15', items: 5, total: 125000, paymentMethod: 'CASH', status: 'PAID', syncStatus: 'PENDING' },
-    { id: 'tx-004', invoiceNo: '#INV-2045', time: '08:50', items: 2, total: 40000, paymentMethod: 'CASH', status: 'VOID', syncStatus: 'SYNCED' },
+    { id: 'tx-001', invoiceNo: '#INV-2048', time: '10:45', items: 3, total: 54000, paymentMethod: 'CASH', status: 'PAID' },
+    { id: 'tx-002', invoiceNo: '#INV-2047', time: '10:30', items: 1, total: 18000, paymentMethod: 'EWALLET', status: 'PAID' },
+    { id: 'tx-003', invoiceNo: '#INV-2046', time: '09:15', items: 5, total: 125000, paymentMethod: 'CASH', status: 'PAID' },
+    { id: 'tx-004', invoiceNo: '#INV-2045', time: '08:50', items: 2, total: 40000, paymentMethod: 'CASH', status: 'VOID' },
 ];
 
 const CATEGORIES = [
@@ -68,8 +67,6 @@ export default function PosInterface() {
     // State Management
     const [activeView, setActiveView] = useState<'menu' | 'history' | 'favorites' | 'profile' | 'settings'>('menu');
     const [cart, setCart] = useState<CartItem[]>([]);
-    const [isOffline, setIsOffline] = useState(false);
-    const [syncStatus, setSyncStatus] = useState<'synced' | 'pending' | 'syncing'>('synced');
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -136,12 +133,10 @@ export default function PosInterface() {
     };
 
     const handleCheckout = () => {
-        setSyncStatus('syncing');
         setTimeout(() => {
             setShowPaymentModal(false);
             setCart([]);
             setCashReceived("");
-            setSyncStatus(isOffline ? 'pending' : 'synced');
         }, 1000);
     };
 
@@ -277,16 +272,8 @@ export default function PosInterface() {
                     </button>
                 </div>
 
-                {/* Bottom Status & User */}
+                {/* User */}
                 <div className="mt-auto flex flex-col gap-4 mb-2 items-center">
-                    <button
-                        onClick={() => setIsOffline(!isOffline)}
-                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isOffline ? 'bg-amber-100 text-amber-500' : 'bg-emerald-100 text-emerald-500'}`}
-                        title="Toggle Offline Status"
-                    >
-                        {isOffline ? <WifiOff size={18} /> : <Wifi size={18} />}
-                    </button>
-
                     {/* User Avatar with Popover */}
                     <div className="relative" ref={userMenuRef}>
                         <button
@@ -436,17 +423,6 @@ export default function PosInterface() {
 
                                     <div className="text-right">
                                         <div className="font-mono font-bold text-lg text-slate-800">{formatRupiah(tx.total).replace(",00", "")}</div>
-                                        <div className="flex items-center justify-end gap-1 mt-1">
-                                            {tx.syncStatus === 'SYNCED' ? (
-                                                <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                                                    <CheckCircle size={10} /> Terkirim
-                                                </span>
-                                            ) : (
-                                                <span className="text-[10px] font-bold text-amber-600 flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
-                                                    <RefreshCw size={10} className="animate-spin" /> Menunggu Sync
-                                                </span>
-                                            )}
-                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -590,45 +566,10 @@ export default function PosInterface() {
                                 </div>
                             </section>
 
-                            {/* Data & Sync */}
-                            <section>
-                                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 ml-2">Data & Sinkronisasi</h3>
-                                <div className="bg-white/40 backdrop-blur-md border border-white/60 rounded-[2rem] overflow-hidden shadow-sm">
-                                    <div className="p-4 border-b border-white/40 flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
-                                                <Database size={20} />
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-slate-800">Penyimpanan Offline</div>
-                                                <div className="text-xs text-slate-500">24 Transaksi belum tersinkron</div>
-                                            </div>
-                                        </div>
-                                        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg shadow-lg shadow-indigo-200 hover:bg-indigo-700">
-                                            <RefreshCw size={14} /> Force Sync
-                                        </button>
-                                    </div>
-                                    <div className="p-4 flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center">
-                                                <Trash2 size={20} />
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-slate-800">Hapus Cache Lokal</div>
-                                                <div className="text-xs text-slate-500">Gunakan jika aplikasi terasa lambat</div>
-                                            </div>
-                                        </div>
-                                        <button className="px-4 py-2 text-rose-600 text-xs font-bold rounded-lg hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-colors">
-                                            Clear Cache
-                                        </button>
-                                    </div>
-                                </div>
-                            </section>
-
                             {/* App Info */}
                             <div className="text-center pt-4 pb-8">
                                 <div className="text-xs font-bold text-slate-400">POS System v2.0.1 (Build 20260120)</div>
-                                <div className="text-[10px] text-slate-300 mt-1">Licensed to Toko Cabang Pusat</div>
+                                <div className="text-[10px] text-slate-300 mt-1">PayTo</div>
                             </div>
 
                         </div>

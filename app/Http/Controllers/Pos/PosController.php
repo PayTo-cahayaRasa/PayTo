@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Pos;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -16,7 +15,7 @@ class PosController extends Controller
         $profileQuery = new ProfileQueryController;
 
         $products = $productQuery->fetch();
-        $userId = $request->user()?->id ?? User::query()->where('role', 'CASHIER')->orderBy('id')->value('id');
+        $userId = $request->user()->id;
         $history = $historyQuery->fetch(10, [
             'userId' => $userId,
         ]);

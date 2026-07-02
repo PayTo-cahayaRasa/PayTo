@@ -16,7 +16,6 @@ class AppSetting extends Model
     protected $fillable = [
         'key',
         'value',
-        'type',
     ];
 
     protected function casts(): array

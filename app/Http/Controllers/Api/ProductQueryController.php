@@ -30,13 +30,17 @@ class ProductQueryController extends Controller
 
         $product = Product::query()->create(Arr::only($payload, [
             'name',
+            'slug',
             'sku',
             'barcode',
             'price',
+            'description',
             'discount',
             'cost',
             'uom',
             'is_active',
+            'is_public',
+            'featured',
         ]));
 
         StockItem::query()->create([
@@ -66,13 +70,17 @@ class ProductQueryController extends Controller
 
         $product->fill(Arr::only($payload, [
             'name',
+            'slug',
             'sku',
             'barcode',
             'price',
+            'description',
             'discount',
             'cost',
             'uom',
             'is_active',
+            'is_public',
+            'featured',
         ]));
         $product->save();
 

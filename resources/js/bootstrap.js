@@ -4,14 +4,3 @@ window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 window.axios.defaults.xsrfCookieName = 'XSRF-TOKEN';
 window.axios.defaults.xsrfHeaderName = 'X-XSRF-TOKEN';
-
-window.axios.interceptors.request.use((config) => {
-    const csrfToken = document.head.querySelector('meta[name="csrf-token"]')?.content;
-
-    if (csrfToken) {
-        config.headers = config.headers ?? {};
-        config.headers['X-CSRF-TOKEN'] = csrfToken;
-    }
-
-    return config;
-});

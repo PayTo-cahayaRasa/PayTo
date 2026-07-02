@@ -23,13 +23,17 @@ class ProductStoreRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', 'unique:products,slug'],
             'sku' => ['nullable', 'string', 'max:255', 'unique:products,sku'],
             'barcode' => ['nullable', 'string', 'max:255', 'unique:products,barcode'],
             'price' => ['required', 'numeric', 'min:0'],
+            'description' => ['nullable', 'string', 'max:2000'],
             'discount' => ['nullable', 'numeric', 'min:0'],
             'cost' => ['nullable', 'numeric', 'min:0'],
             'uom' => ['nullable', 'string', 'max:50'],
             'is_active' => ['nullable', 'boolean'],
+            'is_public' => ['nullable', 'boolean'],
+            'featured' => ['nullable', 'boolean'],
             'stock' => ['required', 'numeric', 'min:0'],
         ];
     }

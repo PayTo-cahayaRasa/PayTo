@@ -26,13 +26,17 @@ class ProductUpdateRequest extends FormRequest
 
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'slug' => ['sometimes', 'nullable', 'string', 'max:255', 'unique:products,slug,'.$productId],
             'sku' => ['sometimes', 'nullable', 'string', 'max:255', 'unique:products,sku,'.$productId],
             'barcode' => ['sometimes', 'nullable', 'string', 'max:255', 'unique:products,barcode,'.$productId],
             'price' => ['sometimes', 'required', 'numeric', 'min:0'],
+            'description' => ['sometimes', 'nullable', 'string', 'max:2000'],
             'discount' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'cost' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'uom' => ['sometimes', 'nullable', 'string', 'max:50'],
             'is_active' => ['sometimes', 'boolean'],
+            'is_public' => ['sometimes', 'boolean'],
+            'featured' => ['sometimes', 'boolean'],
             'stock' => ['sometimes', 'required', 'numeric', 'min:0'],
         ];
     }

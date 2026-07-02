@@ -21,15 +21,13 @@ import UniversalModal from '../../Components/UniversalModal';
 export default function AdminPage() {
     const [activeTab, setActiveTab] = useState<AdminTab>('DASHBOARD');
 
-    const [storeName, setStoreName] = useState("Toko Cabang Pusat");
-    const [discountLimit, setDiscountLimit] = useState(20);
-    const [allowNegativeStock, setAllowNegativeStock] = useState(false);
-
     const [showNotifications, setShowNotifications] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isLargeScreen, setIsLargeScreen] = useState(true);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [logoutError, setLogoutError] = useState<string | null>(null);
     const [adminProfile, setAdminProfile] = useState(ADMIN_PROFILE);
 
     const notificationRef = useRef<HTMLDivElement>(null);
@@ -100,14 +98,25 @@ export default function AdminPage() {
 
     const handleLogout = () => {
         setShowUserMenu(false);
+        setLogoutError(null);
         setShowLogoutModal(true);
     };
 
     const confirmLogout = async () => {
+        setIsLoggingOut(true);
+        setLogoutError(null);
+
         try {
-            await axios.post('/api/pos/logout');
+            await axios.post('/logout');
         } catch (error) {
-            // silent
+            const message = axios.isAxiosError(error)
+                ? error.response?.data?.message
+                : null;
+
+            setLogoutError(message ?? 'Logout gagal. Sesi Anda masih aktif, silakan coba lagi.');
+            setIsLoggingOut(false);
+
+            return;
         }
 
         localStorage.removeItem('pos_logged_in');
@@ -175,27 +184,23 @@ export default function AdminPage() {
                     {activeTab === 'RECEIPT' && <ReceiptTab />}
                     {activeTab === 'APPROVALS' && <ApprovalsTab />}
                     {activeTab === 'USERS' && <UsersTab />}
-                    {activeTab === 'SETTINGS' && (
-                        <SettingsTab
-                            storeName={storeName}
-                            onChangeStoreName={setStoreName}
-                            discountLimit={discountLimit}
-                            onChangeDiscountLimit={setDiscountLimit}
-                            allowNegativeStock={allowNegativeStock}
-                            onToggleAllowNegativeStock={() => setAllowNegativeStock(!allowNegativeStock)}
-                        />
-                    )}
+                    {activeTab === 'SETTINGS' && <SettingsTab />}
                 </div>
             </main>
 
             <UniversalModal
                 isOpen={showLogoutModal}
                 title="Keluar dari Admin?"
-                description="Anda akan keluar dari dashboard admin."
-                tone="warning"
+                description={logoutError ?? 'Anda akan keluar dari dashboard admin.'}
+                tone={logoutError ? 'danger' : 'warning'}
                 confirmLabel="Ya, Keluar"
                 cancelLabel="Batal"
-                onClose={() => setShowLogoutModal(false)}
+                isLoading={isLoggingOut}
+                onClose={() => {
+                    if (!isLoggingOut) {
+                        setShowLogoutModal(false);
+                    }
+                }}
                 onConfirm={confirmLogout}
             />
         </div>

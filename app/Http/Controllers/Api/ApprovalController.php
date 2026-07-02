@@ -31,12 +31,12 @@ class ApprovalController extends Controller
 
         $approvals = Approval::query()
             ->with(['requester', 'approver', 'sale'])
-            ->when($status, fn($query) => $query->where('status', strtoupper((string) $status)))
+            ->when($status, fn ($query) => $query->where('status', strtoupper((string) $status)))
             ->orderByDesc('created_at')
             ->get();
 
         return response()->json([
-            'data' => $approvals->map(fn(Approval $approval) => $this->formatApproval($approval))->values()->all(),
+            'data' => $approvals->map(fn (Approval $approval) => $this->formatApproval($approval))->values()->all(),
         ]);
     }
 
@@ -47,7 +47,7 @@ class ApprovalController extends Controller
         }
 
         $approver = $this->resolveApprover($request);
-        if (!$approver) {
+        if (! $approver) {
             return response()->json(['message' => 'Supervisor tidak ditemukan.'], 422);
         }
 
@@ -76,7 +76,7 @@ class ApprovalController extends Controller
         }
 
         $approver = $this->resolveApprover($request);
-        if (!$approver) {
+        if (! $approver) {
             return response()->json(['message' => 'Supervisor tidak ditemukan.'], 422);
         }
 
@@ -115,7 +115,7 @@ class ApprovalController extends Controller
             'reason' => $approval->reason,
             'time' => $time,
             'saleInvoice' => $approval->sale
-                ? ($approval->sale->server_invoice_no ?: '#' . $approval->sale->id)
+                ? ($approval->sale->server_invoice_no ?: '#'.$approval->sale->id)
                 : null,
             'total' => $total,
             'itemsCount' => $itemsCount,
@@ -124,12 +124,7 @@ class ApprovalController extends Controller
 
     private function resolveApprover(Request $request): ?User
     {
-        $user = $request->user();
-        if ($user && $user->role === 'SUPERVISOR') {
-            return $user;
-        }
-
-        return User::query()->where('role', 'SUPERVISOR')->orderBy('id')->first();
+        return $request->user();
     }
 
     /**
@@ -137,8 +132,8 @@ class ApprovalController extends Controller
      */
     private function processRefundApproval(Approval $approval, User $approver): array
     {
-        $sale = Sale::query()->with(['items'])->find($approval->sale_id);
-        if (!$sale) {
+        $sale = Sale::query()->with(['items'])->find((int) $approval->sale_id);
+        if (! $sale) {
             return ['status' => 'error', 'message' => 'Transaksi penjualan tidak ditemukan.'];
         }
 
@@ -147,7 +142,7 @@ class ApprovalController extends Controller
         }
 
         $occurredAt = $sale->occurred_at ?? $sale->created_at;
-        if (!$occurredAt) {
+        if (! $occurredAt) {
             return ['status' => 'error', 'message' => 'Tanggal transaksi tidak valid.'];
         }
 
@@ -169,7 +164,7 @@ class ApprovalController extends Controller
             ->sum('total_amount');
 
         $refundedQtyMap = RefundItem::query()
-            ->whereHas('refund', fn($query) => $query->where('sale_id', $sale->id))
+            ->whereHas('refund', fn ($query) => $query->where('sale_id', $sale->id))
             ->selectRaw('sale_item_id, SUM(qty) as qty_sum')
             ->groupBy('sale_item_id')
             ->pluck('qty_sum', 'sale_item_id')
@@ -184,7 +179,7 @@ class ApprovalController extends Controller
             $qtyRequested = (float) ($item['qty'] ?? 0);
 
             $saleItem = $itemsById->get($saleItemId);
-            if (!$saleItem) {
+            if (! $saleItem) {
                 return ['status' => 'error', 'message' => 'Item transaksi tidak ditemukan.'];
             }
 

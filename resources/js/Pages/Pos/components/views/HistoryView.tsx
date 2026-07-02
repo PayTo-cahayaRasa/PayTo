@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import {
     Banknote,
-    CheckCircle,
     Clock,
     CreditCard,
-    RefreshCw,
     ShoppingBag,
     ChevronDown
 } from 'lucide-react';
@@ -132,15 +130,6 @@ export default function HistoryView({
                                             {formatRupiah(tx.total).replace(',00', '')}
                                         </div>
 
-                                        {tx.syncStatus === 'SYNCED' ? (
-                                            <span className="text-[10px] font-bold text-emerald-600 inline-flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 mt-1">
-                                                <CheckCircle size={10} /> Terkirim
-                                            </span>
-                                        ) : (
-                                            <span className="text-[10px] font-bold text-amber-600 inline-flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100 mt-1">
-                                                <RefreshCw size={10} className="animate-spin" /> Menunggu Sync
-                                            </span>
-                                        )}
                                     </div>
 
                                     <ChevronDown

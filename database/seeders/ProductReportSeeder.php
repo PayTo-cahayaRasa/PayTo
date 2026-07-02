@@ -62,6 +62,7 @@ class ProductReportSeeder extends Seeder
             DB::table('products')->updateOrInsert(
                 ['sku' => $fields['sku']],
                 array_merge($fields, [
+                    'slug' => Str::slug($fields['name']),
                     'created_at' => $timestamp,
                     'updated_at' => $timestamp,
                 ])

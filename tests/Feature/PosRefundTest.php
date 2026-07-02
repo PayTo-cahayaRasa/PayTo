@@ -87,7 +87,7 @@ class PosRefundTest extends TestCase
             ],
         ];
 
-        $response = $this->postJson('/api/pos/refunds', $payload);
+        $response = $this->actingAs($cashier)->postJson('/api/pos/refunds', $payload);
 
         $response
             ->assertOk()
@@ -103,7 +103,7 @@ class PosRefundTest extends TestCase
             'status' => 'PENDING',
         ]);
 
-        $this->postJson("/api/admin/approvals/{$approvalId}/approve")
+        $this->actingAs($supervisor)->postJson("/api/admin/approvals/{$approvalId}/approve")
             ->assertOk();
 
         $this->assertDatabaseHas('approvals', [
@@ -201,7 +201,7 @@ class PosRefundTest extends TestCase
             ],
         ];
 
-        $this->postJson('/api/pos/refunds', $payload)
+        $this->actingAs($cashier)->postJson('/api/pos/refunds', $payload)
             ->assertStatus(422)
             ->assertJsonFragment([
                 'message' => 'Masa garansi refund sudah berakhir.',

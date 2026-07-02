@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Pos;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Sale;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -65,13 +64,12 @@ class ProductController extends Controller
                     'total' => (float) $sale->grand_total,
                     'paymentMethod' => $payment?->method ?? 'CASH',
                     'status' => $sale->status,
-                    'syncStatus' => $sale->synced_at ? 'SYNCED' : 'PENDING',
                     'itemsDetail' => $itemsDetail,
                 ];
             });
 
         // Profile / shift summary
-        $user = User::first();
+        $user = $request->user();
 
         $today = Carbon::now()->startOfDay();
         $salesQuery = Sale::query()

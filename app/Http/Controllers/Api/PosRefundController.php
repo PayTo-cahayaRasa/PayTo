@@ -13,7 +13,6 @@ use App\Models\AppSetting;
 use App\Models\Refund;
 use App\Models\RefundItem;
 use App\Models\Sale;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -28,7 +27,7 @@ class PosRefundController extends Controller
             ->with(['items'])
             ->find($payload['sale_id']);
 
-        if (!$sale) {
+        if (! $sale) {
             return response()->json(['message' => 'Transaksi penjualan tidak ditemukan.'], 404);
         }
 
@@ -37,7 +36,7 @@ class PosRefundController extends Controller
         }
 
         $occurredAt = $sale->occurred_at ?? $sale->created_at;
-        if (!$occurredAt) {
+        if (! $occurredAt) {
             return response()->json(['message' => 'Tanggal transaksi tidak valid.'], 422);
         }
 
@@ -47,10 +46,7 @@ class PosRefundController extends Controller
             return response()->json(['message' => 'Masa garansi refund sudah berakhir.'], 422);
         }
 
-        $cashier = $request->user() ?? User::query()->where('role', 'CASHIER')->orderBy('id')->first();
-        if (!$cashier) {
-            return response()->json(['message' => 'Kasir tidak ditemukan.'], 422);
-        }
+        $cashier = $request->user();
 
         $hasPendingApproval = Approval::query()
             ->where('sale_id', $sale->id)
@@ -67,7 +63,7 @@ class PosRefundController extends Controller
             ->sum('total_amount');
 
         $refundedQtyMap = RefundItem::query()
-            ->whereHas('refund', fn($query) => $query->where('sale_id', $sale->id))
+            ->whereHas('refund', fn ($query) => $query->where('sale_id', $sale->id))
             ->selectRaw('sale_item_id, SUM(qty) as qty_sum')
             ->groupBy('sale_item_id')
             ->pluck('qty_sum', 'sale_item_id')
@@ -79,7 +75,7 @@ class PosRefundController extends Controller
 
         foreach ($payload['items'] as $item) {
             $saleItem = $itemsById->get((int) $item['sale_item_id']);
-            if (!$saleItem) {
+            if (! $saleItem) {
                 return response()->json(['message' => 'Item transaksi tidak ditemukan.'], 422);
             }
 
@@ -125,7 +121,7 @@ class PosRefundController extends Controller
                 'status' => 'PENDING',
                 'reason' => $payload['reason'],
                 'payload_json' => [
-                    'items' => collect($refundItems)->map(fn($item) => [
+                    'items' => collect($refundItems)->map(fn ($item) => [
                         'sale_item_id' => $item['sale_item_id'],
                         'product_id' => $item['product_id'],
                         'product_name' => $item['product_name'],
