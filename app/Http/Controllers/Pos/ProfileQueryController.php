@@ -6,12 +6,13 @@ use App\Models\Refund;
 use App\Models\Sale;
 use App\Models\User;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileQueryController
 {
     public function fetch(?int $userId = null): array
     {
-        $user = $userId ? User::find($userId) : auth()->user();
+        $user = $userId ? User::find($userId) : Auth::user();
 
         if (! $user) {
             return $this->emptyProfile();

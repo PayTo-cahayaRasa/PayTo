@@ -86,6 +86,8 @@ class AuthenticationAuthorizationTest extends TestCase
 
         $response = $this->actingAs($cashier)->getJson('/api/pos/products');
         $response->assertStatus(200);
+
+        $this->actingAs($cashier)->getJson('/api/pos/profile')->assertOk();
     }
 
     /**
