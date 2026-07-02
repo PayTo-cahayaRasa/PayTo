@@ -25,6 +25,7 @@ Route::middleware(['web', 'auth', 'role:SUPERVISOR'])->prefix('admin')->name('ap
     Route::get('/products/{product}', [ProductQueryController::class, 'show'])->name('products.show');
     Route::put('/products/{product}', [ProductQueryController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}', [ProductQueryController::class, 'destroy'])->name('products.destroy');
+    Route::get('/products/{product}/history', [ProductQueryController::class, 'history'])->name('products.history');
 
     // Inventory recommendations
     Route::get('/inventory/recommendations', [InventoryRecommendationController::class, 'index'])->name('inventory.recommendations');
