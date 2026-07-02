@@ -31,7 +31,15 @@ class PosCheckoutRequest extends FormRequest
             'items.*.discount_amount' => ['nullable', 'numeric', 'min:0'],
             'source' => ['nullable', 'string', 'in:WALK_IN,WHATSAPP'],
             'customer_name' => ['required_if:source,WHATSAPP', 'nullable', 'string', 'max:255'],
-            'customer_phone' => ['required_if:source,WHATSAPP', 'nullable', 'regex:/^[0-9]{8,15}$/'],
+            // Updated: Better phone validation (10-15 digits, no regex for fake detection)
+            'customer_phone' => [
+                'required_if:source,WHATSAPP',
+                'nullable',
+                'string',
+                'min:10',
+                'max:15',
+                'regex:/^[0-9]+$/',
+            ],
         ];
 
         return $rules;
@@ -51,7 +59,9 @@ class PosCheckoutRequest extends FormRequest
             'source.in' => 'Sumber transaksi tidak valid. Gunakan WALK_IN atau WHATSAPP.',
             'customer_name.required_if' => 'Nama pelanggan wajib diisi untuk pesanan WhatsApp.',
             'customer_phone.required_if' => 'Nomor WhatsApp pelanggan wajib diisi.',
-            'customer_phone.regex' => 'Nomor WhatsApp harus berupa 8-15 digit angka tanpa +, spasi, atau tanda hubung.',
+            'customer_phone.regex' => 'Nomor WhatsApp harus berupa angka saja tanpa +, spasi, atau tanda hubung.',
+            'customer_phone.min' => 'Nomor WhatsApp minimal 10 digit.',
+            'customer_phone.max' => 'Nomor WhatsApp maksimal 15 digit.',
         ];
     }
 }
