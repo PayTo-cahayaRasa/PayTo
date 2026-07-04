@@ -2,6 +2,8 @@
 
 ## Overview
 
+PayTo API adalah REST API yang digunakan untuk komunikasi antara frontend (React/Inertia) dan backend (Laravel). Sistem menggunakan session-based authentication.
+
 ### Base URL
 
 ```
@@ -10,16 +12,17 @@ http://localhost/api
 
 ### Authentication
 
-Semua API endpoints (kecuali `/pos/login`) memerlukan authentication menggunakan Laravel's session-based authentication. Gunakan header `X-CSRF-TOKEN` dengan valid CSRF token.
+API PayTo menggunakan session-based authentication via Laravel Sanctum.
+Client POS menggunakan cookie-based session authentication.
 
-**POS Login Flow:**
-- Gunakan endpoint `/pos/login` untuk authentication
-- Endpoint mengembalikan redirect URL berdasarkan user role
-- Request selanjutnya akan menggunakan authenticated session
+**Login Flow:**
+1. POST ke `/login` dengan username dan password
+2. Response mengembalikan redirect ke halaman kasir/admin
+3. Subsequent requests gunakan authenticated session
 
 ### Response Format
 
-Semua responses berformat JSON dengan struktur yang konsisten:
+Semua responses berformat JSON:
 
 ```json
 {
@@ -29,59 +32,98 @@ Semua responses berformat JSON dengan struktur yang konsisten:
 }
 ```
 
-### Status Codes
+### HTTP Status Codes
 
 | Kode | Deskripsi |
 |------|-------------|
 | 200 | Sukses |
-| 201 | Dibuat |
+| 201 | Created |
 | 400 | Bad Request |
 | 401 | Unauthorized |
 | 403 | Forbidden |
 | 404 | Not Found |
 | 422 | Validation Error |
+| 429 | Too Many Requests (Rate Limited) |
 | 500 | Internal Server Error |
+
+### Rate Limiting
+
+| Endpoint Group | Limit |
+|----------------|-------|
+| Admin API (read) | 60 req/min |
+| Admin API (write) | 10 req/5 min |
+| Sensitive actions | 5 req/5 min |
+| Checkout | 30 req/min |
+| Refund | 10 req/min |
+| Login | 5 req/min |
 
 ---
 
-## Admin Dashboard
+## Authentication Routes
+
+### Login
+
+**POST** `/login`
+
+#### Request Body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| username | string | Yes | Username |
+| password | string | Yes | Password |
+
+```bash
+curl -X POST http://localhost/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "kasir1", "password": "password123"}'
+```
+
+#### Response (302)
+
+Redirect ke `/kasir` jika sukses, kembali ke `/login` jika gagal.
+
+---
+
+### Logout
+
+**POST** `/logout`
+
+#### Response (302)
+
+Redirect ke `/login`.
+
+---
+
+## Admin Dashboard Routes
 
 ### Get Dashboard Statistics
 
-**GET** `/admin/dashboard`
-
-#### Deskripsi
-Mengembalikan data dashboard komprehensif termasuk ringkasan penjualan hari ini, jumlah transaksi, alert stok rendah, tren mingguan, dan aktivitas terbaru.
+**GET** `/api/admin/dashboard`
 
 #### Authentication
-Diperlukan (role SUPERVISOR)
+Supervisor only
 
-#### Response
+#### Response (200)
+
 ```json
 {
   "data": {
     "today_sales_total": 1500000.00,
     "today_transactions": 25,
-    "low_stock": {
-      "total": 3,
-      "items": [
-        {
-          "id": 1,
-          "name": "Kopi Bubuk",
-          "stock": 0.5,
-          "reorder_point": 5.0
-        }
-      ]
-    },
+    "low_stock_count": 3,
+    "pending_approvals_count": 2,
     "weekly_sales_trend": [
-      { "date": "2026-06-23", "total": 1250000 },
-      { "date": "2026-06-24", "total": 1380000 }
+      { "date": "2026-07-01", "total": 1250000 },
+      { "date": "2026-07-02", "total": 1380000 }
     ],
     "recent_activities": [
       {
+        "id": 1,
         "type": "SALE",
+        "description": "Penjualan #001",
         "amount": 150000,
-        "user": "John Doe"
+        "user": "Kasir Satu",
+        "created_at": "2026-07-04T10:30:00Z"
       }
     ]
   }
@@ -90,354 +132,372 @@ Diperlukan (role SUPERVISOR)
 
 ---
 
-## Admin Profile
+### Get Profile
 
-### Get Admin Profile
-
-**GET** `/admin/profile`
-
-#### Deskripsi
-Mengembalikan informasi profile admin user saat ini termasuk nama, role, email, dan tanggal join.
+**GET** `/api/admin/profile`
 
 #### Authentication
-Diperlukan (role SUPERVISOR)
+Supervisor only
 
-#### Response
+#### Response (200)
+
 ```json
 {
   "data": {
-    "name": "Nama Admin",
+    "id": 1,
+    "name": "Admin User",
+    "username": "admin",
     "role": "SUPERVISOR",
-    "id": "SPV-001",
     "email": "admin@example.com",
-    "phone": "—",
-    "joinDate": "01 Januari 2026",
-    "lastLogin": "2 jam yang lalu"
+    "is_active": true,
+    "last_login_at": "2026-07-04T08:00:00Z"
   }
 }
 ```
 
 ---
 
-## Products
+## Product Management
 
-### List All Products
+### List Products
 
-**GET** `/admin/products`
-
-#### Deskripsi
-Mengembalikan list produk yang dipaginasi dengan informasi stock.
+**GET** `/api/admin/products`
 
 #### Authentication
-Diperlukan (role SUPERVISOR)
+Supervisor only
 
 #### Query Parameters
 
-| Parameter | Type | Deskripsi |
+| Parameter | Type | Description |
 |-----------|------|-------------|
-| page | integer | Nomor halaman (default: 1) |
-| per_page | integer | Items per halaman (default: 10) |
-| category | integer | Filter by category ID |
+| page | integer | Page number |
+| per_page | integer | Items per page (default: 15) |
+| search | string | Search by name/SKU/barcode |
+| category | string | Filter by category |
 | status | string | Filter by status (ACTIVE/INACTIVE) |
-| search | string | Search by name or SKU |
 
-#### Response
+#### Response (200)
+
 ```json
 {
   "data": [
     {
       "id": 1,
-      "name": "Kopi Bubuk",
-      "sku": "KPB-001",
+      "name": "Kopi Sachet",
+      "sku": "KPF-001",
       "barcode": "1234567890123",
-      "price": 50000.00,
-      "discount": 10.00,
-      "price_after_discount": 45000.00,
-      "cost": 35000.00,
+      "price": 2500.00,
+      "cost": 2000.00,
       "uom": "pcs",
-      "stock": 50.0,
       "is_active": true,
-      "status": "ACTIVE"
+      "stock_on_hand": 100.000,
+      "created_at": "2026-01-15T08:00:00Z"
     }
   ],
   "meta": {
     "current_page": 1,
-    "per_page": 10,
-    "total": 100,
-    "last_page": 10
+    "per_page": 15,
+    "total": 50,
+    "last_page": 4
   }
 }
 ```
 
-### Create Product
+---
 
-**POST** `/admin/products`
+### Get Product
+
+**GET** `/api/admin/products/{product}`
 
 #### Authentication
-Diperlukan (role SUPERVISOR)
+Supervisor only
+
+#### Response (200)
+
+```json
+{
+  "data": {
+    "id": 1,
+    "name": "Kopi Sachet",
+    "sku": "KPF-001",
+    "barcode": "1234567890123",
+    "price": 2500.00,
+    "cost": 2000.00,
+    "uom": "pcs",
+    "is_active": true,
+    "stock_on_hand": 100.000,
+    "created_at": "2026-01-15T08:00:00Z",
+    "updated_at": "2026-07-01T10:00:00Z"
+  }
+}
+```
+
+---
+
+### Get Product History
+
+**GET** `/api/admin/products/{product}/history`
+
+#### Authentication
+Supervisor only
+
+#### Response (200)
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "action": "CREATED",
+      "changes": {
+        "name": "Kopi Sachet",
+        "price": 2500
+      },
+      "actor": {
+        "id": 1,
+        "name": "Admin"
+      },
+      "created_at": "2026-01-15T08:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### Create Product
+
+**POST** `/api/admin/products`
+
+#### Authentication
+Supervisor only
 
 #### Request Body
 
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| name | string | Yes | max:255 |
-| sku | string | No | max:255, unique |
-| barcode | string | No | max:255, unique |
-| price | number | Yes | min:0 |
-| discount | number | No | min:0 |
-| cost | number | No | min:0 |
-| uom | string | No | max:50 |
-| is_active | boolean | No | default: true |
-| stock | number | Yes | min:0 |
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| name | string | Yes | Product name |
+| sku | string | No | SKU (unique) |
+| barcode | string | No | Barcode (unique) |
+| price | number | Yes | Selling price |
+| cost | number | No | Cost price |
+| uom | string | No | Unit of measure |
+| is_active | boolean | No | Active status (default: true) |
 
-#### Example Request
 ```bash
 curl -X POST http://localhost/api/admin/products \
   -H "Content-Type: application/json" \
   -H "X-CSRF-TOKEN: your-csrf-token" \
   -d '{
-    "name": "Kopi Bubuk Arabica",
-    "sku": "KPB-001",
-    "barcode": "1234567890123",
-    "price": 50000,
-    "discount": 10,
-    "cost": 35000,
-    "uom": "pcs",
-    "stock": 100,
-    "is_active": true
+    "name": "Kopi Sachet",
+    "sku": "KPF-001",
+    "price": 2500
   }'
 ```
 
-#### Success Response
+#### Response (201)
+
 ```json
 {
   "data": {
     "id": 1,
-    "name": "Kopi Bubuk Arabica",
-    "sku": "KPB-001",
-    "price": 50000.00,
-    "stock": 100.0
+    "name": "Kopi Sachet",
+    "sku": "KPF-001",
+    "price": 2500.00
   },
-  "message": "Produk berhasil ditambahkan."
-}
-```
-
-#### Error Response (422)
-```json
-{
-  "message": "Nama produk wajib diisi.",
-  "errors": {
-    "name": ["Nama produk wajib diisi."]
-  }
-}
-```
-
-### Get Product Details
-
-**GET** `/admin/products/{product}`
-
-#### Deskripsi
-Mengembalikan informasi detail tentang produk spesifik.
-
-#### Authentication
-Diperlukan (role SUPERVISOR)
-
-#### Path Parameters
-
-| Parameter | Type | Deskripsi |
-|-----------|------|-------------|
-| product | integer | Product ID |
-
-#### Response
-```json
-{
-  "data": {
-    "id": 1,
-    "name": "Kopi Bubuk Arabica",
-    "sku": "KPB-001",
-    "barcode": "1234567890123",
-    "price": 50000.00,
-    "discount": 10.00,
-    "price_after_discount": 45000.00,
-    "cost": 35000.00,
-    "uom": "pcs",
-    "stock": 50.0,
-    "is_active": true,
-    "status": "ACTIVE"
-  }
-}
-```
-
-### Update Product
-
-**PUT** `/admin/products/{product}`
-
-#### Authentication
-Diperlukan (role SUPERVISOR)
-
-#### Path Parameters
-
-| Parameter | Type | Deskripsi |
-|-----------|------|-------------|
-| product | integer | Product ID |
-
-#### Request Body
-
-Semua fields opsional. Hanya fields yang diisi yang akan diupdate.
-
-| Field | Type | Validation |
-|-------|------|------------|
-| name | string | max:255 |
-| sku | string | max:255, unique |
-| barcode | string | max:255, unique |
-| price | number | min:0 |
-| discount | number | min:0 |
-| cost | number | min:0 |
-| uom | string | max:50 |
-| is_active | boolean | |
-| stock | number | min:0 |
-
-#### Example Request
-```bash
-curl -X PUT http://localhost/api/admin/products/1 \
-  -H "Content-Type: application/json" \
-  -H "X-CSRF-TOKEN: your-csrf-token" \
-  -d '{
-    "price": 55000,
-    "stock": 75
-  }'
-```
-
-#### Success Response
-```json
-{
-  "data": {
-    "id": 1,
-    "name": "Kopi Bubuk Arabica",
-    "price": 55000.00,
-    "stock": 75.0
-  },
-  "message": "Produk berhasil diperbarui."
-}
-```
-
-### Delete Product
-
-**DELETE** `/admin/products/{product}`
-
-#### Authentication
-Diperlukan (role SUPERVISOR)
-
-#### Path Parameters
-
-| Parameter | Type | Deskripsi |
-|-----------|------|-------------|
-| product | integer | Product ID |
-
-#### Response
-```json
-{
-  "message": "Produk berhasil dihapus."
+  "message": "Product created successfully"
 }
 ```
 
 ---
 
-## Inventory Recommendations
+### Update Product
+
+**PUT** `/api/admin/products/{product}`
+
+#### Authentication
+Supervisor only
+
+#### Request Body
+
+| Field | Type | Description |
+|-------|------|-------------|
+| name | string | Product name |
+| sku | string | SKU |
+| barcode | string | Barcode |
+| price | number | Selling price |
+| cost | number | Cost price |
+| uom | string | Unit of measure |
+| is_active | boolean | Active status |
+
+#### Response (200)
+
+```json
+{
+  "data": {
+    "id": 1,
+    "name": "Kopi Sachet Premium",
+    "price": 3000.00
+  },
+  "message": "Product updated successfully"
+}
+```
+
+---
+
+### Delete Product
+
+**DELETE** `/api/admin/products/{product}`
+
+#### Authentication
+Supervisor only
+
+#### Response (200)
+
+```json
+{
+  "message": "Product deleted successfully"
+}
+```
+
+---
+
+## Inventory Management
 
 ### Get Inventory Recommendations
 
-**GET** `/admin/inventory/recommendations`
-
-#### Deskripsi
-Menganalisis data penjualan dari 7 hari terakhir untuk memberikan rekomendasi restocking inventory. Mengembalikan produk dengan level stok di bawah reorder points.
+**GET** `/api/admin/inventory/recommendations`
 
 #### Authentication
-Diperlukan (role SUPERVISOR)
+Supervisor only
 
-#### Response
+#### Response (200)
+
 ```json
 {
   "data": [
     {
       "id": 1,
-      "name": "Kopi Bubuk",
-      "sku": "KPB-001",
-      "category_name": "Minuman",
-      "current_stock": 2.5,
-      "avg_daily_sales_7d": 5.2,
-      "avg_daily_sales_30d": 4.8,
-      "reorder_point": 10.0,
-      "recommendation": "35",
-      "reason": "Berdasarkan rata-rata 7 hari: 5.2 unit/hari, lead time 5 hari, safety stock 10"
+      "product_id": 1,
+      "product_name": "Kopi Sachet",
+      "current_stock": 5.000,
+      "avg_daily_sales_7d": 10.000,
+      "avg_daily_sales_30d": 8.000,
+      "reorder_point": 20.000,
+      "suggested_reorder_qty": 50.000,
+      "computed_at": "2026-07-04T00:00:00Z"
     }
-  ],
-  "meta": {
-    "total": 1,
-    "products_below_reorder_point": 1
-  }
+  ]
 }
 ```
 
 ---
 
-## Stock Management
+## Approvals
 
-### Adjust Stock
+### List Approvals
 
-**POST** `/admin/products/{product}/adjust-stock`
-
-#### Deskripsi
-Manual stock adjustment untuk correcting inventory.
+**GET** `/api/admin/approvals`
 
 #### Authentication
-Diperlukan (role SUPERVISOR)
+Supervisor only
 
-#### Path Parameters
+#### Response (200)
 
-| Parameter | Type | Deskripsi |
-|-----------|------|-------------|
-| product | integer | Product ID |
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "action": "REFUND",
+      "status": "PENDING",
+      "sale": {
+        "id": 10,
+        "server_invoice_no": "INV-2026-0010"
+      },
+      "requested_by": {
+        "id": 2,
+        "name": "Kasir Satu"
+      },
+      "reason": "Customer returned item",
+      "created_at": "2026-07-04T10:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### Get Pending Approvals
+
+**GET** `/api/admin/approvals/pending`
+
+#### Authentication
+Supervisor only
+
+#### Response (200)
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "action": "REFUND",
+      "status": "PENDING",
+      "sale_id": 10,
+      "requested_by_id": 2,
+      "reason": "Customer returned item",
+      "created_at": "2026-07-04T10:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### Approve Request
+
+**POST** `/api/admin/approvals/{approval}/approve`
+
+#### Authentication
+Supervisor only
+
+#### Response (200)
+
+```json
+{
+  "data": {
+    "id": 1,
+    "status": "APPROVED"
+  },
+  "message": "Approval granted"
+}
+```
+
+---
+
+### Reject Request
+
+**POST** `/api/admin/approvals/{approval}/reject`
+
+#### Authentication
+Supervisor only
 
 #### Request Body
 
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| quantity | number | Yes | min:0.001 |
-| adjustment_type | string | Yes | INCREASE or DECREASE |
-| reason | string | Yes | max:255 |
-| note | string | No | max:500 |
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| reason | string | Yes | Rejection reason |
 
-#### Example Request
-```bash
-curl -X POST http://localhost/api/admin/products/1/adjust-stock \
-  -H "Content-Type: application/json" \
-  -H "X-CSRF-TOKEN: your-csrf-token" \
-  -d '{
-    "quantity": 50,
-    "adjustment_type": "INCREASE",
-    "reason": "Stock opname correction",
-    "note": "Penyesuaian stok setelah physical count"
-  }'
-```
+#### Response (200)
 
-#### Response
 ```json
 {
-  "success": true,
   "data": {
-    "id": 456,
-    "product_id": 1,
-    "previous_quantity": 100,
-    "adjustment": 50,
-    "new_quantity": 150,
-    "adjustment_type": "INCREASE",
-    "reason": "Stock opname correction",
-    "note": "Penyesuaian stok setelah physical count",
-    "created_by": "admin",
-    "created_at": "2026-06-28 21:30:00"
+    "id": 1,
+    "status": "REJECTED"
   },
-  "message": "Stock berhasil diadjust."
+  "message": "Approval rejected"
 }
 ```
 
@@ -450,327 +510,423 @@ curl -X POST http://localhost/api/admin/products/1/adjust-stock \
 **GET** `/api/admin/staff`
 
 #### Authentication
-Diperlukan (role SUPERVISOR)
+Supervisor only
 
-#### Query Parameters
+#### Response (200)
 
-| Parameter | Type | Deskripsi |
-|-----------|------|-------------|
-| status | string | Filter by status (ACTIVE/INACTIVE) |
-| role | string | Filter by role (CASHIER/SUPERVISOR) |
-| search | string | Search by name or username |
-
-#### Response
 ```json
 {
-  "success": true,
   "data": [
     {
-      "id": 1,
-      "name": "Budi Santoso",
-      "username": "budi.s",
+      "id": 2,
+      "name": "Kasir Satu",
+      "username": "kasir1",
       "role": "CASHIER",
-      "status": "ACTIVE",
       "is_active": true,
-      "total_transactions": 1250,
-      "total_sales": 157500000,
-      "created_at": "2026-01-15 08:00:00",
-      "last_login_at": "2026-06-28 20:45:00"
+      "last_login_at": "2026-07-04T10:00:00Z",
+      "work_seconds_today": 14400
     }
-  ],
-  "meta": {
-    "total": 1,
-    "active": 1,
-    "inactive": 0
+  ]
+}
+```
+
+---
+
+### Get Staff
+
+**GET** `/api/admin/staff/{user}`
+
+#### Authentication
+Supervisor only
+
+#### Response (200)
+
+```json
+{
+  "data": {
+    "id": 2,
+    "name": "Kasir Satu",
+    "username": "kasir1",
+    "role": "CASHIER",
+    "is_active": true,
+    "total_transactions": 150,
+    "total_sales": 15000000.00,
+    "work_seconds_this_month": 432000
   }
 }
 ```
+
+---
 
 ### Create Staff
 
 **POST** `/api/admin/staff`
 
 #### Authentication
-Diperlukan (role SUPERVISOR)
+Supervisor only
 
 #### Request Body
 
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| name | string | Yes | max:255 |
-| username | string | Yes | max:255, unique |
-| password | string | Yes | min:8 |
-| pin | string | Yes | exactly 6 digits |
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| name | string | Yes | Full name |
+| username | string | Yes | Username (unique) |
+| email | string | Yes | Email (unique) |
+| password | string | Yes | Password |
 | role | string | Yes | CASHIER or SUPERVISOR |
-| is_active | boolean | No | default: true |
 
-#### Response
+#### Response (201)
+
 ```json
 {
-  "success": true,
   "data": {
-    "id": 123,
-    "name": "Dewi Lestari",
-    "username": "dewi.l",
-    "role": "CASHIER",
-    "status": "ACTIVE",
-    "is_active": true,
-    "created_at": "2026-03-15 09:30:00",
-    "last_login_at": null
+    "id": 3,
+    "name": "Kasir Dua",
+    "username": "kasir2",
+    "role": "CASHIER"
   },
-  "message": "Staff berhasil dibuat."
-}
-```
-
-### Deactivate Staff
-
-**PATCH** `/api/admin/staff/{staff}`
-
-#### Authentication
-Diperlukan (role SUPERVISOR)
-
-#### Response
-```json
-{
-  "success": true,
-  "data": {
-    "id": 123,
-    "status": "INACTIVE",
-    "is_active": false
-  },
-  "message": "User berhasil dinonaktifkan."
+  "message": "Staff created successfully"
 }
 ```
 
 ---
 
-## Approval Workflow
+### Update Staff
 
-### List Pending Approvals
-
-**GET** `/api/supervisor/refunds?status=pending`
+**PUT** `/api/admin/staff/{user}`
 
 #### Authentication
-Diperlukan (role SUPERVISOR)
+Supervisor only
 
-#### Response
+#### Request Body
+
+| Field | Type | Description |
+|-------|------|-------------|
+| name | string | Full name |
+| email | string | Email |
+| is_active | boolean | Active status |
+
+#### Response (200)
+
 ```json
 {
-  "success": true,
+  "message": "Staff updated successfully"
+}
+```
+
+---
+
+### Delete Staff
+
+**DELETE** `/api/admin/staff/{user}`
+
+#### Authentication
+Supervisor only
+
+#### Response (200)
+
+```json
+{
+  "message": "Staff deleted successfully"
+}
+```
+
+---
+
+### Reset PIN
+
+**POST** `/api/admin/staff/{user}/reset-pin`
+
+#### Authentication
+Supervisor only
+
+#### Response (200)
+
+```json
+{
+  "message": "PIN reset successfully"
+}
+```
+
+---
+
+## Settings
+
+### Get Receipt Settings
+
+**GET** `/api/admin/receipt-settings`
+
+#### Authentication
+Supervisor only
+
+#### Response (200)
+
+```json
+{
+  "data": {
+    "store_name": "PayTo Store",
+    "store_address": "Jl. Contoh No. 1",
+    "store_phone": "081234567890",
+    "footer_message": "Terima kasih atas kunjungan Anda"
+  }
+}
+```
+
+---
+
+### Update Receipt Settings
+
+**PUT** `/api/admin/receipt-settings`
+
+#### Authentication
+Supervisor only
+
+#### Request Body
+
+| Field | Type | Description |
+|-------|------|-------------|
+| store_name | string | Store name |
+| store_address | string | Store address |
+| store_phone | string | Store phone |
+| footer_message | string | Footer message |
+
+#### Response (200)
+
+```json
+{
+  "message": "Settings updated successfully"
+}
+```
+
+---
+
+### Get Business Settings
+
+**GET** `/api/admin/business-settings`
+
+#### Authentication
+Supervisor only
+
+#### Response (200)
+
+```json
+{
+  "data": {
+    "currency": "IDR",
+    "tax_rate": 11,
+    "low_stock_threshold": 10
+  }
+}
+```
+
+---
+
+## POS Routes (Kasir)
+
+### Get POS Products
+
+**GET** `/api/pos/products`
+
+#### Authentication
+Cashier or Supervisor
+
+#### Response (200)
+
+```json
+{
   "data": [
     {
-      "id": 78,
-      "sale_id": 123,
-      "status": "PENDING_APPROVAL",
-      "total_amount": 7500,
-      "items": [
-        {
-          "product_name": "Teh Botol Sasa 250ml",
-          "quantity": 1,
-          "price": 7500
-        }
-      ],
-      "refund_method": "CASH",
-      "note": "Customer tidak jadi beli",
-      "created_by": "kasir1",
-      "created_at": "2026-06-28 21:00:00"
-    }
-  ],
-  "meta": {
-    "total": 1,
-    "pending": 1,
-    "approved": 0,
-    "rejected": 0
-  }
-}
-```
-
-### Approve Refund
-
-**PATCH** `/api/supervisor/refunds/{refund}/approve`
-
-#### Request Body
-```json
-{
-  "approval_note": "Setujui refund sesuai kebijakan"
-}
-```
-
-### Reject Refund
-
-**PATCH** `/api/supervisor/refunds/{refund}/reject`
-
-#### Request Body
-```json
-{
-  "rejection_reason": "Refund melewati batas waktu 2 hari"
-}
-```
-
----
-
-## Push Notifications
-
-### Get VAPID Public Key
-
-**GET** `/api/push/vapid-public-key`
-
-#### Response
-```json
-{
-  "public_key": "BOtXK2J..."
-}
-```
-
-### Subscribe to Push
-
-**POST** `/api/push/subscribe`
-
-#### Request Body
-```json
-{
-  "endpoint": "https://fcm.googleapis.com/fcm/send/...",
-  "keys": {
-    "p256dh": "BNQ...",
-    "auth": "..."
-  }
-}
-```
-
-### Send Notification
-
-**POST** `/api/admin/push/send`
-
-#### Request Body
-```json
-{
-  "title": "Order Baru",
-  "body": "Ada order baru dari customer Budi",
-  "data": {
-    "order_id": 123,
-    "type": "new_order"
-  }
-}
-```
-
----
-
-## Sync Operations
-
-### Sync Offline Transactions
-
-**POST** `/api/pos/sync`
-
-#### Request Body
-```json
-{
-  "transactions": [
-    {
-      "local_txn_uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-      "device_id": "POS-001",
-      "items": [
-        {
-          "product_id": 123,
-          "quantity": 2,
-          "price": 6000
-        }
-      ],
-      "payment_method": "CASH",
-      "total_amount": 12000,
-      "created_at": "2026-06-28T21:00:00.000Z"
+      "id": 1,
+      "name": "Kopi Sachet",
+      "price": 2500.00,
+      "barcode": "1234567890123",
+      "stock_on_hand": 100.000
     }
   ]
 }
 ```
 
-#### Response
+---
+
+### Get POS History
+
+**GET** `/api/pos/history`
+
+#### Authentication
+Cashier or Supervisor
+
+#### Response (200)
+
 ```json
 {
-  "success": true,
-  "data": {
-    "synced": [
-      {
-        "local_txn_uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-        "sale_id": 789,
-        "created_at": "2026-06-28 21:00:00"
-      }
-    ],
-    "failed": [
-      {
-        "local_txn_uuid": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
-        "error": "Product stock insufficient",
-        "retryable": true
-      }
-    ],
-    "duplicates": [
-      {
-        "local_txn_uuid": "c3d4e5f6-a7b8-9012-cdef-123456789012",
-        "sale_id": 790,
-        "created_at": "2026-06-28 21:05:00"
-      }
-    ],
-    "summary": {
-      "total": 3,
-      "synced": 1,
-      "failed": 1,
-      "duplicates": 1
+  "data": [
+    {
+      "id": 1,
+      "server_invoice_no": "INV-2026-0001",
+      "grand_total": 50000.00,
+      "status": "PAID",
+      "items_count": 3,
+      "created_at": "2026-07-04T10:30:00Z"
     }
+  ]
+}
+```
+
+---
+
+### Get POS Profile
+
+**GET** `/api/pos/profile`
+
+#### Authentication
+Cashier or Supervisor
+
+#### Response (200)
+
+```json
+{
+  "data": {
+    "id": 2,
+    "name": "Kasir Satu",
+    "role": "CASHIER",
+    "work_date": "2026-07-04",
+    "work_seconds": 14400
   }
 }
 ```
 
 ---
 
-## Error Codes
+### Checkout
 
-### Validation Errors (422)
+**POST** `/api/pos/checkout`
+
+#### Authentication
+Cashier or Supervisor
+
+#### Request Body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| items | array | Yes | Cart items |
+| items[].product_id | integer | Yes | Product ID |
+| items[].qty | number | Yes | Quantity |
+| items[].price | number | Yes | Unit price |
+| items[].discount_amount | number | No | Discount per item |
+| payments | array | Yes | Payment info |
+| payments[].method | string | Yes | Payment method |
+| payments[].amount | number | Yes | Payment amount |
+| customer_name | string | No | Customer name |
+| customer_phone | string | No | Customer phone |
+| occurred_at | string | No | Transaction time |
+
+```bash
+curl -X POST http://localhost/api/pos/checkout \
+  -H "Content-Type: application/json" \
+  -H "X-CSRF-TOKEN: your-csrf-token" \
+  -d '{
+    "items": [
+      {"product_id": 1, "qty": 2, "price": 2500}
+    ],
+    "payments": [
+      {"method": "CASH", "amount": 10000}
+    ]
+  }'
+```
+
+#### Response (201)
 
 ```json
 {
-  "message": "Validasi gagal",
+  "data": {
+    "sale_id": 1,
+    "server_invoice_no": "INV-2026-0001",
+    "subtotal": 5000.00,
+    "discount_total": 0.00,
+    "tax_total": 550.00,
+    "grand_total": 5550.00,
+    "paid_total": 10000.00,
+    "change_total": 4450.00,
+    "status": "PAID"
+  },
+  "message": "Checkout successful"
+}
+```
+
+---
+
+### Refund
+
+**POST** `/api/pos/refunds`
+
+#### Authentication
+Cashier or Supervisor
+
+#### Request Body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| sale_id | integer | Yes | Original sale ID |
+| items | array | Yes | Items to refund |
+| items[].sale_item_id | integer | Yes | Sale item ID |
+| items[].qty | number | Yes | Refund quantity |
+| reason | string | Yes | Refund reason |
+
+#### Response (201)
+
+```json
+{
+  "data": {
+    "refund_id": 1,
+    "status": "REQUESTED"
+  },
+  "message": "Refund requested, awaiting approval"
+}
+```
+
+---
+
+## Error Responses
+
+### Validation Error (422)
+
+```json
+{
+  "message": "The given data was invalid.",
   "errors": {
-    "field_name": ["Pesan error 1", "Pesan error 2"]
+    "name": ["The name field is required."]
   }
 }
 ```
 
-### Internal Server Error (500)
+### Unauthorized (401)
 
 ```json
 {
-  "message": "Internal server error."
+  "message": "Unauthenticated."
 }
 ```
 
----
+### Forbidden (403)
 
-## Notes
+```json
+{
+  "message": "This action is unauthorized."
+}
+```
 
-### Partial Failures
+### Not Found (404)
 
-Batch operations mungkin mengembalikan partial failures:
-- Successful transactions tetap processed
-- Failed transactions dilog dan dapat diretry
-- Batch status menunjukkan overall success atau failure
+```json
+{
+  "message": "Resource not found."
+}
+```
 
-### Stock Management
+### Rate Limited (429)
 
-- Stock ditrack dengan precision 3 decimal
-- Sale items mengurangi stock immediately
-- Refunds mengembalikan stock ke inventory
-- Inventory recommendations dihitung berdasarkan rata-rata penjualan 7 hari
-- Reorder point formula: (avg_sales_7d × lead_time) + safety_stock
-
-### Sync Process
-
-- POS sync menggunakan batch processing untuk offline transactions
-- Idempotency di-enforce menggunakan device_id + local_txn_uuid
-- Duplicate transactions dideteksi dan di-skip
-
-### Authentication
-
-- Session-based authentication digunakan
-- CSRF tokens diperlukan untuk POST/PUT/DELETE requests
-- Staff bisa login menggunakan username/password atau 6-digit PIN
-- Supervisor login memberikan akses ke both admin dan POS features
-- Cashier login membatasi akses hanya ke POS features
+```json
+{
+  "message": "Too many attempts. Please try again in X seconds."
+}
+```

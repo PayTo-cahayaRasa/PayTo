@@ -1,317 +1,464 @@
 # Memulai dengan PayTo
 
-Selamat datang di PayTo! Tutorial ini akan membantu Anda setup development environment dan mulai bekerja dengan project.
+Selamat datang di PayTo! Tutorial ini akan membantu Anda setup development environment dan mulai bekerja dengan project POS PayTo.
 
-## Prerequisites
+## Daftar Isi
 
-Sebelum memulai, pastikan Anda menginstall hal-hal berikut di sistem Anda:
+1. [Persyaratan Sistem](#persyaratan-sistem)
+2. [Setup Project](#setup-project)
+3. [Menjalankan Development Server](#menjalankan-development-server)
+4. [Login & Akses](#login--akses)
+5. [Struktur Project](#struktur-project)
+6. [Tugas Umum](#tugas-umum)
+7. [Troubleshooting](#troubleshooting)
 
-- **PHP 8.2+** - Diperlukan untuk Laravel framework
-- **Composer** - PHP dependency manager
-- **Node.js 18+** - JavaScript runtime untuk frontend
-- **npm** - Node package manager (sudah termasuk dengan Node.js)
-- **MySQL 5.7+ atau SQLite** - Database (SQLite digunakan secara default)
-- **Git** - Version control
+---
 
-### Verifikasi instalasi
+## Persyaratan Sistem
+
+### Software yang Diperlukan
+
+| Software | Versi Minimal | Description |
+|----------|---------------|-------------|
+| PHP | 8.2+ | Runtime untuk Laravel |
+| Composer | 2.0+ | PHP dependency manager |
+| Node.js | 20+ | JavaScript runtime |
+| npm | 10+ | Node package manager |
+| MySQL | 8.0+ | Database server |
+| Git | 2.0+ | Version control |
+
+### Verifikasi Instalasi
+
+Buka terminal/command prompt dan jalankan:
 
 ```bash
-php -v           # Harus menampilkan PHP 8.2 atau lebih tinggi
-composer -V      # Harus menampilkan Composer version
-node -v          # Harus menampilkan Node.js version
-npm -v           # Harus menampilkan npm version
+php -v
+# Expected: PHP 8.2.x atau lebih tinggi
+
+composer -V
+# Expected: Composer version 2.x
+
+node -v
+# Expected: v20.x.x atau lebih tinggi
+
+npm -v
+# Expected: 10.x.x atau lebih tinggi
+
+mysql --version
+# Expected: mysql  Ver 8.0.x
 ```
+
+---
 
 ## Setup Project
 
-### 1. Clone repository
+### Langkah 1: Clone Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/PayTo-cahayaRasa/PayTo.git
 cd PayTo
 ```
 
-### 2. Copy environment file
-
-Copy file environment example untuk membuat file `.env` Anda sendiri:
+### Langkah 2: Install Dependencies
 
 ```bash
-copy .env.example .env
-```
+# Install PHP & Node dependencies sekaligus
+make install
 
-### 3. Install PHP dependencies
-
-Jalankan Composer untuk install semua PHP packages:
-
-```bash
+# Atau手动:
 composer install
-```
-
-Expected output:
-```
-Installing dependencies from lock file
-Package operations: 123 installs, 0 updates, 0 removals
-...
-Generating optimized autoload files
-```
-
-### 4. Install Node dependencies
-
-Install frontend dependencies:
-
-```bash
 npm install
 ```
 
-Expected output:
-```
-added 145 packages, and audited 146 packages in 2m
-```
-
-### 5. Generate application key
-
-Generate unique application key untuk encryption:
+### Langkah 3: Setup Environment File
 
 ```bash
+# Copy .env.example ke .env
+copy .env.example .env   # Windows
+# cp .env.example .env   # Linux/Mac
+
+# Generate application key
 php artisan key:generate
 ```
 
-Expected output:
-```
-Application key set successfully.
-```
+### Langkah 4: Konfigurasi Database
 
-### 6. Configure database
+Pastikan MySQL server berjalan (XAMPP/WAMP).
 
-Konfigurasi default menggunakan SQLite, yang tidak memerlukan setup. Database file terletak di `database/database.sqlite`.
+1. Buat database baru di MySQL:
 
-Jika Anda ingin menggunakan MySQL:
-
-1. Create database baru di MySQL:
 ```sql
-CREATE DATABASE payto;
+CREATE DATABASE paytocahaya CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-2. Update file `.env` Anda:
-```
+2. Update file `.env`:
+
+```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=payto
+DB_DATABASE=paytocahaya
 DB_USERNAME=root
-DB_PASSWORD=
+DB_PASSWORD=root
 ```
 
-### 7. Jalankan migrations
-
-Create database tables:
+### Langkah 5: Jalankan Migration & Seeder
 
 ```bash
+# Create semua tabel
 php artisan migrate
-```
 
-Expected output:
-```
-Migrating: 2024_01_01_000001_create_users_table
-Migrated:  2024_01_01_000001_create_users_table
-Migrating: 2024_01_01_000002_create_products_table
-...
-Migrated:  2024_01_01_000002_create_products_table
-```
-
-### 8. Jalankan seeders
-
-Populate database dengan data awal termasuk sample users:
-
-```bash
+# Populate data awal (users, sample products)
 php artisan db:seed
 ```
 
-Ini membuat dua default users:
+Ini akan membuat users default:
 
-| Username | Role | PIN |
-|----------|------|-----|
-| testuser | CASHIER | 123456 |
-| supervisor | SUPERVISOR | 654321 |
+| Username | Role | Password |
+|----------|------|----------|
+| testuser | CASHIER | password |
+| supervisor | SUPERVISOR | password |
 
-### 9. Build frontend assets
-
-Compile frontend assets dengan Vite:
+### Langkah 6: Build Frontend
 
 ```bash
+# Build assets untuk production
 npm run build
-```
 
-Untuk development mode (dengan hot-reload), gunakan:
-```bash
+# Atau untuk development dengan hot-reload
 npm run dev
 ```
 
-## Development Environment
+---
 
-### Menjalankan development server
+## Menjalankan Development Server
 
-Gunakan composer script yang convenient untuk menjalankan semua services secara bersamaan:
+### Menggunakan Make Commands (Recommended)
 
 ```bash
-composer run dev
+# Jalankan semua services sekaligus
+make dev
 ```
 
-Command ini menjalankan:
-- **PHP development server** - Berjalan di port 8000
-- **Vite development server** - Handle frontend hot-reloading
-- **Queue worker** - Process background jobs
-- **Logs** - Pail log viewer
+Ini menjalankan:
+- PHP dev server di port 8000
+- Vite hot-reload server
+- Queue worker (background jobs)
+- Log viewer
 
-Expected output:
+### Atau Manual
+
+Buka 2 terminal:
+
+**Terminal 1 - Backend:**
+```bash
+php artisan serve
+# Berjalan di http://localhost:8000
 ```
-[server] Starting php artisan serve...
-[queue] Starting php artisan queue:listen...
-[logs] Starting php artisan pail...
-[vite] Starting vite...
+
+**Terminal 2 - Frontend:**
+```bash
+npm run dev
+# Berjalan di http://localhost:5173
 ```
 
-### Akses aplikasi
+### Akses Aplikasi
 
-Buka browser Anda dan kunjungi:
-
+Buka browser:
 ```
 http://localhost:8000
 ```
 
-## Langkah Pertama
+---
 
-### 1. Login ke aplikasi
+## Login & Akses
 
-Navigate ke `/login` dan gunakan default credentials:
+### Login Page
 
-- **Username**: `testuser`
-- **PIN**: `123456`
+Navigasi ke `/login` dan gunakan credentials:
 
-Atau untuk supervisor access:
-- **Username**: `supervisor`
-- **PIN**: `654321`
+**Sebagai Kasir:**
+- Username: `testuser`
+- Password: `password`
 
-### 2. Jelajahi interface POS
+**Sebagai Supervisor/Admin:**
+- Username: `supervisor`
+- Password: `password`
 
-Setelah login sebagai kasir, Anda akan diarahkan ke `/kasir` (POS interface). Anda bisa:
+### Setelah Login
 
-- Scan products
-- Proses pembayaran
-- View receipts
-- Handle refunds
+**Kasir** diarahkan ke `/kasir` dengan akses:
+- Dashboard kasir
+- Input produk/barcode
+- Proses checkout
+- Riwayat transaksi
+- Profile & settings
 
-### 3. Akses admin panel
+**Supervisor** diarahkan ke `/admin` dengan akses penuh:
+- Dashboard analytics
+- Manajemen produk
+- Manajemen staff
+- Smart inventory
+- Approval requests
+- Pengaturan struk
+- Reports
 
-Navigate ke `/admin` untuk akses administrative features:
+---
 
-- Product management
-- User management
-- Sales reports
-- System settings
-
-## Overview Struktur Project
+## Struktur Project
 
 ```
 PayTo/
 ├── app/
-│   ├── Models/          # Eloquent database models
+│   ├── Enums/                 # Enum definitions (TitleCase keys)
+│   │   ├── SaleStatus.php
+│   │   ├── SaleSource.php
+│   │   ├── ApprovalAction.php
+│   │   └── ...
 │   ├── Http/
-│   │   ├── Controllers/ # Application controllers
-│   │   └── Middleware/  # Custom middleware
-│   └── Providers/       # Service providers
+│   │   ├── Controllers/
+│   │   │   ├── Api/          # REST API controllers
+│   │   │   │   ├── Admin/    # Admin API (products, staff, settings)
+│   │   │   │   └── Pos/     # POS API (checkout, refund)
+│   │   │   ├── Auth/         # Login, logout controllers
+│   │   │   └── Pos/         # Page controllers
+│   │   ├── Middleware/
+│   │   │   ├── EnsureUserHasRole.php
+│   │   │   └── SecurityHeaders.php
+│   │   └── Requests/         # Form Request validation
+│   ├── Models/               # Eloquent models
+│   │   ├── User.php
+│   │   ├── Product.php
+│   │   ├── Sale.php
+│   │   ├── SaleItem.php
+│   │   ├── Payment.php
+│   │   ├── Refund.php
+│   │   ├── Approval.php
+│   │   └── ...
+│   └── Services/             # Business logic
+│       ├── CheckoutProcessor.php
+│       ├── AppSettingsService.php
+│       └── WhatsAppLinkBuilder.php
+├── bootstrap/
+│   └── app.php               # Laravel 12 app configuration
+├── config/
+│   └── ...                   # Laravel config files
 ├── database/
-│   ├── factories/       # Model factories untuk testing
-│   ├── migrations/      # Database migrations
-│   └── seeders/         # Database seeders
+│   ├── factories/            # Model factories untuk testing
+│   ├── migrations/           # Database migrations
+│   └── seeders/              # Database seeders
 ├── resources/
-│   ├── js/              # React frontend components
-│   │   ├── Pages/       # Inertia pages
-│   │   └── Layouts/     # Layout components
-│   └── views/           # Blade views (jika ada)
+│   └── js/
+│       ├── Pages/
+│       │   ├── kasir.tsx     # Kasir/POS page
+│       │   ├── admin.tsx     # Admin layout
+│       │   └── admin/        # Admin sub-pages
+│       │       ├── AdminPage.tsx
+│       │       └── components/
+│       └── Components/       # Shared React components
 ├── routes/
-│   ├── web.php          # Web routes
-│   ├── api.php          # API routes
-│   └── console.php      # Console commands
+│   ├── api.php               # API routes (82 routes)
+│   ├── web.php               # Web routes
+│   └── auth.php              # Auth routes
+├── storage/
+│   ├── app/                  # App storage (receipts, etc.)
+│   └── logs/                 # Application logs
 ├── tests/
-│   ├── Feature/         # Feature tests
-│   └── Unit/            # Unit tests
-├── docs/                # Dokumentasi
-├── public/              # Files yang dapat diakses publik
-├── storage/             # Generated files (logs, cache, uploads)
-├── .env                 # Environment configuration
-├── composer.json        # PHP dependencies
-└── package.json         # Node dependencies
+│   ├── Feature/              # Feature tests
+│   └── Unit/                # Unit tests
+├── docs/
+│   ├── gallery/              # Screenshot aplikasi
+│   ├── reference/            # API & schema docs
+│   ├── explanation/         # Architecture docs
+│   └── tutorials/            # Tutorials
+├── .env                      # Environment config
+├── .env.example              # Example env
+├── composer.json             # PHP dependencies
+├── package.json              # Node dependencies
+├── Makefile                  # Development commands
+└── README.md
 ```
 
-### Model-key
+---
 
-- **User** - Staff users dengan role berbeda
-- **Product** - Products dalam inventory
-- **Sale** - Sales transactions
-- **SaleItem** - Individual items dalam sale
-- **Payment** - Payment records
-- **StockMovement** - Inventory tracking
-- **ReceiptTemplate** - Receipt formatting
-- **AppSetting** - System configuration
+## Model-Key
+
+### Core Models
+
+| Model | Description |
+|-------|-------------|
+| **User** | Staff users dengan role (CASHIER/SUPERVISOR) |
+| **Product** | Produk dengan harga, SKU, barcode |
+| **Sale** | Transaksi penjualan |
+| **SaleItem** | Item dalam satu transaksi |
+| **Payment** | Record pembayaran |
+| **Refund** | Request refund |
+| **RefundItem** | Item yang di-refund |
+| **Approval** | Workflow approval |
+| **StockItem** | Stok per produk |
+| **StockMovement** | History perubahan stok |
+| **AppSetting** | Konfigurasi aplikasi |
+| **AuditLog** | Log aktivitas |
+
+### Enums
+
+| Enum | Values |
+|------|--------|
+| `SaleStatus` | `Draft`, `PendingPayment`, `Paid`, `Void`, `SyncFailed` |
+| `SaleSource` | `Online`, `Offline` |
+| `ApprovalAction` | `DiscountOverride`, `PriceOverride`, `Void`, `Refund` |
+| `ApprovalStatus` | `Pending`, `Approved`, `Rejected` |
+| `RefundStatus` | `Requested`, `Approved`, `Completed` |
+
+---
 
 ## Tugas Umum
 
-### Menambah product baru
+### Menambah Produk Baru
 
 ```bash
-php artisan make:product "Produk Baru"
+# Via API (di Admin > Manajemen Barang)
+# POST /api/admin/products
 ```
 
-### Menjalankan tests
+### Membuat Transaksi Checkout
 
 ```bash
-php artisan test
+# Via POS Interface
+# POST /api/pos/checkout
 ```
 
-### Running linting
+### Proses Refund
+
+1. Kasir request refund di `/kasir`
+2. Supervisor approve di `/admin` > Approvals
+3. Refund di proses
+
+### Reset Password Staff
 
 ```bash
-composer run lint
+php artisan tinker
+# >>> App\Models\User::where('username', 'kasir1')->first()->update(['password' => Hash::make('password')]);
 ```
+
+### Backup Database
+
+```bash
+mysqldump -u root -p paytocahaya > backup_payto.sql
+```
+
+### Restore Database
+
+```bash
+mysql -u root -p paytocahaya < backup_payto.sql
+```
+
+---
+
+## Commands Reference
+
+```bash
+# Development
+make dev              # Start dev server
+make test             # Run tests
+make pint             # Fix code style
+make lint             # Lint check
+make ci               # All CI checks
+
+# Database
+php artisan migrate               # Run migrations
+php artisan migrate:fresh         # Fresh migrate + seed
+php artisan db:seed              # Seed data
+php artisan db:seed --class=ClassName  # Specific seeder
+
+# Cache & Config
+php artisan config:clear
+php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
+
+# Code Style
+./vendor/bin/pint                  # Auto-fix style
+./vendor/bin/pint --test          # Check only
+```
+
+---
 
 ## Troubleshooting
 
-### Database connection errors
+### ❌ "Database connection refused"
 
-Pastikan database server berjalan dan credentials di `.env` benar.
-
-### Permission denied errors
-
-Di Linux/Mac, pastikan directory `storage/` dan `bootstrap/cache/` dapat ditulis:
+1. Pastikan MySQL server berjalan (cek XAMPP/WAMP)
+2. Verify credentials di `.env`
+3. Pastikan database `paytocahaya` ada
 
 ```bash
+mysql -u root -p
+SHOW DATABASES;
+```
+
+### ❌ "Permission denied" saat install
+
+```bash
+# Linux/Mac
 chmod -R 775 storage bootstrap/cache
 ```
 
-### Composer install gagal
+### ❌ "Class not found" setelah update
 
-Pastikan PHP version Anda 8.2+. Cek dengan `php -v`.
+```bash
+composer dump-autoload
+php artisan optimize
+```
 
-### Frontend errors
+### ❌ Frontend tidak loading
 
-1. Install Node dependencies: `npm install`
-2. Rebuild assets: `npm run build`
-3. Check browser console untuk errors
+```bash
+npm install
+npm run build
+```
 
-### General issues
+### ❌ Vite error
 
-1. Clear cache: `php artisan config:clear` dan `php artisan cache:clear`
-2. Check logs di `storage/logs/laravel.log`
-3. Run `php artisan pail` untuk view logs aplikasi secara real-time
+```bash
+rm -rf node_modules/.vite
+npm run dev
+```
+
+### Cek Logs
+
+```bash
+# View recent logs
+tail -f storage/logs/laravel.log
+
+# Atau gunakan Laravel Pail
+php artisan pail
+```
+
+### Reset Everything
+
+```bash
+# Fresh install
+php artisan migrate:fresh --seed
+npm run build
+```
+
+---
+
+## Dokumentasi Lanjutan
+
+- [API Reference](reference/api.md) - Detail endpoint API
+- [Database Schema](reference/database-schema.md) - Struktur database
+- [Architecture](explanation/architecture.md) - Arsitektur sistem
+- [CONTRIBUTING.md](../CONTRIBUTING.md) - Panduan berkontribusi
+
+---
 
 ## Mendapatkan Bantuan
 
-Jika Anda mengalami issues:
+1. Cek troubleshooting di atas
+2. Review dokumentasi lengkap di `docs/`
+3. Cek Laravel logs: `storage/logs/laravel.log`
+4. Run `php artisan pail` untuk real-time log viewer
 
-1. Cek troubleshooting section di atas
-2. Review dokumentasi [How-to Guides](#how-to-guides)
-3. Cek Laravel logs di `storage/logs/laravel.log`
-4. Jalankan `php artisan pail` untuk view aplikasi logs secara real-time
-
-Happy coding!
+Happy coding! 🚀
