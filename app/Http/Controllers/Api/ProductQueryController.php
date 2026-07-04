@@ -47,10 +47,10 @@ class ProductQueryController extends Controller
         ]));
 
         // Create initial stock
-        StockItem::query()->create([
-            'product_id' => $product->id,
-            'on_hand' => $payload['stock'],
-        ]);
+        StockItem::query()->firstOrCreate(
+            ['product_id' => $product->id],
+            ['on_hand' => $payload['stock']]
+        );
 
         // Audit: Log product creation
         ProductHistory::logChange(

@@ -13,6 +13,8 @@ class AppSettingsService
 
     private const KEY_RECEIPT_SETTINGS = 'receipt.settings';
 
+    private const KEY_POS_TARGET = 'pos.cashier_target';
+
     private const DEFAULT_BUSINESS_PROFILE = [
         'name' => 'Nama Toko',
         'address' => 'Alamat Toko',
@@ -30,6 +32,8 @@ class AppSettingsService
         'header' => "NAMA TOKO\nAlamat Toko",
         'footer' => "Terima kasih atas kunjungan Anda\nFollow IG: @tokokopi",
     ];
+
+    private const DEFAULT_POS_TARGET = 1000000;
 
     /**
      * Get business profile settings with defaults merged
@@ -73,6 +77,21 @@ class AppSettingsService
             'business' => $this->getBusinessProfile(),
             'catalog' => $this->getCatalogSettings(),
         ];
+    }
+
+    /**
+     * Get cashier daily target
+     */
+    public function getCashierTarget(): int
+    {
+        $setting = AppSetting::query()->where('key', self::KEY_POS_TARGET)->first();
+        $value = $setting?->value;
+
+        if (is_numeric($value)) {
+            return max(0, (int) $value);
+        }
+
+        return self::DEFAULT_POS_TARGET;
     }
 
     /**

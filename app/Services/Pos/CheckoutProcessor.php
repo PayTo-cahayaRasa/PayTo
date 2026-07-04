@@ -15,6 +15,7 @@ use Illuminate\Validation\ValidationException;
 class CheckoutProcessor
 {
     private const MIN_PHONE_DIGITS = 10;
+
     private const MAX_PHONE_DIGITS = 15;
 
     /**
@@ -66,13 +67,13 @@ class CheckoutProcessor
             $discountPerUnit = ($unitPrice * $discountPercent) / 100;
             $discountAmount = $discountPerUnit * $qty;
 
-            if ($discountAmount > $lineSubtotal) {
+            $lineTotal = $lineSubtotal - $discountAmount;
+
+            if ($lineTotal < 0) {
                 throw ValidationException::withMessages([
-                    'items' => 'Diskon melebihi total item.',
+                    'items' => 'Total item tidak valid.',
                 ]);
             }
-
-            $lineTotal = $lineSubtotal - $discountAmount;
 
             $subtotal += $lineSubtotal;
             $discountTotal += $discountAmount;
@@ -200,7 +201,7 @@ class CheckoutProcessor
         // Ensure Indonesian format (starts with 0 or 62)
         // If starts with 0, convert to 62
         if (str_starts_with($digits, '0')) {
-            $digits = '62' . substr($digits, 1);
+            $digits = '62'.substr($digits, 1);
         }
 
         return $digits;

@@ -8,18 +8,20 @@ use Inertia\Inertia;
 
 class PosController extends Controller
 {
+    public function __construct(
+        private readonly ProductQueryController $productQuery,
+        private readonly HistoryQueryController $historyQuery,
+        private readonly ProfileQueryController $profileQuery
+    ) {}
+
     public function index(Request $request)
     {
-        $productQuery = new ProductQueryController;
-        $historyQuery = new HistoryQueryController;
-        $profileQuery = new ProfileQueryController;
-
-        $products = $productQuery->fetch();
+        $products = $this->productQuery->fetch();
         $userId = $request->user()->id;
-        $history = $historyQuery->fetch(10, [
+        $history = $this->historyQuery->fetch(10, [
             'userId' => $userId,
         ]);
-        $profile = $profileQuery->fetch();
+        $profile = $this->profileQuery->fetch();
 
         return Inertia::render('kasir', [
             'products' => $products,

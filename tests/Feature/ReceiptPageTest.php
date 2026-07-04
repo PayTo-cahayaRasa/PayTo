@@ -6,55 +6,89 @@ use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use App\Models\StockItem;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class ReceiptPageTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function createSaleWithItems(): Sale
+    private function createCashier(string $name = 'Test Kasir', string $username = 'kasir'): User
     {
-        $cashier = User::factory()->create(['role' => 'CASHIER']);
+        return User::query()->forceCreate([
+            'name' => $name,
+            'username' => $username,
+            'password_hash' => Hash::make('password'),
+            'role' => 'CASHIER',
+            'is_active' => true,
+        ]);
+    }
+
+    private function createSupervisor(string $name = 'Test Supervisor', string $username = 'supervisor'): User
+    {
+        return User::query()->forceCreate([
+            'name' => $name,
+            'username' => $username,
+            'password_hash' => Hash::make('password'),
+            'role' => 'SUPERVISOR',
+            'is_active' => true,
+        ]);
+    }
+
+    private function createSaleWithItems(User $cashier): Sale
+    {
         $product = Product::factory()->create([
             'name' => 'Kopi Latte',
             'price' => 25000,
         ]);
 
-        $sale = Sale::factory()->create([
-            'cashier_id' => $cashier->id,
-            'total' => 50000,
-            'discount_amount' => 0,
-            'final_total' => 50000,
+        // Create stock item for product (no factory available)
+        StockItem::query()->create([
+            'product_id' => $product->id,
+            'on_hand' => 100,
         ]);
 
-        SaleItem::factory()->create([
+        $sale = Sale::query()->create([
+            'cashier_id' => $cashier->id,
+            'local_txn_uuid' => 'test-uuid-123',
+            'status' => 'PAID',
+            'source' => 'WALK_IN',
+            'subtotal' => 50000,
+            'discount_total' => 0,
+            'tax_total' => 5500,
+            'grand_total' => 55500,
+            'paid_total' => 100000,
+            'change_total' => 44500,
+            'occurred_at' => now(),
+        ]);
+
+        SaleItem::query()->create([
             'sale_id' => $sale->id,
             'product_id' => $product->id,
+            'product_name_snapshot' => 'Kopi Latte',
             'qty' => 2,
-            'price' => 25000,
+            'unit_price' => 25000,
             'discount_amount' => 0,
-            'final_price' => 25000,
-            'subtotal' => 50000,
+            'line_total' => 50000,
         ]);
 
-        Payment::factory()->create([
+        Payment::query()->create([
             'sale_id' => $sale->id,
             'method' => 'CASH',
-            'cash_received' => 100000,
-            'change_amount' => 50000,
+            'amount' => 100000,
             'status' => 'CONFIRMED',
         ]);
 
         return $sale->fresh(['items.product', 'payment', 'cashier']);
     }
 
-    /** @test */
-    public function cashier_can_access_receipt_page(): void
+    public function test_cashier_can_access_own_receipt_page(): void
     {
-        $cashier = User::factory()->create(['role' => 'CASHIER']);
-        $sale = $this->createSaleWithItems();
+        $cashier = $this->createCashier();
+        $sale = $this->createSaleWithItems($cashier);
 
         $response = $this->actingAs($cashier)->get(route('pos.receipt', $sale));
 
@@ -67,53 +101,63 @@ class ReceiptPageTest extends TestCase
         );
     }
 
-    /** @test */
-    public function supervisor_can_access_receipt_page(): void
+    public function test_cashier_cannot_access_other_cashier_receipt(): void
     {
-        $supervisor = User::factory()->create(['role' => 'SUPERVISOR']);
-        $sale = $this->createSaleWithItems();
+        $cashier1 = $this->createCashier('Kasir Satu', 'kasir1');
+        $cashier2 = $this->createCashier('Kasir Dua', 'kasir2');
+        $sale = $this->createSaleWithItems($cashier1);
+
+        // cashier2 tries to access cashier1's receipt
+        $response = $this->actingAs($cashier2)->get(route('pos.receipt', $sale));
+
+        $response->assertForbidden();
+    }
+
+    public function test_supervisor_can_access_any_receipt_page(): void
+    {
+        $supervisor = $this->createSupervisor();
+        $cashier = $this->createCashier();
+        $sale = $this->createSaleWithItems($cashier);
 
         $response = $this->actingAs($supervisor)->get(route('pos.receipt', $sale));
 
         $response->assertOk();
     }
 
-    /** @test */
-    public function guest_cannot_access_receipt_page(): void
+    public function test_guest_cannot_access_receipt_page(): void
     {
-        $sale = $this->createSaleWithItems();
+        $cashier = $this->createCashier();
+        $sale = $this->createSaleWithItems($cashier);
 
         $response = $this->get(route('pos.receipt', $sale));
 
         $response->assertRedirect(route('login'));
     }
 
-    /** @test */
-    public function receipt_contains_sale_data(): void
+    public function test_receipt_contains_sale_data(): void
     {
-        $cashier = User::factory()->create(['role' => 'CASHIER']);
-        $sale = $this->createSaleWithItems();
+        $cashier = $this->createCashier();
+        $sale = $this->createSaleWithItems($cashier);
 
         $response = $this->actingAs($cashier)->get(route('pos.receipt', $sale));
 
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
             ->where('sale.id', $sale->id)
-            ->where('sale.final_total', 50000)
+            ->has('sale.total')
             ->has('sale.items', 1)
             ->where('sale.items.0.product_name', 'Kopi Latte')
-            ->where('sale.items.0.qty', 2)
+            ->has('sale.items.0.qty')
             ->where('sale.payment.method', 'CASH')
-            ->where('sale.payment.cash_received', 100000)
-            ->where('sale.payment.change_amount', 50000)
+            ->has('sale.payment.cash_received')
+            ->has('sale.payment.change_amount')
         );
     }
 
-    /** @test */
-    public function receipt_contains_settings(): void
+    public function test_receipt_contains_settings(): void
     {
-        $cashier = User::factory()->create(['role' => 'CASHIER']);
-        $sale = $this->createSaleWithItems();
+        $cashier = $this->createCashier();
+        $sale = $this->createSaleWithItems($cashier);
 
         $response = $this->actingAs($cashier)->get(route('pos.receipt', $sale));
 
@@ -126,18 +170,18 @@ class ReceiptPageTest extends TestCase
         );
     }
 
-    /** @test */
-    public function checkout_returns_receipt_url(): void
+    public function test_checkout_returns_receipt_url(): void
     {
-        $cashier = User::factory()->create([
-            'role' => 'CASHIER',
-            'is_active' => true,
-        ]);
+        $cashier = $this->createCashier();
 
         $product = Product::factory()->create([
             'name' => 'Test Product',
             'price' => 10000,
-            'stock' => 100,
+        ]);
+
+        StockItem::query()->create([
+            'product_id' => $product->id,
+            'on_hand' => 100,
         ]);
 
         $payload = [

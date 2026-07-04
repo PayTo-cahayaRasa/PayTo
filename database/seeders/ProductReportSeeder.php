@@ -241,30 +241,8 @@ class ProductReportSeeder extends Seeder
             ],
         ]);
 
-        DB::table('receipt_templates')->updateOrInsert(
-            ['name' => 'Default Print'],
-            [
-                'version' => 1,
-                'is_active' => true,
-                'template_json' => json_encode(['title' => 'PayTo Cafe', 'layout' => 'condensed']),
-                'created_by' => $user->id,
-                'created_at' => $now->copy()->subMinutes(8),
-                'updated_at' => $now->copy()->subMinutes(8),
-            ]
-        );
-
-        $templateId = (int) DB::table('receipt_templates')->where('name', 'Default Print')->value('id');
-        DB::table('receipt_print_logs')->whereIn('sale_id', array_values($saleIds))->delete();
-        DB::table('receipt_print_logs')->insert([
-            [
-                'sale_id' => $saleIds['morningRush'],
-                'template_id' => $templateId,
-                'printed_by' => $user->id,
-                'printed_at' => $now->copy()->subMinutes(2),
-                'created_at' => $now->copy()->subMinutes(2),
-                'updated_at' => $now->copy()->subMinutes(1),
-            ],
-        ]);
+        // NOTE: receipt_templates and receipt_print_logs tables removed in migration cleanup
+        // Receipt settings now managed via AppSettingsService (app_settings table)
 
         foreach ($productIds as $key => $productId) {
             DB::table('inventory_recommendations')->updateOrInsert(

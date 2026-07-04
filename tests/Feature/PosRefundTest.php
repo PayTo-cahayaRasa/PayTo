@@ -103,7 +103,9 @@ class PosRefundTest extends TestCase
             'status' => 'PENDING',
         ]);
 
-        $this->actingAs($supervisor)->postJson("/api/admin/approvals/{$approvalId}/approve")
+        $this->actingAs($supervisor)->postJson("/api/admin/approvals/{$approvalId}/approve", [
+            'confirmed' => true,
+        ])
             ->assertOk();
 
         $this->assertDatabaseHas('approvals', [

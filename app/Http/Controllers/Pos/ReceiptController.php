@@ -20,6 +20,12 @@ class ReceiptController extends Controller
      */
     public function show(Request $request, Sale $sale): Response
     {
+        // IDOR protection: only allow cashier who owns the sale or supervisor
+        $user = $request->user();
+        if ($user->role === 'CASHIER' && $sale->cashier_id !== $user->id) {
+            abort(403, 'Unauthorized access to receipt.');
+        }
+
         // Load relationships
         $sale->load(['items.product', 'payment', 'cashier']);
 
@@ -31,22 +37,23 @@ class ReceiptController extends Controller
             'sale' => [
                 'id' => $sale->id,
                 'local_txn_uuid' => $sale->local_txn_uuid,
-                'total' => $sale->total,
-                'discount_amount' => $sale->discount_amount,
-                'final_total' => $sale->final_total,
+                'subtotal' => $sale->subtotal,
+                'discount_amount' => $sale->discount_total,
+                'tax_total' => $sale->tax_total,
+                'total' => $sale->grand_total,
                 'created_at' => $sale->created_at->format('d/m/Y H:i:s'),
                 'items' => $sale->items->map(fn ($item) => [
-                    'product_name' => $item->product->name,
+                    'product_name' => $item->product?->name ?? $item->product_name_snapshot,
                     'qty' => $item->qty,
-                    'price' => $item->price,
+                    'price' => $item->unit_price,
                     'discount_amount' => $item->discount_amount,
-                    'final_price' => $item->final_price,
-                    'subtotal' => $item->subtotal,
+                    'line_total' => $item->line_total,
                 ]),
                 'payment' => [
                     'method' => $sale->payment->method,
-                    'cash_received' => $sale->payment->cash_received,
-                    'change_amount' => $sale->payment->change_amount,
+                    'amount' => $sale->payment->amount,
+                    'cash_received' => $sale->paid_total,
+                    'change_amount' => $sale->change_total,
                 ],
                 'cashier' => [
                     'name' => $sale->cashier->name,

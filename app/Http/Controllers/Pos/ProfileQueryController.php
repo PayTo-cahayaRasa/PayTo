@@ -5,11 +5,16 @@ namespace App\Http\Controllers\Pos;
 use App\Models\Refund;
 use App\Models\Sale;
 use App\Models\User;
+use App\Services\Settings\AppSettingsService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class ProfileQueryController
 {
+    public function __construct(
+        private readonly AppSettingsService $settingsService
+    ) {}
+
     public function fetch(?int $userId = null): array
     {
         $user = $userId ? User::find($userId) : Auth::user();
@@ -56,7 +61,7 @@ class ProfileQueryController
             $durationText = sprintf('%dh %02dm', $hours, $minutes);
         }
 
-        $target = 1000000;
+        $target = $this->settingsService->getCashierTarget();
         $progress = $target > 0 ? round(($totalToday / $target) * 100) : 0;
 
         $role = match ($user?->role) {
