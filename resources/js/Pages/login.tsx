@@ -319,13 +319,13 @@ export default function PosLoginPage() {
                             <div className="text-center p-6 backdrop-blur-sm bg-white/10 rounded-2xl border border-white/20">
                                 <ShieldCheck size={48} className="mx-auto text-indigo-600 mb-4 drop-shadow-sm" />
                                 <h3 className="font-bold text-lg text-slate-800">Aman & Terintegrasi</h3>
-                                <p className="text-slate-500 text-sm mt-1">Sistem Point of Sale modern dengan keamanan data offline-first.</p>
+                                <p className="text-slate-500 text-sm mt-1">Sistem Point of Sale untuk operasional toko yang terpusat.</p>
                             </div>
                         </div>
                     </div>
 
                     <div className="relative z-10 text-xs text-slate-500 font-medium">
-                        &copy; 2026 Toko Cabang Pusat. v2.0.1
+                        &copy; 2026 PayTo. v2.0.1
                     </div>
                 </div>
 

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Product;
 use App\Models\StockItem;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,6 +14,11 @@ class ProductApiTest extends TestCase
 
     public function test_can_create_product_with_stock(): void
     {
+        $supervisor = User::factory()->create([
+            'role' => 'SUPERVISOR',
+            'is_active' => true,
+        ]);
+
         $payload = [
             'name' => 'Teh Manis',
             'sku' => 'BV-010',
@@ -25,7 +31,7 @@ class ProductApiTest extends TestCase
             'stock' => 20,
         ];
 
-        $response = $this->postJson('/api/admin/products', $payload);
+        $response = $this->actingAs($supervisor)->postJson('/api/admin/products', $payload);
 
         $response
             ->assertCreated()
@@ -45,6 +51,11 @@ class ProductApiTest extends TestCase
 
     public function test_can_list_and_show_products(): void
     {
+        $supervisor = User::factory()->create([
+            'role' => 'SUPERVISOR',
+            'is_active' => true,
+        ]);
+
         $product = Product::query()->create([
             'name' => 'Produk List',
             'sku' => 'LIST-001',
@@ -61,7 +72,7 @@ class ProductApiTest extends TestCase
             'on_hand' => 7,
         ]);
 
-        $this->getJson('/api/admin/products')
+        $this->actingAs($supervisor)->getJson('/api/admin/products')
             ->assertOk()
             ->assertJsonFragment([
                 'id' => $product->id,
@@ -69,7 +80,7 @@ class ProductApiTest extends TestCase
                 'stock' => 7,
             ]);
 
-        $this->getJson("/api/admin/products/{$product->id}")
+        $this->actingAs($supervisor)->getJson("/api/admin/products/{$product->id}")
             ->assertOk()
             ->assertJsonPath('data.name', 'Produk List')
             ->assertJsonPath('data.stock', 7);
@@ -77,6 +88,11 @@ class ProductApiTest extends TestCase
 
     public function test_product_create_rejects_invalid_payload(): void
     {
+        $supervisor = User::factory()->create([
+            'role' => 'SUPERVISOR',
+            'is_active' => true,
+        ]);
+
         $payload = [
             'name' => '',
             'price' => -100,
@@ -84,13 +100,18 @@ class ProductApiTest extends TestCase
             'stock' => -5,
         ];
 
-        $this->postJson('/api/admin/products', $payload)
+        $this->actingAs($supervisor)->postJson('/api/admin/products', $payload)
             ->assertStatus(422)
             ->assertJsonValidationErrors(['name', 'price', 'discount', 'stock']);
     }
 
     public function test_product_create_rejects_duplicate_sku_and_barcode(): void
     {
+        $supervisor = User::factory()->create([
+            'role' => 'SUPERVISOR',
+            'is_active' => true,
+        ]);
+
         Product::query()->create([
             'name' => 'Produk A',
             'sku' => 'DUP-001',
@@ -114,13 +135,18 @@ class ProductApiTest extends TestCase
             'stock' => 10,
         ];
 
-        $this->postJson('/api/admin/products', $payload)
+        $this->actingAs($supervisor)->postJson('/api/admin/products', $payload)
             ->assertStatus(422)
             ->assertJsonValidationErrors(['sku', 'barcode']);
     }
 
     public function test_can_update_product_and_stock(): void
     {
+        $supervisor = User::factory()->create([
+            'role' => 'SUPERVISOR',
+            'is_active' => true,
+        ]);
+
         $product = Product::query()->create([
             'name' => 'Produk Lama',
             'sku' => 'UP-001',
@@ -143,7 +169,7 @@ class ProductApiTest extends TestCase
             'stock' => 12,
         ];
 
-        $this->putJson("/api/admin/products/{$product->id}", $payload)
+        $this->actingAs($supervisor)->putJson("/api/admin/products/{$product->id}", $payload)
             ->assertOk()
             ->assertJsonPath('data.name', 'Produk Baru')
             ->assertJsonPath('data.stock', 12);
@@ -161,6 +187,11 @@ class ProductApiTest extends TestCase
 
     public function test_can_delete_product_and_stock_item(): void
     {
+        $supervisor = User::factory()->create([
+            'role' => 'SUPERVISOR',
+            'is_active' => true,
+        ]);
+
         $product = Product::query()->create([
             'name' => 'Produk Hapus',
             'sku' => 'DEL-001',
@@ -177,7 +208,7 @@ class ProductApiTest extends TestCase
             'on_hand' => 5,
         ]);
 
-        $this->deleteJson("/api/admin/products/{$product->id}")
+        $this->actingAs($supervisor)->deleteJson("/api/admin/products/{$product->id}")
             ->assertOk();
 
         $this->assertDatabaseMissing('products', [

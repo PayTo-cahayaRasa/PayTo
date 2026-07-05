@@ -20,16 +20,40 @@ use Illuminate\Support\Facades\DB;
 
 class PosRefundController extends Controller
 {
+    /**
+     * Determine if the given user can request a refund for the given sale.
+     * Cashiers can only refund their own transactions.
+     * Supervisors can refund any transaction (special cases).
+     */
+    private function canRequestRefund(Sale $sale, User $user): bool
+    {
+        // Supervisors can request refunds for any sale
+        if ($user->role === 'SUPERVISOR') {
+            return true;
+        }
+
+        // Cashiers can only refund their own transactions
+        return $sale->cashier_id === $user->id;
+    }
+
     public function store(PosRefundRequest $request): JsonResponse
     {
         $payload = $request->validated();
+        $cashier = $request->user();
 
         $sale = Sale::query()
-            ->with(['items'])
-            ->find($payload['sale_id']);
+            ->with(['items', 'cashier'])
+            ->find((int) $payload['sale_id']);
 
-        if (!$sale) {
+        if (! $sale) {
             return response()->json(['message' => 'Transaksi penjualan tidak ditemukan.'], 404);
+        }
+
+        // ✅ IDOR FIX: Verify ownership before proceeding
+        if (! $this->canRequestRefund($sale, $cashier)) {
+            return response()->json([
+                'message' => 'Anda tidak memiliki akses untuk merefund transaksi ini.',
+            ], 403);
         }
 
         if ($sale->status !== 'PAID') {
@@ -37,7 +61,7 @@ class PosRefundController extends Controller
         }
 
         $occurredAt = $sale->occurred_at ?? $sale->created_at;
-        if (!$occurredAt) {
+        if (! $occurredAt) {
             return response()->json(['message' => 'Tanggal transaksi tidak valid.'], 422);
         }
 
@@ -45,11 +69,6 @@ class PosRefundController extends Controller
         $refundDeadline = Carbon::parse($occurredAt)->addDays($windowDays)->endOfDay();
         if (now()->greaterThan($refundDeadline)) {
             return response()->json(['message' => 'Masa garansi refund sudah berakhir.'], 422);
-        }
-
-        $cashier = $request->user() ?? User::query()->where('role', 'CASHIER')->orderBy('id')->first();
-        if (!$cashier) {
-            return response()->json(['message' => 'Kasir tidak ditemukan.'], 422);
         }
 
         $hasPendingApproval = Approval::query()
@@ -67,7 +86,7 @@ class PosRefundController extends Controller
             ->sum('total_amount');
 
         $refundedQtyMap = RefundItem::query()
-            ->whereHas('refund', fn($query) => $query->where('sale_id', $sale->id))
+            ->whereHas('refund', fn ($query) => $query->where('sale_id', $sale->id))
             ->selectRaw('sale_item_id, SUM(qty) as qty_sum')
             ->groupBy('sale_item_id')
             ->pluck('qty_sum', 'sale_item_id')
@@ -79,7 +98,7 @@ class PosRefundController extends Controller
 
         foreach ($payload['items'] as $item) {
             $saleItem = $itemsById->get((int) $item['sale_item_id']);
-            if (!$saleItem) {
+            if (! $saleItem) {
                 return response()->json(['message' => 'Item transaksi tidak ditemukan.'], 422);
             }
 
@@ -125,7 +144,7 @@ class PosRefundController extends Controller
                 'status' => 'PENDING',
                 'reason' => $payload['reason'],
                 'payload_json' => [
-                    'items' => collect($refundItems)->map(fn($item) => [
+                    'items' => collect($refundItems)->map(fn ($item) => [
                         'sale_item_id' => $item['sale_item_id'],
                         'product_id' => $item['product_id'],
                         'product_name' => $item['product_name'],
@@ -135,6 +154,9 @@ class PosRefundController extends Controller
                     ])->values()->all(),
                     'total' => $refundTotal,
                     'window_days' => $windowDays,
+                    // ✅ Include cashier info for supervisor visibility
+                    'cashier_name' => $cashier->name,
+                    'cashier_role' => $cashier->role,
                 ],
                 'occurred_at' => now(),
             ]);

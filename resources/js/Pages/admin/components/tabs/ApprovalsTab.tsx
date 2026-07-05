@@ -62,7 +62,9 @@ export default function ApprovalsTab() {
 
         setActionLoadingId(log.id);
         try {
-            await axios.post(`/api/admin/approvals/${log.id}/approve`);
+            await axios.post(`/api/admin/approvals/${log.id}/approve`, {
+                confirmed: true,
+            });
             await fetchApprovals();
         } catch (error) {
             const message = axios.isAxiosError(error)

@@ -34,7 +34,7 @@ class PosLogoutController extends Controller
             ])->save();
         }
 
-        Auth::logout();
+        Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

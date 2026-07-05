@@ -5,18 +5,27 @@ namespace App\Http\Controllers\Pos;
 use App\Models\Refund;
 use App\Models\Sale;
 use App\Models\User;
+use App\Services\Settings\AppSettingsService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileQueryController
 {
+    public function __construct(
+        private readonly AppSettingsService $settingsService
+    ) {}
+
     public function fetch(?int $userId = null): array
     {
-        $user = $userId ? User::find($userId) : auth()->user();
-        $user ??= User::query()->where('role', 'CASHIER')->orderBy('id')->first();
+        $user = $userId ? User::find($userId) : Auth::user();
+
+        if (! $user) {
+            return $this->emptyProfile();
+        }
 
         $today = Carbon::now()->startOfDay();
         $salesQuery = Sale::query()
-            ->when($user?->id, fn($q) => $q->where('cashier_id', $user->id))
+            ->when($user?->id, fn ($q) => $q->where('cashier_id', $user->id))
             ->whereDate('occurred_at', $today)
             ->where('status', 'PAID');
 
@@ -40,7 +49,7 @@ class ProfileQueryController
 
         $durationText = '—';
         if ($loginAt && $loginAt->isSameDay($today)) {
-            $isActiveSession = !$logoutAt || $logoutAt->lessThan($loginAt);
+            $isActiveSession = ! $logoutAt || $logoutAt->lessThan($loginAt);
             if ($isActiveSession) {
                 $workSeconds += $loginAt->diffInSeconds(Carbon::now());
             }
@@ -52,7 +61,7 @@ class ProfileQueryController
             $durationText = sprintf('%dh %02dm', $hours, $minutes);
         }
 
-        $target = 1000000;
+        $target = $this->settingsService->getCashierTarget();
         $progress = $target > 0 ? round(($totalToday / $target) * 100) : 0;
 
         $role = match ($user?->role) {
@@ -74,6 +83,24 @@ class ProfileQueryController
             'shiftDuration' => $durationText,
             'target' => $target,
             'progressPercent' => $progress,
+        ];
+    }
+
+    private function emptyProfile(): array
+    {
+        return [
+            'id' => null,
+            'displayName' => 'Guest',
+            'employeeId' => null,
+            'role' => 'GUEST',
+            'isActive' => false,
+            'totalToday' => 0,
+            'transactionsToday' => 0,
+            'shiftStart' => null,
+            'shiftEnd' => null,
+            'shiftDuration' => '—',
+            'target' => 0,
+            'progressPercent' => 0,
         ];
     }
 }

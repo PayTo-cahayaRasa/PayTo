@@ -2,7 +2,7 @@ import './bootstrap';
 import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { initializePwa } from './pwa/registerPwa';
+import { cleanupLegacyPwa } from './legacyPwaCleanup';
 
 const appName = import.meta.env.VITE_APP_NAME || 'PayTo';
 
@@ -18,4 +18,4 @@ createInertiaApp({
     },
 });
 
-initializePwa();
+void cleanupLegacyPwa().catch(() => undefined);

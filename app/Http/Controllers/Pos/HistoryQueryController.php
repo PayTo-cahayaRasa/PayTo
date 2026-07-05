@@ -19,7 +19,7 @@ class HistoryQueryController
         return $this->buildQuery($filters)
             ->limit($limit)
             ->get()
-            ->map(fn(Sale $sale) => $this->mapSale($sale))
+            ->map(fn (Sale $sale) => $this->mapSale($sale))
             ->all();
     }
 
@@ -33,7 +33,7 @@ class HistoryQueryController
             ->paginate($perPage, ['*'], 'page', $page);
 
         $data = $paginator->getCollection()
-            ->map(fn(Sale $sale) => $this->mapSale($sale))
+            ->map(fn (Sale $sale) => $this->mapSale($sale))
             ->values()
             ->all();
 
@@ -57,18 +57,18 @@ class HistoryQueryController
             ->with(['items', 'payments', 'refunds.items'])
             ->orderByDesc('occurred_at');
 
-        if (!empty($filters['userId'])) {
+        if (! empty($filters['userId'])) {
             $query->where('cashier_id', (int) $filters['userId']);
         }
 
-        if (!empty($filters['startDate']) && !empty($filters['endDate'])) {
+        if (! empty($filters['startDate']) && ! empty($filters['endDate'])) {
             $start = Carbon::parse((string) $filters['startDate'])->startOfDay();
             $end = Carbon::parse((string) $filters['endDate'])->endOfDay();
             $query->whereBetween('occurred_at', [$start, $end]);
-        } elseif (!empty($filters['startDate'])) {
+        } elseif (! empty($filters['startDate'])) {
             $start = Carbon::parse((string) $filters['startDate'])->startOfDay();
             $query->where('occurred_at', '>=', $start);
-        } elseif (!empty($filters['endDate'])) {
+        } elseif (! empty($filters['endDate'])) {
             $end = Carbon::parse((string) $filters['endDate'])->endOfDay();
             $query->where('occurred_at', '<=', $end);
         }
@@ -82,10 +82,10 @@ class HistoryQueryController
     protected function mapSale(Sale $sale): array
     {
         $payment = $sale->payments->first();
-        $refundItems = $sale->refunds->flatMap(fn($refund) => $refund->items);
+        $refundItems = $sale->refunds->flatMap(fn ($refund) => $refund->items);
         $refundedQtyMap = $refundItems
             ->groupBy('sale_item_id')
-            ->map(fn($items) => (float) $items->sum('qty'))
+            ->map(fn ($items) => (float) $items->sum('qty'))
             ->all();
         $refundedTotal = (float) $sale->refunds->sum('total_amount');
         $pendingRefundApprovals = Approval::query()
@@ -93,7 +93,7 @@ class HistoryQueryController
             ->where('action', 'REFUND')
             ->where('status', 'PENDING')
             ->get();
-        $pendingRefundTotal = (float) $pendingRefundApprovals->sum(fn(Approval $approval) => (float) data_get($approval->payload_json, 'total', 0));
+        $pendingRefundTotal = (float) $pendingRefundApprovals->sum(fn (Approval $approval) => (float) data_get($approval->payload_json, 'total', 0));
         $hasPendingRefundApproval = $pendingRefundApprovals->isNotEmpty();
         $windowDays = $this->refundWindowDays();
         $occurredAt = $sale->occurred_at ?? $sale->created_at;
@@ -106,9 +106,9 @@ class HistoryQueryController
             && $refundDeadline
             && now()->lessThanOrEqualTo($refundDeadline)
             && $refundableRemaining > 0
-            && !$hasPendingRefundApproval;
+            && ! $hasPendingRefundApproval;
 
-        $itemsDetail = $sale->items->map(fn($it) => [
+        $itemsDetail = $sale->items->map(fn ($it) => [
             'id' => (string) $it->id,
             'name' => $it->product_name_snapshot,
             'qty' => (float) $it->qty,
@@ -124,7 +124,7 @@ class HistoryQueryController
         return [
             'id' => $sale->local_txn_uuid,
             'saleId' => $sale->id,
-            'invoiceNo' => $sale->server_invoice_no ? $sale->server_invoice_no : '#' . $sale->id,
+            'invoiceNo' => $sale->server_invoice_no ? $sale->server_invoice_no : '#'.$sale->id,
             'time' => $time,
             'items' => $sale->items->count(),
             'totalBeforeDiscount' => (float) $sale->subtotal,
@@ -134,7 +134,6 @@ class HistoryQueryController
             'total' => (float) $sale->grand_total,
             'paymentMethod' => $payment?->method ?? 'CASH',
             'status' => $sale->status,
-            'syncStatus' => $sale->synced_at ? 'SYNCED' : 'PENDING',
             'refundedTotal' => $refundedTotal,
             'refundableRemaining' => $refundableRemaining,
             'pendingRefundTotal' => $pendingRefundTotal,

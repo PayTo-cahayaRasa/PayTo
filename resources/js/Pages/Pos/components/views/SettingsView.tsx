@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Printer, RefreshCw } from 'lucide-react';
+import { Printer } from 'lucide-react';
 
 export default function SettingsView() {
     const [printerName, setPrinterName] = useState('');
     const [printerStatus, setPrinterStatus] = useState<'connected' | 'not_connected'>('not_connected');
     const [isTesting, setIsTesting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [isRefreshing, setIsRefreshing] = useState(false);
 
     useEffect(() => {
         let mounted = true;
@@ -57,17 +56,6 @@ export default function SettingsView() {
         }
     };
 
-    const handleRefresh = async () => {
-        setIsRefreshing(true);
-        try {
-            await axios.post('/api/pos/settings/refresh');
-        } catch (e) {
-            // silent
-        } finally {
-            setIsRefreshing(false);
-        }
-    };
-
     return (
         <div className="flex-1 overflow-y-auto pr-2 pb-4 -mr-2 custom-scrollbar-light animate-in slide-in-from-bottom-4 duration-300">
             <div className="space-y-6">
@@ -113,30 +101,6 @@ export default function SettingsView() {
                                     {isSaving ? 'Menyimpan...' : 'Simpan'}
                                 </button>
                             </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section>
-                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 ml-2">Sinkronisasi</h3>
-                    <div className="bg-white/40 backdrop-blur-md border border-white/60 rounded-4xl overflow-hidden shadow-sm">
-                        <div className="p-4 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
-                                    <RefreshCw size={20} />
-                                </div>
-                                <div>
-                                    <div className="font-bold text-slate-800">Sinkronisasi Otomatis</div>
-                                    <div className="text-xs text-slate-500">Data kasir akan diperbarui saat terkoneksi.</div>
-                                </div>
-                            </div>
-                            <button
-                                onClick={handleRefresh}
-                                disabled={isRefreshing}
-                                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg shadow-lg shadow-indigo-200 hover:bg-indigo-700 disabled:opacity-50"
-                            >
-                                <RefreshCw size={14} /> {isRefreshing ? 'Memuat...' : 'Refresh'}
-                            </button>
                         </div>
                     </div>
                 </section>

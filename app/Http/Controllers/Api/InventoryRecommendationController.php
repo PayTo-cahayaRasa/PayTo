@@ -25,13 +25,16 @@ class InventoryRecommendationController extends Controller
             ->get()
             ->keyBy('product_id');
 
-        $recommendationMeta = InventoryRecommendation::query()
-            ->get()
-            ->keyBy('product_id');
-
         $products = Product::query()
             ->with('stockItem')
             ->get();
+
+        $productIds = $products->pluck('id');
+
+        $recommendationMeta = InventoryRecommendation::query()
+            ->whereIn('product_id', $productIds)
+            ->get()
+            ->keyBy('product_id');
 
         $items = $products->map(function (Product $product) use ($salesByProduct, $recommendationMeta) {
             $sales = $salesByProduct->get($product->id);

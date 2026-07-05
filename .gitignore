@@ -24,4 +24,7 @@ Homestead.yaml
 Thumbs.db
 .vscode
 opencode.json
-/docs/
+
+task.md
+SECURITY_REVIEW.md
+BUG_REPORT.md

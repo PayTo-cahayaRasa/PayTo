@@ -18,6 +18,11 @@ class AdminDashboardApiTest extends TestCase
 
     public function test_admin_dashboard_returns_metrics(): void
     {
+        $supervisor = User::factory()->create([
+            'role' => 'SUPERVISOR',
+            'is_active' => true,
+        ]);
+
         $cashier = new User;
         $cashier->name = 'Kasir Test';
         $cashier->username = 'kasir.test';
@@ -74,7 +79,7 @@ class AdminDashboardApiTest extends TestCase
             'status' => 'RECORDED',
         ]);
 
-        $response = $this->getJson('/api/admin/dashboard');
+        $response = $this->actingAs($supervisor)->getJson('/api/admin/dashboard');
 
         $response
             ->assertOk()

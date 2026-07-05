@@ -20,6 +20,16 @@ class ApprovalApproveRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [];
+        return [
+            'confirmed' => ['required', 'boolean', 'accepted'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'confirmed.required' => 'Konfirmasi persetujuan wajib diisi.',
+            'confirmed.accepted' => 'Anda harus mengkonfirmasi persetujuan.',
+        ];
     }
 }

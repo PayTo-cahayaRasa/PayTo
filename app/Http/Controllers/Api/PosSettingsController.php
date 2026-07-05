@@ -21,9 +21,6 @@ class PosSettingsController extends Controller
                     'name' => $printerName,
                     'status' => $printerName ? 'connected' : 'not_connected',
                 ],
-                'sync' => [
-                    'mode' => 'auto',
-                ],
             ],
         ]);
     }
@@ -62,13 +59,6 @@ class PosSettingsController extends Controller
 
         return response()->json([
             'message' => 'Test print berhasil dikirim.',
-        ]);
-    }
-
-    public function refreshSync(): JsonResponse
-    {
-        return response()->json([
-            'message' => 'Data berhasil diperbarui.',
         ]);
     }
 }

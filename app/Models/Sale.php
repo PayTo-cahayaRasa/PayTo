@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SaleSource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,6 +14,9 @@ class Sale extends Model
         'server_invoice_no',
         'local_txn_uuid',
         'status',
+        'source',
+        'customer_name',
+        'customer_phone',
         'cashier_id',
         'subtotal',
         'discount_total',
@@ -21,12 +25,12 @@ class Sale extends Model
         'paid_total',
         'change_total',
         'occurred_at',
-        'synced_at',
     ];
 
     protected function casts(): array
     {
         return [
+            'source' => SaleSource::class,
             'subtotal' => 'decimal:2',
             'discount_total' => 'decimal:2',
             'tax_total' => 'decimal:2',
@@ -34,7 +38,6 @@ class Sale extends Model
             'paid_total' => 'decimal:2',
             'change_total' => 'decimal:2',
             'occurred_at' => 'datetime',
-            'synced_at' => 'datetime',
         ];
     }
 
@@ -46,6 +49,11 @@ class Sale extends Model
     public function payments(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Payment::class, 'sale_id');
+    }
+
+    public function payment(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Payment::class, 'sale_id')->latestOfMany();
     }
 
     public function refunds(): \Illuminate\Database\Eloquent\Relations\HasMany

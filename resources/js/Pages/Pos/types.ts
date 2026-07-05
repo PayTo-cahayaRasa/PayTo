@@ -18,8 +18,6 @@ export type CartItem = Product & {
 
 export type PaymentMethod = 'CASH' | 'EWALLET';
 
-export type SyncStatus = 'synced' | 'pending' | 'syncing';
-
 export type Category = {
     id: string;
     label: string;
@@ -49,7 +47,6 @@ export type TransactionHistory = {
     totalAfterDiscount: number;
     taxTotal: number;
     total: number;
-    syncStatus: 'SYNCED' | 'PENDING';
     items: number;
     refundedTotal: number;
     refundableRemaining: number;

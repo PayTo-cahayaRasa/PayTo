@@ -55,6 +55,7 @@ class User extends Authenticatable
             'last_logout_at' => 'datetime',
             'work_date' => 'date',
             'work_seconds' => 'integer',
+            'is_active' => 'boolean',
             'password' => 'hashed',
             'password_hash' => 'hashed',
             'pin_hash' => 'hashed',
@@ -84,6 +85,7 @@ class User extends Authenticatable
      */
     public static function fetchForPin(string $plainPin, ?string $role = null): ?self
     {
+        $matchedUser = null;
         $candidates = static::query()
             ->when($role, fn (Builder $query) => $query->where('role', $role))
             ->whereNotNull('pin_hash')
@@ -91,11 +93,11 @@ class User extends Authenticatable
             ->cursor();
 
         foreach ($candidates as $user) {
-            if (Hash::check($plainPin, $user->pin_hash)) {
-                return $user;
+            if (Hash::check($plainPin, $user->pin_hash) && $matchedUser === null) {
+                $matchedUser = $user;
             }
         }
 
-        return null;
+        return $matchedUser;
     }
 }

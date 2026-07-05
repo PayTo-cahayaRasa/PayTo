@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\SecurePin;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 class StaffStoreRequest extends FormRequest
 {
@@ -26,8 +28,8 @@ class StaffStoreRequest extends FormRequest
             'username' => ['required', 'string', 'max:255', 'unique:users,username'],
             'role' => ['required', 'string', 'in:CASHIER,SUPERVISOR'],
             'is_active' => ['nullable', 'boolean'],
-            'password' => ['required_without:pin', 'nullable', 'string', 'min:6', 'max:255'],
-            'pin' => ['required_without:password', 'nullable', 'string', 'digits:6'],
+            'password' => ['required_without:pin', 'nullable', 'string', 'max:255', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
+            'pin' => ['required_without:password', 'nullable', 'string', 'digits:6', new SecurePin],
         ];
     }
 

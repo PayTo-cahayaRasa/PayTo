@@ -61,7 +61,7 @@ export default function HeaderBar({
                         {activeView === 'history' && "Pantau semua aktivitas penjualan hari ini"}
                         {activeView === 'favorites' && "Akses cepat ke menu terlaris"}
                         {activeView === 'profile' && "Informasi shift dan kinerja Anda"}
-                        {activeView === 'settings' && "Kelola perangkat dan data lokal"}
+                        {activeView === 'settings' && "Kelola perangkat kasir"}
                     </p>
                 </div>
             </div>

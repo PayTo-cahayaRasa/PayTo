@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StaffDestroyRequest;
 use App\Http\Requests\StaffResetPinRequest;
 use App\Http\Requests\StaffStoreRequest;
 use App\Http\Requests\StaffUpdateRequest;
@@ -103,7 +104,7 @@ class StaffManagementController extends Controller
         ]);
     }
 
-    public function destroy(User $user): JsonResponse
+    public function destroy(StaffDestroyRequest $request, User $user): JsonResponse
     {
         $user->delete();
 

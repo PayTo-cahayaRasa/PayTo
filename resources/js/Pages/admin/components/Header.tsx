@@ -38,7 +38,7 @@ const headerTitleMap: Record<AdminTab, string> = {
 };
 
 const headerSubtitleMap: Record<AdminTab, string> = {
-    DASHBOARD: 'Pantau performa outlet secara real-time.',
+    DASHBOARD: 'Pantau performa toko secara real-time.',
     INVENTORY: 'Rekomendasi restock otomatis berdasarkan rata-rata penjualan 7 hari.',
     RECEIPT: 'Atur tampilan struk yang dicetak di kasir.',
     APPROVALS: 'Audit log approval untuk aksi sensitif.',
