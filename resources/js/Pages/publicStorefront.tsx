@@ -59,9 +59,7 @@ type PublicHeaderProps = {
 };
 
 type HeroSectionProps = {
-    badgeLabel: string;
     heading: string;
-    description: string;
 };
 
 type CatalogSidebarProps = {
@@ -111,12 +109,12 @@ function SunBadgeIcon() {
 
 function BrandMark() {
     return (
-        <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#fff7ed] sm:h-11 sm:w-11">
-                <SunBadgeIcon />
-            </div>
-            <span className="truncate font-display text-[1.45rem] font-semibold leading-none tracking-[-0.04em] text-[#3a2117] sm:text-[2rem]">
-                PayTo
+        <div className="flex min-w-0 items-center gap-2.5">
+            <span className="truncate font-display text-[1.5rem] font-bold leading-none tracking-[-0.04em] text-[#3a2117] sm:text-[2.1rem]">
+                Cahaya Rasa
+            </span>
+            <span className="hidden rounded-full border border-[#e8d7c3] bg-[#fff7ea] px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-[#a37244] sm:inline-block">
+                Oleh-Oleh Malang
             </span>
         </div>
     );
@@ -190,14 +188,34 @@ function HeroClouds() {
 function HeroDecorBackdrop() {
     return (
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[2.5rem]">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_14%,rgba(255,255,255,0.92),transparent_24%),linear-gradient(180deg,#fffaf3_0%,#fdf3e5_65%,#f7e7cc_100%)]" />
-            <div className="absolute inset-x-0 bottom-[-3.5rem] h-[24rem] opacity-90">
+            {/* Warm Gradient Base */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.95),transparent_30%),radial-gradient(circle_at_80%_30%,rgba(254,238,200,0.6),transparent_45%),linear-gradient(180deg,#fffaf3_0%,#fdf3e5_65%,#f7e7cc_100%)]" />
+
+            {/* Sunburst Rays Effect */}
+            <div className="absolute -right-20 -top-20 h-[35rem] w-[35rem] rounded-full bg-[radial-gradient(circle,rgba(245,180,60,0.15)_0%,rgba(245,180,60,0.05)_45%,transparent_70%)] blur-xl" />
+            <div className="absolute -left-20 top-10 h-[25rem] w-[25rem] rounded-full bg-[radial-gradient(circle,rgba(245,180,60,0.12)_0%,transparent_65%)] blur-xl" />
+
+            {/* Floating Background Chips & Leaves */}
+            <ChipOrnament className="absolute left-[8%] top-[12%] h-10 w-10 rotate-12 opacity-40 sm:h-14 sm:w-14" />
+            <ChipOrnament className="absolute left-[35%] top-[8%] h-8 w-8 -rotate-45 opacity-30 sm:h-10 sm:w-10" />
+            <ChipOrnament className="absolute left-[22%] bottom-[25%] h-9 w-9 rotate-45 opacity-35 sm:h-12 sm:w-12" />
+            <ChipOrnament className="absolute right-[12%] top-[15%] h-11 w-11 -rotate-12 opacity-35 sm:h-16 sm:w-16" />
+            <ChipOrnament className="absolute right-[28%] bottom-[18%] h-8 w-8 rotate-30 opacity-30 sm:h-10 sm:w-10" />
+
+            <Sparkle className="absolute left-[15%] top-[25%] h-6 w-6 opacity-50" />
+            <Sparkle className="absolute left-[45%] top-[18%] h-5 w-5 opacity-40" />
+            <Sparkle className="absolute right-[20%] bottom-[30%] h-7 w-7 opacity-50" />
+
+            {/* Landscape Silhouette */}
+            <div className="absolute inset-x-0 bottom-[-3.5rem] h-[20rem] opacity-90">
                 <HeroLandscape />
             </div>
-            <div className="absolute inset-y-0 left-0 w-32 bg-[linear-gradient(90deg,#fef8ef_0%,rgba(254,248,239,0.78)_36%,rgba(254,248,239,0)_100%)] sm:w-40 lg:w-52" />
+
+            {/* Side & Top/Bottom Fades */}
+            <div className="absolute inset-y-0 left-0 w-32 bg-[linear-gradient(90deg,#fef8ef_0%,rgba(254,248,239,0.78)_36%,rgba(244,248,239,0)_100%)] sm:w-40 lg:w-52" />
             <div className="absolute inset-y-0 right-0 w-32 bg-[linear-gradient(270deg,#f8ebd5_0%,rgba(248,235,213,0.78)_36%,rgba(248,235,213,0)_100%)] sm:w-40 lg:w-52" />
             <div className="absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(255,250,243,0.96)_0%,rgba(255,250,243,0.55)_55%,rgba(255,250,243,0)_100%)]" />
-            <div className="absolute inset-x-0 bottom-0 h-44 bg-[linear-gradient(180deg,rgba(247,231,204,0)_0%,rgba(250,239,221,0.68)_45%,#fbf3e7_78%,#fdf6ec_100%)]" />
+            <div className="absolute inset-x-0 bottom-0 h-32 bg-[linear-gradient(180deg,rgba(247,231,204,0)_0%,rgba(250,239,221,0.68)_45%,#fbf3e7_78%,#fdf6ec_100%)]" />
             <div className="absolute inset-x-[10%] bottom-[5.5rem] h-24 rounded-[50%] bg-[radial-gradient(circle,rgba(229,198,145,0.18)_0%,rgba(229,198,145,0.08)_42%,transparent_76%)] blur-2xl" />
         </div>
     );
@@ -230,32 +248,59 @@ function LeafBranch({ className, mirrored = false }: { className: string; mirror
     );
 }
 
+function ChipOrnament({ className }: { className: string }) {
+    return (
+        <svg aria-hidden="true" viewBox="0 0 40 40" className={className} fill="none">
+            <path
+                d="M20 4C11 4 5 10 5 19c0 10 7 17 16 17 8 0 14-6 14-14 0-10-6-18-15-18Z"
+                fill="#f5b842"
+                stroke="#d48c1b"
+                strokeWidth="1.5"
+            />
+            <path d="M12 14c3-2 8-3 12-1M10 22c4-1 10-1 15 2M16 28c3 1 7 1 10-1" stroke="#e09b26" strokeWidth="1.2" strokeLinecap="round" opacity="0.7" />
+            <circle cx="15" cy="12" r="1" fill="#b86e09" opacity="0.5" />
+            <circle cx="24" cy="18" r="1.2" fill="#b86e09" opacity="0.5" />
+            <circle cx="18" cy="25" r="1" fill="#b86e09" opacity="0.5" />
+        </svg>
+    );
+}
+
 function HeroBadgeArtwork() {
     return (
-        <div className="relative mx-auto h-[18.5rem] w-[18.5rem] sm:h-[24rem] sm:w-[24rem] lg:h-[31rem] lg:w-[31rem]">
-            <div className="absolute inset-2 rounded-full bg-[radial-gradient(circle,#fffaf1_0%,rgba(253,246,236,0.75)_48%,rgba(245,208,146,0.5)_82%,transparent_100%)]" />
-            <div className="absolute inset-[1rem] rounded-full border border-dashed border-[#edbe77] sm:inset-[1.25rem] lg:inset-[1.55rem]" />
-            <div className="absolute left-[0.65rem] top-[5rem] sm:left-[1.1rem] sm:top-[6.8rem] lg:left-[1.8rem] lg:top-[8.6rem]">
-                <LeafBranch className="h-28 w-14 sm:h-36 sm:w-16 lg:h-44 lg:w-20" />
+        <div className="relative mx-auto h-[16.5rem] w-[16.5rem] sm:h-[20rem] sm:w-[20rem] lg:h-[26rem] lg:w-[26rem]">
+            {/* Radial Golden Sunburst Glow */}
+            <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,#fff5d6_0%,rgba(253,235,180,0.85)_40%,rgba(245,190,90,0.35)_70%,transparent_100%)] blur-sm" />
+
+            {/* Concentric Decorative Rings */}
+            <div className="absolute inset-[0.5rem] rounded-full border border-dashed border-[#e5a942]/60 sm:inset-[0.75rem] lg:inset-[1rem]" />
+            <div className="absolute inset-[1.2rem] rounded-full border border-dotted border-[#d48c1b]/40 sm:inset-[1.6rem] lg:inset-[2rem]" />
+
+            {/* Leaf Branches (Left & Right) */}
+            <div className="absolute -left-[0.5rem] top-[4rem] sm:left-[0.2rem] sm:top-[5.5rem] lg:left-[0.5rem] lg:top-[7rem]">
+                <LeafBranch className="h-28 w-14 sm:h-36 sm:w-18 lg:h-48 lg:w-24" />
             </div>
-            <div className="absolute right-[0.75rem] top-[2.6rem] sm:right-[1.2rem] sm:top-[3.7rem] lg:right-[1.8rem] lg:top-[4.5rem]">
-                <LeafBranch className="h-32 w-16 sm:h-40 sm:w-20 lg:h-52 lg:w-24" mirrored />
+            <div className="absolute -right-[0.5rem] top-[2rem] sm:right-[0.2rem] sm:top-[3rem] lg:right-[0.5rem] lg:top-[4rem]">
+                <LeafBranch className="h-32 w-16 sm:h-40 sm:w-20 lg:h-52 lg:w-26" mirrored />
             </div>
-            <Sparkle className="absolute left-[1.8rem] top-[4.2rem] h-7 w-7 sm:left-[2.2rem] sm:top-[5.4rem] sm:h-8 sm:w-8 lg:left-[3.1rem] lg:top-[6.9rem] lg:h-10 lg:w-10" />
-            <Sparkle className="absolute right-[3rem] top-[5.2rem] h-6 w-6 sm:right-[3.8rem] sm:top-[6.7rem] sm:h-7 sm:w-7 lg:right-[4.9rem] lg:top-[8.7rem] lg:h-8 lg:w-8" />
-            <Sparkle className="absolute left-[5.9rem] bottom-[2.3rem] h-5 w-5 sm:left-[7.4rem] sm:bottom-[3rem] sm:h-6 sm:w-6 lg:left-[9.7rem] lg:bottom-[4.7rem] lg:h-7 lg:w-7" />
-            <div className="absolute left-1/2 top-[3.4rem] h-5 w-18 -translate-x-1/2 rounded-t-full border-t-[2px] border-dotted border-[#6a3a1c] opacity-70 sm:top-[4.2rem] sm:h-6 sm:w-24 lg:top-[5.45rem] lg:h-7 lg:w-32 lg:border-t-[3px]" />
-            <div className="absolute left-1/2 top-[3.15rem] flex -translate-x-1/2 gap-1 sm:top-[3.85rem] sm:gap-1.5 lg:top-[5rem]">
-                {Array.from({ length: 10 }).map((_, index) => (
-                    <span key={index} className="h-1 w-1 rounded-full bg-[#fff6dd] shadow-[0_0_8px_rgba(255,246,221,0.9)] sm:h-1.5 sm:w-1.5" />
-                ))}
-            </div>
-            <div className="absolute inset-[2.6rem] flex items-center justify-center rounded-full border-[4px] border-[#3a2117] bg-[radial-gradient(circle_at_35%_35%,#fee78d_0%,#f9d650_35%,#f4c42e_100%)] shadow-[0_28px_60px_-24px_rgba(58,33,23,0.48)] sm:inset-[3.2rem] lg:inset-[4.25rem] lg:border-[6px]">
-                <div className="absolute inset-[0.55rem] rounded-full border-[1.5px] border-[#3a2117] sm:inset-[0.75rem] lg:inset-[0.9rem] lg:border-[2px]" />
-                <div className="text-center text-[#3a2117]">
-                    <p className="font-display text-[4.2rem] font-bold leading-none tracking-[-0.08em] sm:text-[5.7rem] lg:text-[7.75rem]">CR</p>
-                    <p className="mt-1 font-display text-[1.2rem] font-semibold italic tracking-[-0.05em] sm:text-[1.55rem] lg:mt-2 lg:text-[2.2rem]">Cahaya Rasa</p>
-                </div>
+
+            {/* Floating Keripik / Snack Ornaments */}
+            <ChipOrnament className="absolute -left-[0.8rem] top-[1.5rem] h-8 w-8 -rotate-12 sm:left-[0.5rem] sm:top-[2rem] sm:h-10 sm:w-10 lg:left-[1rem] lg:top-[2.5rem] lg:h-12 lg:w-12" />
+            <ChipOrnament className="absolute -right-[0.6rem] bottom-[3rem] h-7 w-7 rotate-45 sm:right-[0.8rem] sm:bottom-[4rem] sm:h-9 sm:w-9 lg:right-[1.5rem] lg:bottom-[5rem] lg:h-11 lg:w-11" />
+            <ChipOrnament className="absolute left-[2rem] bottom-[1rem] h-6 w-6 rotate-12 sm:left-[3rem] sm:bottom-[1.5rem] sm:h-8 sm:w-8 lg:left-[4rem] lg:bottom-[2rem] lg:h-10 lg:w-10" />
+
+            {/* Sparkles */}
+            <Sparkle className="absolute left-[1.8rem] top-[4.2rem] h-6 w-6 sm:left-[2.2rem] sm:top-[5.4rem] sm:h-7 sm:w-7 lg:left-[3.1rem] lg:top-[6.9rem] lg:h-9 lg:w-9" />
+            <Sparkle className="absolute right-[3rem] top-[5.2rem] h-5 w-5 sm:right-[3.8rem] sm:top-[6.7rem] sm:h-6 sm:w-6 lg:right-[4.9rem] lg:top-[8.7rem] lg:h-7 lg:w-7" />
+            <Sparkle className="absolute left-[5.9rem] bottom-[2.3rem] h-4 w-4 sm:left-[7.4rem] sm:bottom-[3rem] sm:h-5 sm:w-5 lg:left-[9.7rem] lg:bottom-[4.7rem] lg:h-6 lg:w-6" />
+
+            {/* Central Badge Container with Official Logo Image */}
+            <div className="absolute inset-[2.2rem] flex items-center justify-center rounded-full border-[4px] border-[#3a2117] bg-[radial-gradient(circle_at_35%_35%,#fff3b3_0%,#fcd84b_45%,#f4b81a_100%)] p-3 shadow-[0_28px_60px_-24px_rgba(58,33,23,0.48)] sm:inset-[2.8rem] sm:p-4 lg:inset-[3.6rem] lg:border-[6px] lg:p-6">
+                <div className="absolute inset-[0.4rem] rounded-full border-[1.5px] border-[#3a2117]/80 sm:inset-[0.6rem] lg:inset-[0.75rem] lg:border-[2px]" />
+                <img
+                    src="/images/logo-removed.png"
+                    alt="Cahaya Rasa Logo"
+                    className="relative z-10 h-full w-full object-contain drop-shadow-[0_8px_16px_rgba(58,33,23,0.25)] transition-transform duration-300 hover:scale-105"
+                />
             </div>
         </div>
     );
@@ -346,16 +391,16 @@ export function ProductVisual({ product, index }: { product: PublicCatalogProduc
                 : 'chips';
 
     return (
-        <div className="relative h-[14.7rem] overflow-hidden rounded-[1.6rem] bg-[radial-gradient(circle_at_top_left,#fff9f1_0%,#f7ead4_55%,#f2dfbd_100%)]">
+        <div className="relative h-[12.5rem] overflow-hidden rounded-[1.4rem] bg-[radial-gradient(circle_at_top_left,#fff9f1_0%,#f7ead4_55%,#f2dfbd_100%)]">
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.42),transparent_46%)]" />
-            <div className="absolute left-1/2 top-4 h-[11.1rem] w-[7.7rem] -translate-x-1/2 rounded-[1.55rem_1.55rem_1rem_1rem] bg-[linear-gradient(180deg,#d89b4f_0%,#c17c36_45%,#d39549_100%)] shadow-[0_22px_34px_-18px_rgba(58,33,23,0.45)]" />
-            <div className="absolute left-1/2 top-8 h-[8.4rem] w-[6.2rem] -translate-x-1/2 rounded-[1.25rem_1.25rem_0.75rem_0.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.26),rgba(255,255,255,0.02))] border border-white/30" />
-            <div className="absolute left-1/2 top-[4.35rem] flex h-[3.2rem] w-[3.55rem] -translate-x-1/2 flex-col items-center justify-center rounded-[0.9rem] bg-[#f7d8a6] px-1.5 text-center shadow-[0_10px_18px_-12px_rgba(58,33,23,0.45)]">
-                <span className="font-display text-[0.72rem] font-semibold leading-none tracking-[-0.03em] text-[#7f4b28]">PayTo</span>
-                <span className="mt-0.5 text-[0.42rem] font-semibold uppercase tracking-[0.18em] text-[#9a6a37]">Daily</span>
+            <div className="absolute left-1/2 top-3 h-[9.5rem] w-[6.5rem] -translate-x-1/2 rounded-[1.3rem_1.3rem_0.85rem_0.85rem] bg-[linear-gradient(180deg,#d89b4f_0%,#c17c36_45%,#d39549_100%)] shadow-[0_18px_28px_-15px_rgba(58,33,23,0.45)]" />
+            <div className="absolute left-1/2 top-6 h-[7.2rem] w-[5.2rem] -translate-x-1/2 rounded-[1.05rem_1.05rem_0.65rem_0.65rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.26),rgba(255,255,255,0.02))] border border-white/30" />
+            <div className="absolute left-1/2 top-[3.7rem] flex h-[2.7rem] w-[3rem] -translate-x-1/2 flex-col items-center justify-center rounded-[0.75rem] bg-[#f7d8a6] px-1.5 text-center shadow-[0_8px_15px_-10px_rgba(58,33,23,0.45)]">
+                <span className="font-display text-[0.62rem] font-semibold leading-none tracking-[-0.03em] text-[#7f4b28]">PayTo</span>
+                <span className="mt-0.5 text-[0.36rem] font-semibold uppercase tracking-[0.18em] text-[#9a6a37]">Daily</span>
             </div>
             <ProductPile type={visualType} />
-            <div className="absolute inset-x-3 bottom-2 h-10 rounded-[50%] bg-[radial-gradient(circle,rgba(226,171,92,0.55)_0%,transparent_72%)] blur-[2px]" />
+            <div className="absolute inset-x-3 bottom-2 h-8 rounded-[50%] bg-[radial-gradient(circle,rgba(226,171,92,0.55)_0%,transparent_72%)] blur-[2px]" />
         </div>
     );
 }
@@ -519,9 +564,20 @@ export function PublicHeader({ cartItems, onIncreaseCartItem, onDecreaseCartItem
         previousCartItemsCountRef.current = totalCartItems;
     }, [totalCartItems]);
 
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 20);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     return (
-        <header className="px-4 pt-5 sm:px-5 lg:px-8">
-            <nav className="mx-auto flex min-h-[4.25rem] max-w-[1848px] items-center justify-between gap-3 rounded-[2rem] border border-[#f1e6d7] bg-[#fffdf9] px-3 py-2 shadow-[0_24px_48px_-36px_rgba(58,33,23,0.25)] sm:h-[4.5rem] sm:px-7 sm:py-0 lg:px-8">
+        <header className="sticky top-0 z-50 px-4 pt-3 pb-2 sm:px-5 lg:px-8">
+            <nav className={`mx-auto flex min-h-[4.25rem] max-w-[1848px] items-center justify-between gap-3 rounded-[2rem] border border-[#f1e6d7] px-3 py-2 shadow-[0_24px_48px_-36px_rgba(58,33,23,0.25)] sm:h-[4.5rem] sm:px-7 sm:py-0 lg:px-8 transition-all duration-300 ${isScrolled ? 'bg-white/60 backdrop-blur-md shadow-md' : 'bg-[#fffdf9]'}`}>
                 <BrandMark />
 
                 <div className="flex shrink-0 items-center gap-2 sm:gap-3">
@@ -594,7 +650,7 @@ export function PublicHeader({ cartItems, onIncreaseCartItem, onDecreaseCartItem
                                     </>
                                 ) : (
                                     <p className="mt-4 text-sm leading-7 text-[#8d6b4e]">
-                                        Tambahkan produk terlebih dahulu untuk melanjutkan order PayTo.
+                                        Tambahkan produk terlebih dahulu untuk melanjutkan order Cahaya Rasa.
                                     </p>
                                 )}
                             </div>
@@ -612,51 +668,49 @@ export function PublicHeader({ cartItems, onIncreaseCartItem, onDecreaseCartItem
     );
 }
 
-export function HeroSection({ badgeLabel, heading, description }: HeroSectionProps) {
+export function HeroSection({ heading }: HeroSectionProps) {
     return (
         <section className="overflow-x-clip px-4 pb-3 pt-5 sm:px-5 lg:px-8">
-            <div className="relative mx-auto max-w-[1848px] overflow-hidden rounded-[2.5rem] px-5 pb-14 pt-8 shadow-[0_30px_65px_-46px_rgba(58,33,23,0.22)] sm:px-8 sm:pb-20 sm:pt-11 lg:overflow-visible lg:px-12 lg:pb-24">
+            <div className="relative mx-auto max-w-[1848px] overflow-hidden rounded-[2.5rem] px-5 pb-10 pt-6 shadow-[0_30px_65px_-46px_rgba(58,33,23,0.22)] sm:px-8 sm:pb-14 sm:pt-8 lg:overflow-visible lg:px-12 lg:pb-16">
                 <HeroDecorBackdrop />
                 <HeroClouds />
                 <div className="relative z-10 grid items-start gap-8 lg:grid-cols-[0.54fr_0.46fr]">
                     <div className="max-w-[33rem] pt-1 sm:pt-2">
-                        <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-[#eadfcf] bg-white px-4 py-2 text-[0.84rem] font-semibold text-[#8d6b4e] shadow-[0_16px_36px_-26px_rgba(58,33,23,0.22)] sm:text-sm">
-                            <MapPin size={15} strokeWidth={1.8} />
-                            {badgeLabel}
-                        </div>
-                        <h1 className="mt-6 whitespace-pre-line font-display text-[3.2rem] font-semibold leading-[0.88] tracking-[-0.06em] text-[#3a2117] sm:mt-7 sm:text-[4.1rem] lg:text-[5.25rem]">
+                        <h1 className="mt-4 whitespace-pre-line font-display text-[2.8rem] font-semibold leading-[0.88] tracking-[-0.06em] text-[#3a2117] sm:mt-5 sm:text-[3.6rem] lg:text-[4.5rem]">
                             {heading}
                         </h1>
-                        <p className="mt-5 max-w-[30rem] text-[1rem] leading-8 text-[#725442] sm:mt-6 sm:text-[1.12rem] sm:leading-9">{description}</p>
-                        <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row">
+                        <p className="mt-4 max-w-[30rem] text-[0.95rem] leading-7 text-[#725442] sm:mt-5 sm:text-[1.05rem] sm:leading-8">
+                            Nikmati kelezatan camilan khas Malang yang dibuat dengan resep rumahan dan bahan pilihan terbaik.
+                        </p>
+                        <div className="mt-6 flex flex-col gap-3 sm:mt-7 sm:flex-row">
                             <a
                                 href={storefrontShopHref}
-                                className="inline-flex min-h-[3.5rem] w-full items-center justify-center gap-2 rounded-full bg-[#f59a21] px-6 text-sm font-semibold text-white shadow-[0_22px_36px_-26px_rgba(245,154,33,0.65)] sm:w-auto"
+                                className="inline-flex min-h-[3.2rem] w-full items-center justify-center gap-2 rounded-full bg-[#f59a21] px-6 text-sm font-semibold text-white shadow-[0_22px_36px_-26px_rgba(245,154,33,0.65)] transition hover:-translate-y-0.5 hover:bg-[#e08913] sm:w-auto"
                             >
                                 <ShoppingCart size={16} strokeWidth={1.9} />
                                 Belanja Sekarang
                             </a>
                             <a
                                 href={storefrontShopHref}
-                                className="inline-flex min-h-[3.5rem] w-full items-center justify-center gap-2 rounded-full border border-[#e5d7c5] bg-white/80 px-6 text-sm font-semibold text-[#3a2117] sm:w-auto"
+                                className="inline-flex min-h-[3.2rem] w-full items-center justify-center gap-2 rounded-full border border-[#e5d7c5] bg-white/80 px-6 text-sm font-semibold text-[#3a2117] transition hover:-translate-y-0.5 hover:bg-white sm:w-auto"
                             >
                                 Lihat Produk
                                 <ChevronRight size={16} strokeWidth={1.9} />
                             </a>
                         </div>
-                        <div className="mt-9 grid gap-4 text-[#3a2117] sm:mt-10 sm:grid-cols-[1fr_auto_1fr_auto_1fr] sm:items-start">
+                        <div className="mt-7 grid gap-4 text-[#3a2117] sm:mt-8 sm:grid-cols-[1fr_auto_1fr_auto_1fr] sm:items-start">
                             <FeatureItem
                                 title="Bahan Pilihan"
                                 subtitle="Berkualitas"
                                 icon={<Medal size={18} strokeWidth={1.8} />}
                             />
-                            <div className="hidden h-12 w-px bg-[#eadfcf] sm:block" />
+                            <div className="hidden h-10 w-px bg-[#eadfcf] sm:block" />
                             <FeatureItem
                                 title="Tanpa Pengawet"
                                 subtitle="& Pewarna Buatan"
                                 icon={<Leaf size={18} strokeWidth={1.8} />}
                             />
-                            <div className="hidden h-12 w-px bg-[#eadfcf] sm:block" />
+                            <div className="hidden h-10 w-px bg-[#eadfcf] sm:block" />
                             <FeatureItem
                                 title="Dibuat Dengan Hati"
                                 subtitle="Rasa Rumahan"
@@ -730,51 +784,42 @@ export function ProductCard({ product, index, detailHref, onAddToCart }: Product
     }
 
     return (
-        <article className="overflow-hidden rounded-[1.45rem] border border-[#f0e4d4] bg-white shadow-[0_14px_30px_-24px_rgba(58,33,23,0.18)]">
-            <Link href={detailHref} className="block px-3 pt-3">
+        <article className="overflow-hidden rounded-[1.2rem] border border-[#f0e4d4] bg-white shadow-[0_14px_30px_-24px_rgba(58,33,23,0.18)]">
+            <Link href={detailHref} className="block px-2.5 pt-2.5">
                 <ProductVisual product={product} index={index} />
             </Link>
-            <div className="px-4 pb-4 pt-4">
-                <Link href={detailHref} className="font-display text-[1.35rem] font-semibold leading-[1.08] tracking-[-0.04em] text-[#3a2117] sm:text-[1.6rem]">
+            <div className="px-3 pb-3 pt-3">
+                <Link href={detailHref} className="font-display text-[1.15rem] font-semibold leading-[1.08] tracking-[-0.04em] text-[#3a2117] sm:text-[1.3rem]">
                     {product.name}
                 </Link>
-                <div className="mt-2 flex items-center gap-1.5 text-[0.9rem] text-[#746557]">
-                    <Star size={14} strokeWidth={1.9} className="fill-[#f59a21] text-[#f59a21]" />
+                <div className="mt-1.5 flex items-center gap-1.5 text-[0.85rem] text-[#746557]">
+                    <Star size={13} strokeWidth={1.9} className="fill-[#f59a21] text-[#f59a21]" />
                     <span className="font-semibold text-[#9a682e]">{review.rating}</span>
                     <span>({review.reviews})</span>
                 </div>
-                <p className="mt-3 text-[1.35rem] font-semibold tracking-[-0.04em] text-[#3a2117] sm:text-[1.6rem]">{formatRupiah(product.price)}</p>
-                <button
-                    type="button"
-                    onClick={handleAddToCart}
-                    className={`mt-3 inline-flex min-h-[2.8rem] w-full items-center justify-between rounded-[0.85rem] border px-4 text-sm font-semibold transition duration-300 ${
-                        isAddConfirmed
-                            ? 'border-[#f59a21] bg-[#f59a21] text-white shadow-[0_18px_30px_-22px_rgba(245,154,33,0.8)] scale-[1.02]'
-                            : 'border-[#eadfcf] bg-[#fff7ea] text-[#3a2117]'
-                    }`}
-                >
-                    <span className="flex items-center gap-2">
-                        <span
-                            className={`inline-flex h-5 w-5 items-center justify-center rounded-full transition ${
-                                isAddConfirmed ? 'bg-white/20 scale-110' : 'bg-[#f7e2bb]'
-                            }`}
-                        >
-                            {isAddConfirmed ? <Check size={13} strokeWidth={2.4} /> : <ShoppingCart size={13} strokeWidth={2} />}
-                        </span>
+                <p className="mt-2 text-[1.15rem] font-semibold tracking-[-0.04em] text-[#3a2117] sm:text-[1.3rem]">{formatRupiah(product.price)}</p>
+                <div className="mt-2.5 flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={handleAddToCart}
+                        className={`inline-flex min-h-[2.4rem] flex-1 items-center justify-center rounded-[0.75rem] border px-3 text-[0.8rem] font-semibold transition duration-300 ${
+                            isAddConfirmed
+                                ? 'border-[#f59a21] bg-[#f59a21] text-white shadow-[0_18px_30px_-22px_rgba(245,154,33,0.8)] scale-[1.02]'
+                                : 'border-[#eadfcf] bg-[#fff7ea] text-[#3a2117]'
+                        }`}
+                    >
                         {isAddConfirmed ? 'Berhasil Ditambahkan' : 'Tambah ke Keranjang'}
-                    </span>
-                    <span className={`transition ${isAddConfirmed ? 'translate-x-0 opacity-100' : 'translate-x-0 opacity-70'}`}>
-                        {isAddConfirmed ? <Check size={16} strokeWidth={2.2} /> : <ShoppingCart size={16} strokeWidth={1.9} />}
-                    </span>
-                </button>
-                <a
-                    href={getProductWhatsappUrl(product.name)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-2 inline-flex min-h-[2.8rem] w-full items-center justify-center rounded-[0.85rem] bg-[#3a2117] px-4 text-sm font-semibold text-white"
-                >
-                    Pesan via WhatsApp
-                </a>
+                    </button>
+                    <a
+                        href={getProductWhatsappUrl(product.name)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex h-[2.4rem] w-[2.4rem] shrink-0 items-center justify-center rounded-[0.75rem] bg-[#3a2117] text-white"
+                        aria-label="Pesan via WhatsApp"
+                    >
+                        <ShoppingCart size={15} strokeWidth={1.9} />
+                    </a>
+                </div>
             </div>
         </article>
     );
@@ -834,10 +879,10 @@ export function BlackCtaSection() {
                 <div className="grid gap-8 lg:grid-cols-[1.18fr_0.82fr] lg:items-center">
                     <div>
                         <h2 className="max-w-[30rem] font-display text-[2.2rem] font-semibold leading-[1.02] tracking-[-0.05em] text-white sm:text-[2.55rem]">
-                            Dapatkan Update & Promo Spesial dari PayTo Rasa!
+                            Dapatkan Update & Promo Spesial dari Cahaya Rasa!
                         </h2>
                         <p className="mt-4 max-w-[29rem] text-[0.98rem] leading-7 text-[#ddc7b0] sm:text-[1rem]">
-                            Jangan lewatkan promo menarik, produk terbaru, dan penawaran eksklusif untuk menu favorit Anda.
+                            Jangan lewatkan promo menarik, produk terbaru, dan penawaran eksklusif untuk camilan favorit Anda.
                         </p>
                     </div>
                     <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
@@ -854,7 +899,7 @@ export function BlackCtaSection() {
                         </div>
                         <div className="border-t border-white/15 pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
                             <p className="max-w-[18rem] text-sm leading-7 text-[#ddc7b0]">
-                                Atau pesan langsung via WhatsApp untuk order dan tanya produk.
+                                Atau pesan langsung via WhatsApp untuk order & tanya produk.
                             </p>
                             <a
                                 href={whatsappUrl}
@@ -881,7 +926,7 @@ export function PublicFooter() {
                     <div>
                         <BrandMark />
                         <p className="mt-4 max-w-xs text-sm leading-7 text-[#6d5948]">
-                            Makanan dan minuman harian PayTo dibuat untuk rasa yang akrab, praktis, dan nyaman dipesan kapan pun.
+                            Camilan khas Malang dari Wiyung. Dibuat dengan bahan pilihan dan resep rumahan untuk rasa terbaik.
                         </p>
                         <div className="mt-5 flex items-center gap-3">
                             {[Instagram, Facebook, MessageCircle, Mail].map((Icon, index) => (
@@ -904,6 +949,7 @@ export function PublicFooter() {
                             <a href="#footer">Cara Belanja</a>
                             <a href="#footer">Pengiriman</a>
                             <a href="#footer">Pembayaran</a>
+                            <a href="#footer">Retur & Refund</a>
                             <a href="#footer">FAQ</a>
                         </div>
                     </div>
@@ -925,22 +971,26 @@ export function PublicFooter() {
                         <div className="mt-4 grid gap-4 text-sm leading-7 text-[#6d5948]">
                             <div className="flex items-start gap-3">
                                 <MessageCircle size={16} strokeWidth={1.8} className="mt-1 text-[#3a2117]" />
-                                <span>0812-8471-9284</span>
+                                <span>0812-3456-7890</span>
                             </div>
                             <div className="flex items-start gap-3">
                                 <Mail size={16} strokeWidth={1.8} className="mt-1 text-[#3a2117]" />
-                                <span>halo@payto.store</span>
+                                <span>hello@cahayarasa.id</span>
                             </div>
                             <div className="flex items-start gap-3">
                                 <MapPin size={16} strokeWidth={1.8} className="mt-1 text-[#3a2117]" />
-                                <span>Jl. Kemang Raya No. 88, Jakarta Selatan</span>
+                                <span>Wiyung, Malang, Jawa Timur</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div className="mt-8 flex flex-col gap-3 border-t border-[#eadfcf] pt-5 text-xs text-[#836b58] sm:flex-row sm:items-center sm:justify-between">
-                    <p>© 2026 PayTo. All Rights Reserved.</p>
+                    <div className="flex items-center gap-2">
+                        <p>© 2025 Cahaya Rasa. All Rights Reserved.</p>
+                        <span className="text-[#b69877]">•</span>
+                        <span className="text-[10px] text-[#a08568]">Powered by PayTo POS</span>
+                    </div>
                     <div className="flex flex-wrap items-center gap-4 sm:gap-6">
                         <a href="#footer">Syarat & Ketentuan</a>
                         <a href="#footer">Kebijakan Privasi</a>

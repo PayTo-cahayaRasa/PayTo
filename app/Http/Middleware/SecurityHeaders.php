@@ -31,7 +31,8 @@ class SecurityHeaders
 
         // Content Security Policy - Configure based on your needs
         // For SPA with Inertia, you may need to adjust this
-        $csp = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;";
+        $viteOrigin = config('app.env') === 'local' ? ' http://127.0.0.1:5173' : '';
+        $csp = "default-src 'self'; script-src 'self'{$viteOrigin} 'unsafe-inline' 'unsafe-eval'; style-src 'self'{$viteOrigin} 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;";
         $response->headers->set('Content-Security-Policy', $csp);
 
         // Permissions Policy (disable unnecessary browser features)

@@ -46,10 +46,10 @@ export default function LandingPage() {
 
     return (
         <>
-            <Head title="PayTo">
+            <Head title="Cahaya Rasa">
                 <meta
                     name="description"
-                    content="PayTo dengan tampilan storefront baru bernuansa hangat, tradisional, dan tetap memakai data asli produk untuk pemesanan via WhatsApp."
+                    content="Cahaya Rasa dengan tampilan storefront baru bernuansa hangat, tradisional, dan tetap memakai data asli produk untuk pemesanan via WhatsApp."
                 />
             </Head>
 
@@ -64,9 +64,7 @@ export default function LandingPage() {
 
                 <main id="main-content">
                     <HeroSection
-                        badgeLabel="Pesanan Harian PayTo"
-                        heading={'Renyahnya\nPayTo Setiap\nHari'}
-                        description="PayTo menghadirkan makanan dan minuman harian dengan bahan pilihan, proses praktis, dan rasa rumahan yang cocok untuk pesanan cepat setiap hari."
+                        heading={'Renyahnya\nKeripik\nCahaya Rasa'}
                     />
 
                     <section id={storefrontShopSectionId} className="relative z-10 -mt-2 px-4 py-3 sm:px-5 lg:-mt-4 lg:px-8">
@@ -88,7 +86,7 @@ export default function LandingPage() {
                                                     setCurrentPage(1);
                                                 });
                                             }}
-                                            placeholder="Cari menu PayTo"
+                                            placeholder="Cari produk Cahaya Rasa"
                                             className="w-full bg-transparent text-sm text-[#3a2117] outline-none placeholder:text-[#b69877]"
                                         />
                                     </label>
