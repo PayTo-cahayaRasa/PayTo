@@ -31,3 +31,12 @@ SECURITY_REVIEW.md
 BUG_REPORT.md
 
 /docs/
+
+# Agent/skill configs (personal workspace - do not commit)
+/.agents/
+/.github/tugas.md
+/.github/skills/
+/.github/copilot-instructions.md
+
+# Temp files
+tmp-*.png
