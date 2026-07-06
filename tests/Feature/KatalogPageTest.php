@@ -7,15 +7,18 @@ use Tests\TestCase;
 
 class KatalogPageTest extends TestCase
 {
-    public function test_public_catalog_page_returns_a_successful_response(): void
+    public function test_public_catalog_page_redirects_to_landing_shop_section(): void
     {
         $response = $this->get('/katalog');
 
-        $response->assertOk();
-        $response->assertInertia(fn (AssertableInertia $page) => $page
-            ->component('katalogPage')
-            ->url('/katalog')
-        );
+        $response->assertRedirect('/#shop-products');
+    }
+
+    public function test_public_catalog_page_with_query_redirects_to_landing_shop_section(): void
+    {
+        $response = $this->get('/katalog?focus=search');
+
+        $response->assertRedirect('/#shop-products');
     }
 
     public function test_public_catalog_detail_page_returns_a_successful_response(): void

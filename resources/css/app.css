@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
 html {
@@ -42,6 +43,7 @@ html {
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Aptos', 'Arial Nova', 'Segoe UI', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-        'Noto Color Emoji';
+    --font-sans: 'Plus Jakarta Sans', 'Aptos', 'Arial Nova', 'Segoe UI', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Playfair Display', 'Times New Roman', serif;
 }

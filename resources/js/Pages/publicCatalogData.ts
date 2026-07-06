@@ -11,6 +11,7 @@ export type PublicCatalogProduct = {
 };
 
 export type PublicCatalogFilterId = 'new-arrival' | 'best-seller' | 'on-discount' | null;
+export type PublicCatalogSortId = 'popular' | 'name-asc' | 'price-asc' | 'price-desc';
 
 export const PUBLIC_CATEGORIES = [
     { id: 'All', label: 'Semua' },
@@ -164,4 +165,29 @@ export function applyPublicCatalogFilter(
     }
 
     return products;
+}
+
+export function sortPublicCatalogProducts(
+    products: PublicCatalogProduct[],
+    sortId: PublicCatalogSortId,
+): PublicCatalogProduct[] {
+    if (sortId === 'name-asc') {
+        return [...products].sort((leftProduct, rightProduct) => leftProduct.name.localeCompare(rightProduct.name, 'id-ID'));
+    }
+
+    if (sortId === 'price-asc') {
+        return [...products].sort((leftProduct, rightProduct) => leftProduct.price - rightProduct.price);
+    }
+
+    if (sortId === 'price-desc') {
+        return [...products].sort((leftProduct, rightProduct) => rightProduct.price - leftProduct.price);
+    }
+
+    return [...products].sort((leftProduct, rightProduct) => {
+        if (rightProduct.stock === leftProduct.stock) {
+            return leftProduct.name.localeCompare(rightProduct.name, 'id-ID');
+        }
+
+        return rightProduct.stock - leftProduct.stock;
+    });
 }
