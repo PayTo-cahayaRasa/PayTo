@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -9,18 +10,18 @@ class StorefrontController extends Controller
 {
     public function index(): Response
     {
-        return Inertia::render('landingPage');
+        return Inertia::render('storefront/LandingPage');
     }
 
-    public function catalog(): Response
+    public function catalog(): RedirectResponse
     {
-        return Inertia::render('catalog');
+        return redirect('/#shop-products');
     }
 
-    public function show(string $slug): Response
+    public function show(int $product): Response
     {
-        return Inertia::render('productDetail', [
-            'slug' => $slug,
+        return Inertia::render('storefront/KatalogDetailPage', [
+            'productId' => $product,
         ]);
     }
 }

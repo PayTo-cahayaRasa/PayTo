@@ -16,6 +16,7 @@
 /public/build
 /public/hot
 /public/storage
+public/.flyenv
 /storage/*.key
 /storage/pail
 /vendor
@@ -28,3 +29,5 @@ opencode.json
 task.md
 SECURITY_REVIEW.md
 BUG_REPORT.md
+
+/docs/

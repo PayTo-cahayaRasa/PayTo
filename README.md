@@ -122,7 +122,7 @@ PayTo/
 │       ├── Pages/
 │       │   ├── admin/  # Admin dashboard pages
 │       │   ├── kasir.tsx
-│       │   └── catalog.tsx
+│       │   └── storefront/ # Public storefront pages and components
 │       └── Components/  # React components
 ├── routes/
 │   ├── api.php        # API routes

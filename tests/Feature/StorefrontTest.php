@@ -11,23 +11,22 @@ class StorefrontTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->component('landingPage')
+                ->component('storefront/LandingPage')
                 ->missing('featured_products'));
     }
 
-    public function test_guest_can_access_mock_catalog_page(): void
+    public function test_guest_is_redirected_to_landing_shop_section_when_opening_catalog_page(): void
     {
         $this->get('/katalog')
-            ->assertOk()
-            ->assertInertia(fn ($page) => $page->component('catalog'));
+            ->assertRedirect('/#shop-products');
     }
 
-    public function test_guest_can_access_mock_product_detail_page(): void
+    public function test_guest_can_access_public_product_detail_page(): void
     {
-        $this->get('/katalog/single-origin-espresso')
+        $this->get('/katalog/1')
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->component('productDetail')
-                ->where('slug', 'single-origin-espresso'));
+                ->component('storefront/KatalogDetailPage')
+                ->where('productId', 1));
     }
 }
