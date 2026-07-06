@@ -12,7 +12,7 @@ use Illuminate\Support\Carbon;
 class HistoryQueryController
 {
     /**
-     * @param  array{userId?: int|null, startDate?: string|null, endDate?: string|null}  $filters
+     * @param  array{userId?: int|null, startDate?: string|null, endDate?: string|null, source?: string|null}  $filters
      */
     public function fetch(int $limit = 10, array $filters = []): array
     {
@@ -24,7 +24,7 @@ class HistoryQueryController
     }
 
     /**
-     * @param  array{userId?: int|null, startDate?: string|null, endDate?: string|null}  $filters
+     * @param  array{userId?: int|null, startDate?: string|null, endDate?: string|null, source?: string|null}  $filters
      * @return array{data: array<int, array<string, mixed>>, meta: array<string, int>}
      */
     public function fetchPaginated(int $page, int $perPage, array $filters = []): array
@@ -49,7 +49,7 @@ class HistoryQueryController
     }
 
     /**
-     * @param  array{userId?: int|null, startDate?: string|null, endDate?: string|null}  $filters
+     * @param  array{userId?: int|null, startDate?: string|null, endDate?: string|null, source?: string|null}  $filters
      */
     protected function buildQuery(array $filters = []): Builder|QueryBuilder
     {
@@ -59,6 +59,10 @@ class HistoryQueryController
 
         if (! empty($filters['userId'])) {
             $query->where('cashier_id', (int) $filters['userId']);
+        }
+
+        if (! empty($filters['source'])) {
+            $query->where('source', (string) $filters['source']);
         }
 
         if (! empty($filters['startDate']) && ! empty($filters['endDate'])) {
@@ -126,6 +130,9 @@ class HistoryQueryController
             'saleId' => $sale->id,
             'invoiceNo' => $sale->server_invoice_no ? $sale->server_invoice_no : '#'.$sale->id,
             'time' => $time,
+            'source' => $sale->source->value,
+            'customerName' => $sale->customer_name,
+            'customerPhone' => $sale->customer_phone,
             'items' => $sale->items->count(),
             'totalBeforeDiscount' => (float) $sale->subtotal,
             'discountTotal' => (float) $sale->discount_total,

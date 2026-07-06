@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { Banknote, CreditCard, Printer, X, ChevronDown, ChevronUp, Delete } from 'lucide-react';
 
+import type { SaleSource } from '../types';
+
 type PaymentModalProps = {
     isOpen: boolean;
     paymentMethod: 'CASH' | 'EWALLET';
     onPaymentMethodChange: (method: 'CASH' | 'EWALLET') => void;
     cashReceived: string;
     onCashReceivedChange: (value: string) => void;
+    source: SaleSource;
+    onSourceChange: (source: SaleSource) => void;
+    customerName: string;
+    onCustomerNameChange: (value: string) => void;
+    customerPhone: string;
+    onCustomerPhoneChange: (value: string) => void;
+    validationError: string | null;
     onClose: () => void;
     onCheckout: () => void;
     quickCashAmounts: number[];
@@ -25,6 +34,13 @@ export default function PaymentModal({
     onPaymentMethodChange,
     cashReceived,
     onCashReceivedChange,
+    source,
+    onSourceChange,
+    customerName,
+    onCustomerNameChange,
+    customerPhone,
+    onCustomerPhoneChange,
+    validationError,
     onClose,
     onCheckout,
     quickCashAmounts,
@@ -235,6 +251,50 @@ export default function PaymentModal({
                     {/* Scrollable Content Area */}
                     <div className="flex-1 overflow-y-auto px-5 md:px-8 pb-4">
                         <div className="max-w-md mx-auto h-full flex flex-col">
+                            <div className="mb-4 space-y-3 rounded-2xl border border-slate-200 bg-white p-4">
+                                <div className="grid grid-cols-2 gap-2">
+                                    {[
+                                        { id: 'WALK_IN', label: 'Walk-in' },
+                                        { id: 'WHATSAPP', label: 'WhatsApp' },
+                                    ].map((option) => (
+                                        <button
+                                            key={option.id}
+                                            type="button"
+                                            onClick={() => onSourceChange(option.id as SaleSource)}
+                                            className={`rounded-xl px-3 py-2 text-sm font-bold transition ${source === option.id
+                                                ? 'bg-slate-900 text-white'
+                                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                                }`}
+                                        >
+                                            {option.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {source === 'WHATSAPP' && (
+                                    <div className="grid gap-2">
+                                        <input
+                                            type="text"
+                                            value={customerName}
+                                            onChange={(event) => onCustomerNameChange(event.target.value)}
+                                            placeholder="Nama pelanggan"
+                                            className="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                                        />
+                                        <input
+                                            type="tel"
+                                            inputMode="numeric"
+                                            value={customerPhone}
+                                            onChange={(event) => onCustomerPhoneChange(event.target.value.replace(/\D/g, ''))}
+                                            placeholder="Nomor WhatsApp pelanggan"
+                                            className="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                                        />
+                                    </div>
+                                )}
+
+                                {validationError && (
+                                    <p className="text-xs font-semibold text-rose-600">{validationError}</p>
+                                )}
+                            </div>
 
                             {paymentMethod === 'CASH' && (
                                 <div className="flex flex-col h-full animate-in slide-in-from-right-4 duration-300">

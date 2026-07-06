@@ -10,9 +10,7 @@ use Illuminate\Support\Facades\Route;
 // Public storefront routes
 Route::get('/', [StorefrontController::class, 'index'])->name('landing');
 Route::get('/katalog', [StorefrontController::class, 'catalog'])->name('catalog.index');
-Route::get('/katalog/{product}', [StorefrontController::class, 'show'])
-    ->whereNumber('product')
-    ->name('catalog.show');
+Route::get('/katalog/{product:slug}', [StorefrontController::class, 'show'])->name('catalog.show');
 
 Route::get('/login', function () {
     return inertia('login');

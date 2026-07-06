@@ -3,8 +3,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { PUBLIC_PRODUCTS } from '../data/publicCatalogData';
 import { publicCartStorageKey } from '../constants';
 import type { PublicCartEntry, PublicCartLineItem } from '../types';
+import type { PublicCatalogProduct } from '../data/publicCatalogData';
 
-export function usePublicCart() {
+export function usePublicCart(products: PublicCatalogProduct[] = PUBLIC_PRODUCTS) {
     const [cartEntries, setCartEntries] = useState<PublicCartEntry[]>([]);
     const [hasLoaded, setHasLoaded] = useState(false);
 
@@ -37,7 +38,7 @@ export function usePublicCart() {
     const cartItems = useMemo(() => {
         return cartEntries
             .map((entry) => {
-                const product = PUBLIC_PRODUCTS.find((catalogProduct) => catalogProduct.id === entry.productId);
+                const product = products.find((catalogProduct) => catalogProduct.id === entry.productId);
 
                 if (!product) {
                     return null;
@@ -49,7 +50,7 @@ export function usePublicCart() {
                 };
             })
             .filter((entry): entry is PublicCartLineItem => entry !== null);
-    }, [cartEntries]);
+    }, [cartEntries, products]);
 
     function addToCart(productId: number): void {
         setCartEntries((currentEntries) => {

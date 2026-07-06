@@ -28,7 +28,6 @@ class WhatsAppOrderCheckoutTest extends TestCase
         $this->product = Product::factory()->create([
             'name' => 'Kopi Latte',
             'price' => 25000,
-            'stock' => 100,
             'discount' => 0,
         ]);
     }
@@ -36,7 +35,7 @@ class WhatsAppOrderCheckoutTest extends TestCase
     /** @test */
     public function checkout_without_source_defaults_to_walk_in(): void
     {
-        $response = $this->actingAs($this->cashier, 'sanctum')
+        $response = $this->actingAs($this->cashier)
             ->postJson('/api/pos/checkout', [
                 'payment_method' => 'CASH',
                 'cash_received' => 30000,
@@ -59,7 +58,7 @@ class WhatsAppOrderCheckoutTest extends TestCase
     /** @test */
     public function checkout_with_walk_in_source_stores_correctly(): void
     {
-        $response = $this->actingAs($this->cashier, 'sanctum')
+        $response = $this->actingAs($this->cashier)
             ->postJson('/api/pos/checkout', [
                 'source' => 'WALK_IN',
                 'payment_method' => 'CASH',
@@ -81,7 +80,7 @@ class WhatsAppOrderCheckoutTest extends TestCase
     /** @test */
     public function checkout_with_whatsapp_source_requires_customer_name(): void
     {
-        $response = $this->actingAs($this->cashier, 'sanctum')
+        $response = $this->actingAs($this->cashier)
             ->postJson('/api/pos/checkout', [
                 'source' => 'WHATSAPP',
                 'customer_phone' => '6281234567890',
@@ -102,7 +101,7 @@ class WhatsAppOrderCheckoutTest extends TestCase
     /** @test */
     public function checkout_with_whatsapp_source_requires_customer_phone(): void
     {
-        $response = $this->actingAs($this->cashier, 'sanctum')
+        $response = $this->actingAs($this->cashier)
             ->postJson('/api/pos/checkout', [
                 'source' => 'WHATSAPP',
                 'customer_name' => 'Budi',
@@ -123,7 +122,7 @@ class WhatsAppOrderCheckoutTest extends TestCase
     /** @test */
     public function checkout_with_whatsapp_source_validates_phone_format(): void
     {
-        $response = $this->actingAs($this->cashier, 'sanctum')
+        $response = $this->actingAs($this->cashier)
             ->postJson('/api/pos/checkout', [
                 'source' => 'WHATSAPP',
                 'customer_name' => 'Budi',
@@ -145,7 +144,7 @@ class WhatsAppOrderCheckoutTest extends TestCase
     /** @test */
     public function checkout_with_valid_whatsapp_order_succeeds(): void
     {
-        $response = $this->actingAs($this->cashier, 'sanctum')
+        $response = $this->actingAs($this->cashier)
             ->postJson('/api/pos/checkout', [
                 'source' => 'WHATSAPP',
                 'customer_name' => 'Budi Santoso',
@@ -177,7 +176,7 @@ class WhatsAppOrderCheckoutTest extends TestCase
     /** @test */
     public function checkout_rejects_invalid_source(): void
     {
-        $response = $this->actingAs($this->cashier, 'sanctum')
+        $response = $this->actingAs($this->cashier)
             ->postJson('/api/pos/checkout', [
                 'source' => 'ONLINE', // not allowed
                 'payment_method' => 'CASH',
@@ -200,11 +199,10 @@ class WhatsAppOrderCheckoutTest extends TestCase
         $productWithDiscount = Product::factory()->create([
             'name' => 'Kopi Espresso',
             'price' => 20000,
-            'stock' => 100,
-            'discount' => 10, // 10% discount
+            'discount' => 10,
         ]);
 
-        $response = $this->actingAs($this->cashier, 'sanctum')
+        $response = $this->actingAs($this->cashier)
             ->postJson('/api/pos/checkout', [
                 'source' => 'WHATSAPP',
                 'customer_name' => 'Andi',
@@ -232,7 +230,7 @@ class WhatsAppOrderCheckoutTest extends TestCase
     /** @test */
     public function sale_model_casts_source_to_enum(): void
     {
-        $this->actingAs($this->cashier, 'sanctum')
+        $this->actingAs($this->cashier)
             ->postJson('/api/pos/checkout', [
                 'source' => 'WHATSAPP',
                 'customer_name' => 'Test',
@@ -252,5 +250,32 @@ class WhatsAppOrderCheckoutTest extends TestCase
         $this->assertInstanceOf(SaleSource::class, $sale->source);
         $this->assertEquals(SaleSource::WhatsApp, $sale->source);
         $this->assertEquals('WhatsApp', $sale->source->label());
+    }
+
+    public function test_history_can_filter_whatsapp_orders_and_show_customer_data(): void
+    {
+        $this->actingAs($this->cashier)->postJson('/api/pos/checkout', [
+            'payment_method' => 'CASH',
+            'cash_received' => 30000,
+            'items' => [['product_id' => $this->product->id, 'qty' => 1]],
+        ])->assertOk();
+
+        $this->actingAs($this->cashier)->postJson('/api/pos/checkout', [
+            'source' => 'WHATSAPP',
+            'customer_name' => 'Budi Santoso',
+            'customer_phone' => '6281234567890',
+            'payment_method' => 'CASH',
+            'cash_received' => 60000,
+            'items' => [['product_id' => $this->product->id, 'qty' => 1]],
+        ])->assertOk();
+
+        $response = $this->actingAs($this->cashier)->getJson('/api/pos/history?source=WHATSAPP');
+
+        $response
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.source', 'WHATSAPP')
+            ->assertJsonPath('data.0.customerName', 'Budi Santoso')
+            ->assertJsonPath('data.0.customerPhone', '6281234567890');
     }
 }

@@ -14,8 +14,10 @@ type HistoryViewProps = {
     formatRupiah: (num: number) => string;
     startDate: string;
     endDate: string;
+    source: string;
     onStartDateChange: (value: string) => void;
     onEndDateChange: (value: string) => void;
+    onSourceChange: (value: string) => void;
     onResetFilters: () => void;
     page: number;
     lastPage: number;
@@ -28,8 +30,10 @@ export default function HistoryView({
     formatRupiah,
     startDate,
     endDate,
+    source,
     onStartDateChange,
     onEndDateChange,
+    onSourceChange,
     onResetFilters,
     page,
     lastPage,
@@ -64,6 +68,18 @@ export default function HistoryView({
                                 onChange={(e) => onEndDateChange(e.target.value)}
                                 className="mt-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
                             />
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Sumber</label>
+                            <select
+                                value={source}
+                                onChange={(e) => onSourceChange(e.target.value)}
+                                className="mt-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
+                            >
+                                <option value="">Semua</option>
+                                <option value="WALK_IN">Walk-in</option>
+                                <option value="WHATSAPP">WhatsApp</option>
+                            </select>
                         </div>
                     </div>
                     <button
@@ -109,6 +125,11 @@ export default function HistoryView({
                                             {tx.status === 'VOID' && (
                                                 <span className="px-2 py-0.5 rounded-md bg-rose-500 text-white text-[10px] font-bold">
                                                     VOID
+                                                </span>
+                                            )}
+                                            {tx.source === 'WHATSAPP' && (
+                                                <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-bold">
+                                                    WhatsApp
                                                 </span>
                                             )}
                                         </div>
@@ -158,6 +179,17 @@ export default function HistoryView({
                                             <p className="text-xs text-slate-400">Status</p>
                                             <p className="font-semibold">{tx.status}</p>
                                         </div>
+                                        <div>
+                                            <p className="text-xs text-slate-400">Sumber</p>
+                                            <p className="font-semibold">{tx.source === 'WHATSAPP' ? 'WhatsApp' : 'Walk-in'}</p>
+                                        </div>
+                                        {tx.source === 'WHATSAPP' && (
+                                            <div>
+                                                <p className="text-xs text-slate-400">Pelanggan</p>
+                                                <p className="font-semibold">{tx.customerName}</p>
+                                                <p className="text-xs text-slate-500">{tx.customerPhone}</p>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* LIST ITEM */}

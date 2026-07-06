@@ -35,10 +35,13 @@ class BusinessSettingsApiTest extends TestCase
 
         $payload = [
             'business' => [
-                'name' => 'Toko Maju Jaya',
-                'address' => 'Jl. Merdeka No. 123, Jakarta',
+                'name' => 'Cahaya Rasa',
+                'tagline' => 'Oleh-Oleh Malang',
+                'address' => '2P5W+95R, Jl. Sukoanyar, Nongkosongo, Wringinsongo, Kec. Tumpang, Kabupaten Malang, Jawa Timur 65156',
                 'whatsapp_number' => '6281234567890',
                 'operating_hours' => 'Senin-Minggu 08.00-22.00',
+                'instagram_url' => 'https://www.instagram.com/cahayarasamalang/',
+                'tiktok_url' => 'https://www.tiktok.com/@cahayarasa_28',
             ],
             'catalog' => [
                 'enabled' => true,
@@ -191,8 +194,11 @@ class BusinessSettingsApiTest extends TestCase
         $response->assertJson([
             'data' => [
                 'business' => [
-                    'name' => 'Nama Toko',
-                    'address' => 'Alamat Toko',
+                    'name' => 'Cahaya Rasa',
+                    'tagline' => 'Oleh-Oleh Malang',
+                    'address' => '2P5W+95R, Jl. Sukoanyar, Nongkosongo, Wringinsongo, Kec. Tumpang, Kabupaten Malang, Jawa Timur 65156',
+                    'instagram_url' => 'https://www.instagram.com/cahayarasamalang/',
+                    'tiktok_url' => 'https://www.tiktok.com/@cahayarasa_28',
                 ],
                 'catalog' => [
                     'enabled' => true,

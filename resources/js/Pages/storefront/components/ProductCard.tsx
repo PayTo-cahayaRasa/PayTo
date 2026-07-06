@@ -2,7 +2,7 @@ import { Link } from '@inertiajs/react';
 import { ShoppingCart, Star } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-import { formatRupiah, getProductWhatsappUrl } from '../data/publicCatalogData';
+import { formatRupiah } from '../data/publicCatalogData';
 import type { ProductCardProps } from '../types';
 import { ProductVisual } from './ProductVisual';
 
@@ -61,12 +61,17 @@ export function ProductCard({ product, index, detailHref, onAddToCart }: Product
                     <span className="font-semibold text-[#9a682e]">{review.rating}</span>
                     <span>({review.reviews})</span>
                 </div>
-                <p className="mt-2 text-[1.15rem] font-semibold tracking-[-0.04em] text-[#3a2117] sm:text-[1.3rem]">{formatRupiah(product.price)}</p>
+                <div className="mt-2">
+                    <p className="text-[1.15rem] font-semibold tracking-[-0.04em] text-[#3a2117] sm:text-[1.3rem]">{formatRupiah(product.finalPrice ?? product.price)}</p>
+                    {(product.discount ?? 0) > 0 && (
+                        <p className="text-xs font-semibold text-[#9b7860] line-through">{formatRupiah(product.price)}</p>
+                    )}
+                </div>
                 <div className="mt-2.5 flex items-center gap-2">
                     <button
                         type="button"
                         onClick={handleAddToCart}
-                        className={`inline-flex min-h-[2.4rem] flex-1 items-center justify-center rounded-[0.75rem] border px-3 text-[0.8rem] font-semibold transition duration-300 ${
+                        className={`inline-flex min-h-[2.4rem] flex-1 items-center justify-center rounded-xl border px-3 text-[0.8rem] font-semibold transition duration-300 ${
                             isAddConfirmed
                                 ? 'border-[#f59a21] bg-[#f59a21] text-white shadow-[0_18px_30px_-22px_rgba(245,154,33,0.8)] scale-[1.02]'
                                 : 'border-[#eadfcf] bg-[#fff7ea] text-[#3a2117]'
@@ -74,15 +79,17 @@ export function ProductCard({ product, index, detailHref, onAddToCart }: Product
                     >
                         {isAddConfirmed ? 'Berhasil Ditambahkan' : 'Tambah ke Keranjang'}
                     </button>
-                    <a
-                        href={getProductWhatsappUrl(product.name)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex h-[2.4rem] w-[2.4rem] shrink-0 items-center justify-center rounded-[0.75rem] bg-[#3a2117] text-white"
-                        aria-label="Pesan via WhatsApp"
-                    >
-                        <ShoppingCart size={15} strokeWidth={1.9} />
-                    </a>
+                    {product.whatsappUrl && (
+                        <a
+                            href={product.whatsappUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex h-[2.4rem] w-[2.4rem] shrink-0 items-center justify-center rounded-xl bg-[#3a2117] text-white"
+                            aria-label="Pesan via WhatsApp"
+                        >
+                            <ShoppingCart size={15} strokeWidth={1.9} />
+                        </a>
+                    )}
                 </div>
             </div>
         </article>

@@ -2,17 +2,18 @@ import { Menu, ShoppingCart, Trash2, UserRound } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { formatRupiah } from '../data/publicCatalogData';
-import { whatsappUrl } from '../constants';
+import { businessWhatsappUrl } from '../constants';
 import type { PublicHeaderProps } from '../types';
 import { BrandMark } from './BrandMark';
 import { HeaderIconButton } from './HeaderIconButton';
 
-export function PublicHeader({ cartItems, onIncreaseCartItem, onDecreaseCartItem, onClearCart }: PublicHeaderProps) {
+export function PublicHeader({ business, cartItems, onIncreaseCartItem, onDecreaseCartItem, onClearCart }: PublicHeaderProps) {
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isCartBumping, setIsCartBumping] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const cartRef = useRef<HTMLDivElement | null>(null);
     const previousCartItemsCountRef = useRef<number | null>(null);
+    const whatsappUrl = businessWhatsappUrl(business);
     const totalCartItems = cartItems.reduce((total, item) => total + item.quantity, 0);
     const cartTotal = cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0);
 
@@ -63,7 +64,7 @@ export function PublicHeader({ cartItems, onIncreaseCartItem, onDecreaseCartItem
     return (
         <header className="sticky top-0 z-50 px-4 pt-3 pb-2 sm:px-5 lg:px-8">
             <nav className={`mx-auto flex min-h-[4.25rem] max-w-[1848px] items-center justify-between gap-3 rounded-[2rem] border border-[#f1e6d7] px-3 py-2 shadow-[0_24px_48px_-36px_rgba(58,33,23,0.25)] sm:h-[4.5rem] sm:px-7 sm:py-0 lg:px-8 transition-all duration-300 ${isScrolled ? 'bg-white/60 backdrop-blur-md shadow-md' : 'bg-[#fffdf9]'}`}>
-                <BrandMark />
+                <BrandMark business={business} />
 
                 <div className="flex shrink-0 items-center gap-2 sm:gap-3">
                     <div ref={cartRef} className="relative">
@@ -123,19 +124,21 @@ export function PublicHeader({ cartItems, onIncreaseCartItem, onDecreaseCartItem
                                                 <span className="text-[#8d6b4e]">Subtotal</span>
                                                 <span className="font-semibold text-[#3a2117]">{formatRupiah(cartTotal)}</span>
                                             </div>
-                                            <a
-                                                href={whatsappUrl}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#25d366] px-4 text-sm font-semibold text-white"
-                                            >
-                                                Checkout via WhatsApp
-                                            </a>
+                                            {whatsappUrl ? (
+                                                <a
+                                                    href={whatsappUrl}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#25d366] px-4 text-sm font-semibold text-white"
+                                                >
+                                                    Checkout via WhatsApp
+                                                </a>
+                                            ) : null}
                                         </div>
                                     </>
                                 ) : (
                                     <p className="mt-4 text-sm leading-7 text-[#8d6b4e]">
-                                        Tambahkan produk terlebih dahulu untuk melanjutkan order Cahaya Rasa.
+                                        Tambahkan produk terlebih dahulu untuk melanjutkan order {business.name}.
                                     </p>
                                 )}
                             </div>

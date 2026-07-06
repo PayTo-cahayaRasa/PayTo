@@ -1,13 +1,18 @@
 export type PublicCatalogProduct = {
     id: number;
+    slug?: string;
     name: string;
     price: number;
-    category: string;
+    finalPrice?: number;
+    discount?: number;
+    category?: string;
     stock: number;
     sku: string;
     description: string;
-    details: string[];
+    details?: string[];
     imageColor?: string;
+    imageUrl?: string | null;
+    whatsappUrl?: string | null;
 };
 
 export type PublicCatalogFilterId = 'new-arrival' | 'best-seller' | 'on-discount' | null;
