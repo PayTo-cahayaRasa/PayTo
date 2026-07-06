@@ -1,7 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { ChevronLeft, MapPin, MessageCircle, ShoppingCart, Star } from 'lucide-react';
 
-import { PUBLIC_PRODUCTS, formatRupiah, getProductWhatsappUrl, getPublicCatalogProduct } from './publicCatalogData';
+import { PUBLIC_PRODUCTS, formatRupiah, getProductWhatsappUrl, getPublicCatalogProduct } from './data/publicCatalogData';
 import {
     ProductCard,
     ProductVisual,
@@ -11,7 +11,7 @@ import {
     SkipLink,
     storefrontShopHref,
     usePublicCart,
-} from './publicStorefront';
+} from '.';
 
 type KatalogDetailPageProps = {
     productId: number;

@@ -16,7 +16,7 @@ class LoginFlowTest extends TestCase
         $response = $this->get('/');
 
         $response->assertOk();
-        $response->assertInertia(fn ($page) => $page->component('landingPage'));
+        $response->assertInertia(fn ($page) => $page->component('storefront/LandingPage'));
     }
 
     /** @test */

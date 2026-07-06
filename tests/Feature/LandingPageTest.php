@@ -13,7 +13,7 @@ class LandingPageTest extends TestCase
 
         $response->assertOk();
         $response->assertInertia(fn (AssertableInertia $page) => $page
-            ->component('landingPage')
+            ->component('storefront/LandingPage')
             ->url('/')
         );
     }

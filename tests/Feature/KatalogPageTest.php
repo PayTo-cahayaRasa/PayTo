@@ -27,7 +27,7 @@ class KatalogPageTest extends TestCase
 
         $response->assertOk();
         $response->assertInertia(fn (AssertableInertia $page) => $page
-            ->component('katalogDetailPage')
+            ->component('storefront/KatalogDetailPage')
             ->url('/katalog/1')
             ->where('productId', 1)
         );
@@ -39,7 +39,7 @@ class KatalogPageTest extends TestCase
 
         $response->assertOk();
         $response->assertInertia(fn (AssertableInertia $page) => $page
-            ->component('katalogDetailPage')
+            ->component('storefront/KatalogDetailPage')
             ->url('/katalog/999')
             ->where('productId', 999)
         );

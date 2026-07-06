@@ -11,7 +11,7 @@ class StorefrontTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->component('landingPage')
+                ->component('storefront/LandingPage')
                 ->missing('featured_products'));
     }
 
@@ -26,7 +26,7 @@ class StorefrontTest extends TestCase
         $this->get('/katalog/1')
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->component('katalogDetailPage')
+                ->component('storefront/KatalogDetailPage')
                 ->where('productId', 1));
     }
 }

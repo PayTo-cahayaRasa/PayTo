@@ -10,7 +10,7 @@ class StorefrontController extends Controller
 {
     public function index(): Response
     {
-        return Inertia::render('landingPage');
+        return Inertia::render('storefront/LandingPage');
     }
 
     public function catalog(): RedirectResponse
@@ -20,7 +20,7 @@ class StorefrontController extends Controller
 
     public function show(int $product): Response
     {
-        return Inertia::render('katalogDetailPage', [
+        return Inertia::render('storefront/KatalogDetailPage', [
             'productId' => $product,
         ]);
     }
