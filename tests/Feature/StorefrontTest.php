@@ -11,7 +11,7 @@ class StorefrontTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_guest_can_access_landing_with_featured_public_products(): void
+    public function test_guest_can_access_landing_with_active_products(): void
     {
         $product = Product::factory()->create([
             'name' => 'Keripik Pisang',
@@ -25,8 +25,8 @@ class StorefrontTest extends TestCase
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('storefront/LandingPage')
-                ->where('featuredProducts.0.id', $product->id)
-                ->missing('featuredProducts.0.cost'));
+                ->where('products.data.0.id', $product->id)
+                ->missing('products.data.0.cost'));
     }
 
     public function test_guest_can_open_catalog_with_search(): void
@@ -69,7 +69,7 @@ class StorefrontTest extends TestCase
                 ->missing('product.cost'));
     }
 
-    public function test_guest_cannot_access_non_public_product_detail(): void
+    public function test_guest_can_access_active_product_detail_regardless_of_legacy_public_flag(): void
     {
         Product::factory()->create([
             'slug' => 'produk-internal',
@@ -77,7 +77,7 @@ class StorefrontTest extends TestCase
             'is_public' => false,
         ]);
 
-        $this->get('/katalog/produk-internal')->assertNotFound();
+        $this->get('/katalog/produk-internal')->assertOk();
     }
 
     public function test_catalog_can_be_disabled_without_exposing_products(): void
@@ -102,6 +102,6 @@ class StorefrontTest extends TestCase
             ->assertInertia(fn ($page) => $page
                 ->component('storefront/LandingPage')
                 ->where('catalog.enabled', false)
-                ->where('featuredProducts', []));
+                ->where('products', null));
     }
 }

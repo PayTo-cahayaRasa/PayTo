@@ -8,7 +8,7 @@ export function PublicFooter({ business }: PublicFooterProps) {
     const whatsappHref = businessWhatsappUrl(business);
 
     return (
-        <footer className="px-4 pb-8 pt-2 sm:px-5 lg:px-8">
+        <footer id="kontak" className="scroll-mt-24 px-4 pb-8 pt-2 sm:px-5 lg:px-8">
             <div className="mx-auto max-w-462 px-3 py-4 sm:px-0">
                 <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.12fr_0.8fr_0.8fr_1fr]">
                     <div>
