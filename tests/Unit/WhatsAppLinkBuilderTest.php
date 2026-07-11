@@ -6,11 +6,13 @@ use App\Models\Product;
 use App\Services\Settings\AppSettingsService;
 use App\Services\WhatsAppLinkBuilder;
 use Mockery;
+use Mockery\MockInterface;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class WhatsAppLinkBuilderTest extends TestCase
 {
-    private AppSettingsService $mockSettings;
+    private AppSettingsService&MockInterface $mockSettings;
 
     private WhatsAppLinkBuilder $builder;
 
@@ -22,7 +24,7 @@ class WhatsAppLinkBuilderTest extends TestCase
         $this->builder = new WhatsAppLinkBuilder($this->mockSettings);
     }
 
-    /** @test */
+    #[Test]
     public function builds_whatsapp_link_with_correct_format(): void
     {
         $this->mockSettings->shouldReceive('getCatalogSettings')
@@ -49,7 +51,7 @@ class WhatsAppLinkBuilderTest extends TestCase
         $this->assertStringContainsString('Rp25.000', urldecode($link));
     }
 
-    /** @test */
+    #[Test]
     public function replaces_all_placeholders_correctly(): void
     {
         $this->mockSettings->shouldReceive('getCatalogSettings')
@@ -78,7 +80,7 @@ class WhatsAppLinkBuilderTest extends TestCase
         $this->assertStringContainsString('Jumlah: 2', $decodedLink);
     }
 
-    /** @test */
+    #[Test]
     public function applies_discount_to_price(): void
     {
         $this->mockSettings->shouldReceive('getCatalogSettings')
@@ -107,7 +109,7 @@ class WhatsAppLinkBuilderTest extends TestCase
         $this->assertStringNotContainsString('Rp10.000', $decodedLink);
     }
 
-    /** @test */
+    #[Test]
     public function returns_null_when_whatsapp_disabled(): void
     {
         $this->mockSettings->shouldReceive('getCatalogSettings')
@@ -132,7 +134,7 @@ class WhatsAppLinkBuilderTest extends TestCase
         $this->assertNull($link);
     }
 
-    /** @test */
+    #[Test]
     public function returns_null_when_whatsapp_number_invalid(): void
     {
         $this->mockSettings->shouldReceive('getCatalogSettings')
@@ -157,7 +159,7 @@ class WhatsAppLinkBuilderTest extends TestCase
         $this->assertNull($link);
     }
 
-    /** @test */
+    #[Test]
     public function url_encodes_message_properly(): void
     {
         $this->mockSettings->shouldReceive('getCatalogSettings')

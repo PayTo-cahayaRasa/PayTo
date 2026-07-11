@@ -68,7 +68,7 @@ export function PublicHeader({ business, cartItems, onIncreaseCartItem, onDecrea
             <nav className={`relative mx-auto flex max-w-462 items-center justify-between gap-4 border px-3 transition-all duration-300 motion-reduce:transition-none sm:px-5 lg:px-7 ${
                 isScrolled
                     ? 'min-h-16 rounded-[1.6rem] border-white/80 bg-[#fffdf9]/88 shadow-[0_18px_42px_-28px_rgba(58,33,23,0.38)] backdrop-blur-xl'
-                    : 'min-h-18 rounded-[2rem] border-[#eadfcf]/85 bg-[#fffdf9]/72 shadow-[0_24px_60px_-44px_rgba(58,33,23,0.3)] backdrop-blur-md'
+                    : 'min-h-18 rounded-4xl border-[#eadfcf]/85 bg-[#fffdf9]/72 shadow-[0_24px_60px_-44px_rgba(58,33,23,0.3)] backdrop-blur-md'
             }`}>
                 <a href="/" aria-label={`${business.name} — Beranda`} className="rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9b5c22]">
                     <BrandMark business={business} />
