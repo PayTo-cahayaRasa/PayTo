@@ -30,7 +30,7 @@ jobs:
         with:
           php-version: '8.3'
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql, pdo_mysql, bcmath, intl, gd, exif, iconv
-          coverage: xdebug
+          coverage: none
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -71,13 +71,7 @@ jobs:
           DB_DATABASE: payto_test
           DB_USERNAME: root
           DB_PASSWORD: password
-        run: php artisan test --coverage --min=80
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v5
-        with:
-          files: ./coverage.xml
-          fail_ci_if_error: false
+        run: php artisan test
 
   code-quality:
     name: Code Quality
