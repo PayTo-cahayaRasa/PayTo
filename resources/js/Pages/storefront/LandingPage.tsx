@@ -79,14 +79,14 @@ export default function LandingPage({ business, catalog, featuredProducts = [], 
                 <main id="main-content">
                     <HeroSection business={business} />
 
-                    <section id={storefrontShopSectionId} className="relative z-10 -mt-2 px-4 py-3 sm:px-5 lg:-mt-4 lg:px-8">
-                        <div className="mx-auto max-w-462 rounded-4xl border border-[#f1e6d7] bg-[#fffdf9] px-4 py-5 shadow-[0_24px_48px_-36px_rgba(58,33,23,0.18)] sm:px-7 sm:py-8 lg:px-8">
+                    <section id={storefrontShopSectionId} className="relative z-20 -mt-36 px-4 pb-3 sm:-mt-44 sm:px-5 lg:-mt-54 lg:px-8">
+                        <div className="mx-auto max-w-462 rounded-t-[2.25rem] border border-b-0 border-[#f1e6d7] bg-[#fffdf9]/98 px-4 py-6 shadow-[0_-18px_46px_-38px_rgba(58,33,23,0.32)] backdrop-blur-sm sm:px-7 sm:py-9 lg:px-9">
                             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                                 <div>
                                     <h2 className="font-display text-[2.35rem] font-semibold leading-none tracking-[-0.05em] text-[#3a2117] sm:text-[3rem]">
-                                        Produk Unggulan
+                                        Shop Produk
                                     </h2>
-                                    <p className="mt-2 text-sm leading-6 text-[#7a5d47]">{business.address} · {business.operating_hours}</p>
+                                    <p className="mt-2 text-sm leading-6 text-[#7a5d47]">Pilih camilan favorit Anda, langsung dari {business.name}.</p>
                                 </div>
                                 <form onSubmit={submitSearch} className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
                                     <label className="flex min-h-12 items-center gap-3 rounded-full border border-[#eadfcf] bg-white px-4">

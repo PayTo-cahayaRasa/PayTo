@@ -136,6 +136,11 @@ class PosRefundController extends Controller
         }
 
         $approval = DB::transaction(function () use ($sale, $cashier, $refundItems, $refundTotal, $payload, $windowDays) {
+            Sale::query()->lockForUpdate()->findOrFail($sale->id);
+            if (Approval::query()->where('sale_id', $sale->id)->where('action', 'REFUND')->where('status', 'PENDING')->exists()) {
+                return null;
+            }
+
             return Approval::query()->create([
                 'action' => 'REFUND',
                 'sale_id' => $sale->id,
@@ -154,13 +159,17 @@ class PosRefundController extends Controller
                     ])->values()->all(),
                     'total' => $refundTotal,
                     'window_days' => $windowDays,
-                    // ✅ Include cashier info for supervisor visibility
+                    // Include cashier info for supervisor visibility
                     'cashier_name' => $cashier->name,
                     'cashier_role' => $cashier->role,
                 ],
                 'occurred_at' => now(),
             ]);
         });
+
+        if (! $approval) {
+            return response()->json(['message' => 'Masih menunggu approval supervisor.'], 422);
+        }
 
         return response()->json([
             'data' => [

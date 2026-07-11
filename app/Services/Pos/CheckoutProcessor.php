@@ -6,6 +6,8 @@ use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use App\Models\StockItem;
+use App\Models\StockMovement;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -143,6 +145,22 @@ class CheckoutProcessor
                 SaleItem::query()->create(array_merge($lineItem, [
                     'sale_id' => $sale->id,
                 ]));
+
+                $updated = StockItem::query()
+                    ->where('product_id', $lineItem['product_id'])
+                    ->where('on_hand', '>=', $lineItem['qty'])
+                    ->decrement('on_hand', $lineItem['qty']);
+                if ($updated !== 1) {
+                    throw ValidationException::withMessages(['items' => 'Stok produk tidak mencukupi.']);
+                }
+                StockMovement::query()->create([
+                    'product_id' => $lineItem['product_id'],
+                    'type' => 'SALE_OUT',
+                    'qty_delta' => -$lineItem['qty'],
+                    'ref_type' => 'sale',
+                    'ref_id' => (string) $sale->id,
+                    'created_by' => $cashier->id,
+                ]);
             }
 
             Payment::query()->create([

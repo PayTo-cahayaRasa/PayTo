@@ -105,6 +105,7 @@ class PosRefundTest extends TestCase
 
         $this->actingAs($supervisor)->postJson("/api/admin/approvals/{$approvalId}/approve", [
             'confirmed' => true,
+            'current_credential' => 'secret',
         ])
             ->assertOk();
 

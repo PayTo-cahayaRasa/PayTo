@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\SaleSource;
 use App\Models\Product;
+use App\Models\StockItem;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -29,6 +30,11 @@ class WhatsAppOrderCheckoutTest extends TestCase
             'name' => 'Kopi Latte',
             'price' => 25000,
             'discount' => 0,
+        ]);
+
+        StockItem::query()->create([
+            'product_id' => $this->product->id,
+            'on_hand' => 100,
         ]);
     }
 

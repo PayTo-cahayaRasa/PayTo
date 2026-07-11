@@ -233,7 +233,7 @@ export default function PosInterface() {
             const isPaymentConfirmed = ['confirmed', 'success', 'paid', 'settlement'].includes(responseStatus);
             const responseTotals = response?.data?.totals || {};
             const invoiceNo = response?.data?.invoice_no || response?.data?.invoiceNo || null;
-            const receiptUrl = response?.data?.receipt_url || null;
+            const saleId = Number(response?.data?.sale_id);
 
             setShowPaymentModal(false);
             setCart([]);
@@ -242,8 +242,8 @@ export default function PosInterface() {
             setCustomerName('');
             setCustomerPhone('');
 
-            if (receiptUrl) {
-                window.open(receiptUrl, '_blank', 'noopener,noreferrer');
+            if (Number.isSafeInteger(saleId) && saleId > 0) {
+                window.open(`/pos/sales/${saleId}/receipt`, '_blank', 'noopener,noreferrer');
             }
 
             if (isPaymentConfirmed) {
@@ -378,8 +378,6 @@ export default function PosInterface() {
             return;
         }
 
-        localStorage.removeItem('pos_logged_in');
-        localStorage.removeItem('pos_role');
         window.location.assign('/login');
     };
 

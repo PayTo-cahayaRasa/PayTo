@@ -6,24 +6,28 @@ import type { HeroSectionProps } from '../types';
 
 function HeroLandscape() {
     return (
-        <svg aria-hidden="true" viewBox="0 0 1200 340" className="h-full w-full opacity-60" fill="none">
-            <path
-                d="M0 272C82 243 148 211 238 210C343 208 400 273 494 275C589 276 661 215 759 212C876 208 984 275 1200 248V340H0V272Z"
-                fill="#efd9ae"
-                opacity="0.58"
-            />
-            <path
-                d="M0 300C102 265 171 244 273 247C361 250 437 304 514 301C617 297 694 235 798 236C922 238 1047 308 1200 286V340H0V300Z"
-                fill="#e8cb96"
-                opacity="0.38"
-            />
-            <path d="M48 304 156 197 248 304" stroke="#ddb97e" strokeWidth="4" strokeLinejoin="round" opacity="0.52" />
-            <path d="M160 304 217 246 286 304" stroke="#ddb97e" strokeWidth="4" strokeLinejoin="round" opacity="0.48" />
-            <path d="M776 304v-66l43-33 45 33v66" stroke="#d8b272" strokeWidth="4" strokeLinejoin="round" opacity="0.5" />
-            <path d="M848 304v-84l56-41 60 41v84" stroke="#cfaa6a" strokeWidth="4" strokeLinejoin="round" opacity="0.54" />
-            <path d="M948 304v-70l46-35 50 35v70" stroke="#cfaa6a" strokeWidth="4" strokeLinejoin="round" opacity="0.4" />
-            <path d="M865 179v-26l38-27 41 27v26" stroke="#cfaa6a" strokeWidth="4" strokeLinejoin="round" opacity="0.42" />
-            <path d="M790 233v-18l28-22 28 22v18" stroke="#d8b272" strokeWidth="4" strokeLinejoin="round" opacity="0.42" />
+        <svg aria-hidden="true" viewBox="0 0 1200 340" className="h-full w-full" fill="none">
+            <path d="M0 258C112 214 199 208 302 240C394 269 457 282 548 246C659 202 757 198 871 238C981 277 1070 274 1200 225V340H0V258Z" fill="#f1dfbd" opacity="0.68" />
+            <path d="M0 292C122 252 218 246 321 274C425 303 508 303 608 265C727 220 824 233 926 273C1024 311 1107 303 1200 278V340H0V292Z" fill="#e8cb96" opacity="0.48" />
+            <path d="M0 318C143 288 255 288 379 312C523 339 659 305 760 286C909 258 1031 321 1200 300V340H0V318Z" fill="#dfbb7d" opacity="0.25" />
+
+            <g stroke="#cfa464" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 296 122 196l106 100M88 296l79-73 74 73M184 296l54-48 58 48" strokeWidth="3" opacity="0.5" />
+                <path d="m58 268 64-64 29 29M113 205l17-18 69 70" strokeWidth="1.5" opacity="0.34" />
+                <path d="M695 302h402" strokeWidth="2" opacity="0.34" />
+
+                <path d="M742 301v-54l45-32 45 32v54M730 247h115l-58-40-57 40Z" strokeWidth="3" opacity="0.58" />
+                <path d="M848 301v-75l59-42 60 42v75M833 226h149l-75-52-74 52Z" strokeWidth="3.5" opacity="0.64" />
+                <path d="M970 301v-58l47-35 49 35v58M958 243h120l-61-44-59 44Z" strokeWidth="3" opacity="0.5" />
+                <path d="M874 183v-24l33-24 35 24v24M865 159h84l-42-31-42 31Z" strokeWidth="2.5" opacity="0.48" />
+
+                <path d="M682 303c8-41 17-66 35-96M702 263c-20-4-31-15-37-32 22 2 34 13 37 32ZM708 242c18-5 29-17 34-35-20 3-31 15-34 35Z" strokeWidth="2.5" opacity="0.46" />
+                <path d="M1105 304c-3-35 4-62 21-88M1116 252c-17-3-27-13-32-28 19 2 29 12 32 28ZM1121 239c16-5 25-15 29-31-18 4-27 14-29 31Z" strokeWidth="2.5" opacity="0.42" />
+            </g>
+
+            <g fill="#d3a65e" opacity="0.36">
+                <circle cx="648" cy="284" r="4" /><circle cx="672" cy="292" r="3" /><circle cx="1080" cy="280" r="4" />
+            </g>
         </svg>
     );
 }
@@ -87,8 +91,11 @@ function HeroDecorBackdrop() {
     return (
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[2.5rem]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.95),transparent_30%),radial-gradient(circle_at_80%_30%,rgba(254,238,200,0.6),transparent_45%),linear-gradient(180deg,#fffaf3_0%,#fdf3e5_65%,#f7e7cc_100%)]" />
-            <div className="absolute -right-20 -top-20 h-140 w-140 rounded-full bg-[radial-gradient(circle,rgba(245,180,60,0.15)_0%,rgba(245,180,60,0.05)_45%,transparent_70%)] blur-xl" />
+            <div className="absolute -right-20 -top-20 h-140 w-140 rounded-full bg-[radial-gradient(circle,rgba(245,180,60,0.2)_0%,rgba(245,180,60,0.08)_45%,transparent_70%)] blur-xl" />
             <div className="absolute -left-20 top-10 h-100 w-100 rounded-full bg-[radial-gradient(circle,rgba(245,180,60,0.12)_0%,transparent_65%)] blur-xl" />
+            <div className="absolute -bottom-20 right-[5%] h-96 w-[62%] rounded-[50%] bg-[radial-gradient(ellipse,rgba(239,190,96,0.24)_0%,rgba(239,190,96,0.1)_42%,transparent_72%)] blur-2xl" />
+            <div className="absolute bottom-12 right-[7%] h-112 w-112 rounded-full border border-dashed border-[#dea43f]/25 sm:right-[10%] lg:right-[12%]" />
+            <div className="absolute bottom-23 right-[11%] h-96 w-96 rounded-full border border-dotted border-[#d48c1b]/20 sm:right-[14%] lg:right-[16%]" />
 
             <ChipOrnament className="absolute left-[8%] top-[12%] h-10 w-10 rotate-12 opacity-40 sm:h-14 sm:w-14" />
             <ChipOrnament className="absolute left-[35%] top-[8%] h-8 w-8 -rotate-45 opacity-30 sm:h-10 sm:w-10" />
@@ -99,7 +106,7 @@ function HeroDecorBackdrop() {
             <Sparkle className="absolute left-[45%] top-[18%] h-5 w-5 opacity-40" />
             <Sparkle className="absolute right-[20%] bottom-[30%] h-7 w-7 opacity-50" />
 
-            <div className="absolute inset-x-0 -bottom-14 h-80 opacity-90">
+            <div className="absolute inset-x-0 -bottom-2 h-96 opacity-95 sm:h-104 lg:-bottom-4 lg:h-112">
                 <HeroLandscape />
             </div>
             <div className="absolute inset-y-0 left-0 w-32 bg-[linear-gradient(90deg,#fef8ef_0%,rgba(254,248,239,0.78)_36%,rgba(244,248,239,0)_100%)] sm:w-40 lg:w-52" />
@@ -160,23 +167,21 @@ function FeatureItem({ title, subtitle, icon }: { title: string; subtitle: strin
 
 export function HeroSection({ business }: HeroSectionProps) {
     return (
-        <section className="overflow-x-clip px-4 pb-3 pt-5 sm:px-5 lg:px-8">
-            <div className="relative mx-auto max-w-462 overflow-hidden rounded-[2.5rem] px-5 pb-10 pt-6 shadow-[0_30px_65px_-46px_rgba(58,33,23,0.22)] sm:px-8 sm:pb-14 sm:pt-8 lg:overflow-visible lg:px-12 lg:pb-16">
+        <section className="relative -mt-24 overflow-hidden pb-30 pt-29 sm:-mt-26 sm:pb-38 sm:pt-32 lg:pb-48">
+            <div className="relative mx-auto max-w-462 px-5 pb-16 pt-6 sm:px-8 sm:pb-20 sm:pt-8 lg:px-12 lg:pb-24">
                 <HeroDecorBackdrop />
                 <HeroClouds />
                 <div className="relative z-10 grid items-start gap-8 lg:grid-cols-[0.54fr_0.46fr]">
                     <div className="max-w-132 pt-1 sm:pt-2">
-                        <h1 className="mt-4 whitespace-pre-line font-display text-[2.8rem] font-semibold leading-[0.88] tracking-[-0.06em] text-[#3a2117] sm:mt-5 sm:text-[3.6rem] lg:text-[4.5rem]">
-                            Buatan Tumpang,\nRasa Malang
+                        <h1 className="mt-4 font-display text-[2.8rem] font-semibold leading-[0.88] tracking-[-0.06em] text-[#3a2117] sm:mt-5 sm:text-[3.6rem] lg:text-[4.5rem]">
+                            Renyahnya
+                            <br />
+                            Cahaya Rasa
                         </h1>
                         <p className="mt-4 max-w-120 text-[0.95rem] leading-7 text-[#725442] sm:mt-5 sm:text-[1.05rem] sm:leading-8">
-                            {business.name} menghadirkan camilan dan oleh-oleh rumahan dari Malang: renyah, praktis, dan siap dipesan untuk keluarga maupun buah tangan.
+                            Camilan khas Malang yang dibuat dari bahan pilihan dan resep rumahan untuk rasa renyah, gurih, dan selalu bikin ingin kembali.
                         </p>
-                        {(business.address || business.operating_hours) && (
-                            <p className="mt-3 max-w-120 text-sm font-semibold leading-6 text-[#725442]">
-                                {[business.address, business.operating_hours].filter(Boolean).join(' · ')}
-                            </p>
-                        )}
+
                         <div className="mt-6 flex flex-col gap-3 sm:mt-7 sm:flex-row">
                             <a
                                 href={storefrontShopHref}
