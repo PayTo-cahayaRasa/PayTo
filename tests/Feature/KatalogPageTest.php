@@ -2,46 +2,102 @@
 
 namespace Tests\Feature;
 
+use App\Models\Product;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia;
 use Tests\TestCase;
 
 class KatalogPageTest extends TestCase
 {
-    public function test_public_catalog_page_redirects_to_landing_shop_section(): void
-    {
-        $response = $this->get('/katalog');
+    use RefreshDatabase;
 
-        $response->assertRedirect('/#shop-products');
+    public function test_public_landing_page_renders_active_backend_products(): void
+    {
+        Product::factory()->create([
+            'name' => 'Keripik Pisang',
+            'slug' => 'keripik-pisang',
+            'is_active' => true,
+            'is_public' => false,
+            'featured' => false,
+        ]);
+
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('storefront/LandingPage')
+            ->url('/')
+            ->where('products.data.0.name', 'Keripik Pisang')
+        );
     }
 
-    public function test_public_catalog_page_with_query_redirects_to_landing_shop_section(): void
+    public function test_public_catalog_page_renders_backend_catalog(): void
     {
-        $response = $this->get('/katalog?focus=search');
+        Product::factory()->create([
+            'name' => 'Keripik Pisang',
+            'slug' => 'keripik-pisang',
+            'is_active' => true,
+            'is_public' => false,
+        ]);
 
-        $response->assertRedirect('/#shop-products');
+        $response = $this->get('/katalog');
+
+        $response->assertOk();
+        $response->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('storefront/LandingPage')
+            ->url('/katalog')
+            ->where('products.data.0.name', 'Keripik Pisang')
+        );
+    }
+
+    public function test_public_catalog_page_with_query_filters_products(): void
+    {
+        Product::factory()->create([
+            'name' => 'Keripik Pisang',
+            'slug' => 'keripik-pisang',
+            'is_active' => true,
+            'is_public' => false,
+        ]);
+        Product::factory()->create([
+            'name' => 'Stik Talas',
+            'slug' => 'stik-talas',
+            'is_active' => true,
+            'is_public' => false,
+        ]);
+
+        $response = $this->get('/katalog?q=pisang');
+
+        $response->assertOk();
+        $response->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('storefront/LandingPage')
+            ->url('/katalog?q=pisang')
+            ->where('products.data.0.name', 'Keripik Pisang')
+            ->where('products.data', fn ($products): bool => $products->count() === 1)
+        );
     }
 
     public function test_public_catalog_detail_page_returns_a_successful_response(): void
     {
-        $response = $this->get('/katalog/1');
+        $product = Product::factory()->create([
+            'slug' => 'keripik-pisang',
+            'is_active' => true,
+            'is_public' => false,
+        ]);
+
+        $response = $this->get('/katalog/keripik-pisang');
 
         $response->assertOk();
         $response->assertInertia(fn (AssertableInertia $page) => $page
             ->component('storefront/KatalogDetailPage')
-            ->url('/katalog/1')
-            ->where('productId', 1)
+            ->url('/katalog/keripik-pisang')
+            ->where('product.id', $product->id)
         );
     }
 
-    public function test_missing_public_catalog_detail_page_still_renders_the_detail_shell(): void
+    public function test_missing_public_catalog_detail_page_returns_not_found(): void
     {
-        $response = $this->get('/katalog/999');
+        $response = $this->get('/katalog/produk-hilang');
 
-        $response->assertOk();
-        $response->assertInertia(fn (AssertableInertia $page) => $page
-            ->component('storefront/KatalogDetailPage')
-            ->url('/katalog/999')
-            ->where('productId', 999)
-        );
+        $response->assertNotFound();
     }
 }

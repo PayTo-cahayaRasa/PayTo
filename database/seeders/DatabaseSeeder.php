@@ -31,6 +31,9 @@ class DatabaseSeeder extends Seeder
             'role' => 'SUPERVISOR',
         ]);
 
-        $this->call(ProductReportSeeder::class);
+        $this->call([
+            ProductReportSeeder::class,
+            StorefrontSeeder::class,
+        ]);
     }
 }

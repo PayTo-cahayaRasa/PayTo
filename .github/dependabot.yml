@@ -8,8 +8,7 @@ updates:
       day: "monday"
       time: "09:00"
     open-pull-requests-limit: 5
-    reviewers:
-      - "ORGANIZATION/backend-team"
+
     labels:
       - "dependencies"
       - "composer"
@@ -28,8 +27,7 @@ updates:
       day: "monday"
       time: "09:00"
     open-pull-requests-limit: 5
-    reviewers:
-      - "ORGANIZATION/frontend-team"
+
     labels:
       - "dependencies"
       - "npm"
@@ -47,8 +45,7 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "ORGANIZATION/devops-team"
+
     labels:
       - "dependencies"
       - "github-actions"

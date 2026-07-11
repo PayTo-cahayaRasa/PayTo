@@ -9,9 +9,12 @@ import axios from 'axios';
 type BusinessSettings = {
     business: {
         name: string;
+        tagline?: string;
         address: string;
         whatsapp_number: string;
         operating_hours: string;
+        instagram_url?: string;
+        tiktok_url?: string;
     };
     catalog: {
         enabled: boolean;
@@ -28,9 +31,12 @@ export default function SettingsTab() {
     const [settings, setSettings] = useState<BusinessSettings>({
         business: {
             name: '',
+            tagline: '',
             address: '',
             whatsapp_number: '',
             operating_hours: '',
+            instagram_url: '',
+            tiktok_url: '',
         },
         catalog: {
             enabled: true,
@@ -109,7 +115,7 @@ export default function SettingsTab() {
             {/* Status Messages */}
             {saveStatus === 'success' && (
                 <div className="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-start gap-3">
-                    <CheckCircle size={20} className="text-green-600 flex-shrink-0 mt-0.5" />
+                    <CheckCircle size={20} className="text-green-600 shrink-0 mt-0.5" />
                     <div>
                         <p className="font-bold text-sm text-green-900">Berhasil disimpan!</p>
                         <p className="text-xs text-green-700 mt-1">Pengaturan toko berhasil diperbarui.</p>
@@ -119,7 +125,7 @@ export default function SettingsTab() {
 
             {saveStatus === 'error' && errorMessage && (
                 <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
-                    <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
+                    <AlertCircle size={20} className="text-red-600 shrink-0 mt-0.5" />
                     <div>
                         <p className="font-bold text-sm text-red-900">Gagal menyimpan</p>
                         <p className="text-xs text-red-700 mt-1">{errorMessage}</p>
@@ -129,7 +135,7 @@ export default function SettingsTab() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Profil Toko */}
-                <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem] p-6 shadow-sm">
+                <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-4xl p-6 shadow-sm">
                     <h3 className="font-bold text-lg text-slate-800 mb-6 flex items-center gap-2">
                         <Settings size={20} className="text-slate-400" /> Profil Toko
                     </h3>
@@ -158,6 +164,31 @@ export default function SettingsTab() {
                             />
                             {getFieldError('business.name') && (
                                 <p className="text-xs text-red-600 mt-1">{getFieldError('business.name')}</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                                Tagline
+                            </label>
+                            <input
+                                type="text"
+                                value={settings.business.tagline || ''}
+                                onChange={(e) =>
+                                    setSettings({
+                                        ...settings,
+                                        business: { ...settings.business, tagline: e.target.value },
+                                    })
+                                }
+                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none ${
+                                    getFieldError('business.tagline')
+                                        ? 'border-red-300 bg-red-50/50'
+                                        : 'border-white/60'
+                                }`}
+                                placeholder="Contoh: Oleh-Oleh Malang"
+                            />
+                            {getFieldError('business.tagline') && (
+                                <p className="text-xs text-red-600 mt-1">{getFieldError('business.tagline')}</p>
                             )}
                         </div>
 
@@ -245,11 +276,61 @@ export default function SettingsTab() {
                                 </p>
                             )}
                         </div>
+
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                                Link Instagram
+                            </label>
+                            <input
+                                type="url"
+                                value={settings.business.instagram_url || ''}
+                                onChange={(e) =>
+                                    setSettings({
+                                        ...settings,
+                                        business: { ...settings.business, instagram_url: e.target.value },
+                                    })
+                                }
+                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none ${
+                                    getFieldError('business.instagram_url')
+                                        ? 'border-red-300 bg-red-50/50'
+                                        : 'border-white/60'
+                                }`}
+                                placeholder="https://www.instagram.com/cahayarasamalang/"
+                            />
+                            {getFieldError('business.instagram_url') && (
+                                <p className="text-xs text-red-600 mt-1">{getFieldError('business.instagram_url')}</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                                Link TikTok
+                            </label>
+                            <input
+                                type="url"
+                                value={settings.business.tiktok_url || ''}
+                                onChange={(e) =>
+                                    setSettings({
+                                        ...settings,
+                                        business: { ...settings.business, tiktok_url: e.target.value },
+                                    })
+                                }
+                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none ${
+                                    getFieldError('business.tiktok_url')
+                                        ? 'border-red-300 bg-red-50/50'
+                                        : 'border-white/60'
+                                }`}
+                                placeholder="https://www.tiktok.com/@cahayarasa_28"
+                            />
+                            {getFieldError('business.tiktok_url') && (
+                                <p className="text-xs text-red-600 mt-1">{getFieldError('business.tiktok_url')}</p>
+                            )}
+                        </div>
                     </div>
                 </div>
 
                 {/* Pengaturan Katalog */}
-                <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem] p-6 shadow-sm">
+                <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-4xl p-6 shadow-sm">
                     <h3 className="font-bold text-lg text-slate-800 mb-6 flex items-center gap-2">
                         <Globe size={20} className="text-slate-400" /> Katalog & WhatsApp
                     </h3>

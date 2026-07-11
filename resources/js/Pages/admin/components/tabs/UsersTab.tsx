@@ -155,6 +155,15 @@ export default function UsersTab() {
             payload.current_credential = currentCredential;
         }
 
+        if (!selectedStaff && formState.role === 'SUPERVISOR') {
+            const credential = window.prompt('Masukkan password atau PIN supervisor saat ini:');
+            if (!credential) {
+                setIsSaving(false);
+                return;
+            }
+            payload.current_credential = credential;
+        }
+
         try {
             if (selectedStaff) {
                 const response = await axios.put(`/api/admin/staff/${selectedStaff.id}`, payload);

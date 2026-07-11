@@ -18,6 +18,8 @@ export type CartItem = Product & {
 
 export type PaymentMethod = 'CASH' | 'EWALLET';
 
+export type SaleSource = 'WALK_IN' | 'WHATSAPP';
+
 export type Category = {
     id: string;
     label: string;
@@ -41,6 +43,9 @@ export type TransactionHistory = {
     invoiceNo: string;
     time: string;
     status: 'PAID' | 'VOID';
+    source: SaleSource;
+    customerName?: string | null;
+    customerPhone?: string | null;
     paymentMethod: 'CASH' | 'EWALLET';
     totalBeforeDiscount: number;
     discountTotal: number;

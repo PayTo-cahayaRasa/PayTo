@@ -33,10 +33,6 @@ export default function AdminPage() {
     const notificationRef = useRef<HTMLDivElement>(null);
     const userMenuRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        const isLoggedIn = localStorage.getItem('pos_logged_in') === 'true';
-        const role = localStorage.getItem('pos_role');
-    }, []);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -119,8 +115,6 @@ export default function AdminPage() {
             return;
         }
 
-        localStorage.removeItem('pos_logged_in');
-        localStorage.removeItem('pos_role');
         window.location.assign('/login');
     };
 

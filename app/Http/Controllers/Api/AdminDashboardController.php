@@ -32,6 +32,13 @@ class AdminDashboardController extends Controller
             ->whereBetween('occurred_at', [$todayStart, $todayEnd])
             ->count();
 
+        $sourceSummary = Sale::query()
+            ->selectRaw('source, COUNT(*) as transactions, SUM(grand_total) as total')
+            ->where('status', 'PAID')
+            ->groupBy('source')
+            ->get()
+            ->keyBy('source');
+
         $trendStart = now()->subDays(6)->startOfDay();
         $trendEnd = now()->endOfDay();
 
@@ -110,6 +117,12 @@ class AdminDashboardController extends Controller
             'data' => [
                 'today_sales_total' => $todaySalesTotal,
                 'today_transactions' => $todayTransactions,
+                'source_summary' => collect(['WALK_IN', 'WHATSAPP'])->mapWithKeys(fn (string $source): array => [
+                    $source => [
+                        'transactions' => (int) ($sourceSummary->get($source)->transactions ?? 0),
+                        'total' => (float) ($sourceSummary->get($source)->total ?? 0),
+                    ],
+                ]),
                 'low_stock' => [
                     'total' => $lowStockItems->count(),
                     'items' => $lowStockItems->values(),

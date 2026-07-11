@@ -69,6 +69,9 @@ class AdminDashboardApiTest extends TestCase
             'grand_total' => 100000,
             'paid_total' => 100000,
             'change_total' => 0,
+            'source' => 'WHATSAPP',
+            'customer_name' => 'Budi',
+            'customer_phone' => '6281234567890',
             'occurred_at' => now(),
         ]);
 
@@ -87,12 +90,18 @@ class AdminDashboardApiTest extends TestCase
                 'data' => [
                     'today_sales_total',
                     'today_transactions',
+                    'source_summary' => [
+                        'WALK_IN' => ['transactions', 'total'],
+                        'WHATSAPP' => ['transactions', 'total'],
+                    ],
                     'low_stock' => ['total', 'items'],
                     'weekly_sales_trend',
                     'recent_activities',
                 ],
             ])
             ->assertJsonPath('data.today_transactions', 1)
+            ->assertJsonPath('data.source_summary.WHATSAPP.transactions', 1)
+            ->assertJsonPath('data.source_summary.WALK_IN.transactions', 0)
             ->assertJsonPath('data.low_stock.total', 1)
             ->assertJsonCount(7, 'data.weekly_sales_trend')
             ->assertJsonCount(1, 'data.recent_activities');

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Product;
+use App\Models\StockItem;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -29,6 +30,7 @@ class PosCheckoutApiTest extends TestCase
             'uom' => 'cup',
             'is_active' => true,
         ]);
+        StockItem::query()->create(['product_id' => $product->id, 'on_hand' => 2]);
 
         $response = $this->actingAs($cashier)->postJson('/api/pos/checkout', [
             'cashier_id' => $otherCashier->id,
@@ -56,5 +58,7 @@ class PosCheckoutApiTest extends TestCase
         $this->assertDatabaseMissing('sales', [
             'local_txn_uuid' => '00000000-0000-0000-0000-000000000000',
         ]);
+        $this->assertDatabaseHas('stock_items', ['product_id' => $product->id, 'on_hand' => 1]);
+        $this->assertDatabaseHas('stock_movements', ['product_id' => $product->id, 'type' => 'SALE_OUT']);
     }
 }

@@ -35,9 +35,13 @@ class ProductHistory extends Model
      * Available audit events
      */
     public const EVENT_CREATED = 'CREATED';
+
     public const EVENT_UPDATED = 'UPDATED';
+
     public const EVENT_DELETED = 'DELETED';
+
     public const EVENT_STOCK_ADJUSTED = 'STOCK_ADJUSTED';
+
     public const EVENT_STOCK_OPNAME = 'STOCK_OPNAME';
 
     public function product(): \Illuminate\Database\Eloquent\Relations\BelongsTo

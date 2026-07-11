@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class BusinessSettingsRequest extends FormRequest
 {
@@ -27,6 +28,9 @@ class BusinessSettingsRequest extends FormRequest
             'business.address' => ['required', 'string', 'max:500'],
             'business.whatsapp_number' => ['nullable', 'string', 'regex:/^[0-9]{8,15}$/'],
             'business.operating_hours' => ['required', 'string', 'max:255'],
+            'business.tagline' => ['nullable', 'string', 'max:120'],
+            'business.instagram_url' => ['nullable', 'url', 'max:255'],
+            'business.tiktok_url' => ['nullable', 'url', 'max:255'],
 
             // Catalog settings
             'catalog.enabled' => ['required', 'boolean'],
@@ -45,6 +49,9 @@ class BusinessSettingsRequest extends FormRequest
             'business.address' => 'alamat toko',
             'business.whatsapp_number' => 'nomor WhatsApp',
             'business.operating_hours' => 'jam operasional',
+            'business.tagline' => 'tagline toko',
+            'business.instagram_url' => 'tautan Instagram',
+            'business.tiktok_url' => 'tautan TikTok',
             'catalog.enabled' => 'status katalog',
             'catalog.whatsapp_enabled' => 'status WhatsApp katalog',
             'catalog.whatsapp_message_template' => 'template pesan WhatsApp',
@@ -64,6 +71,8 @@ class BusinessSettingsRequest extends FormRequest
             'business.whatsapp_number.regex' => 'Nomor WhatsApp harus berupa 8-15 digit angka (format internasional tanpa +, spasi, atau tanda hubung). Contoh: 6281234567890',
             'business.operating_hours.required' => 'Jam operasional wajib diisi.',
             'business.operating_hours.max' => 'Jam operasional maksimal 255 karakter.',
+            'business.instagram_url.url' => 'Tautan Instagram harus berupa URL valid.',
+            'business.tiktok_url.url' => 'Tautan TikTok harus berupa URL valid.',
             'catalog.enabled.required' => 'Status katalog wajib diisi.',
             'catalog.enabled.boolean' => 'Status katalog harus berupa true atau false.',
             'catalog.whatsapp_enabled.required' => 'Status WhatsApp katalog wajib diisi.',
@@ -76,9 +85,9 @@ class BusinessSettingsRequest extends FormRequest
     /**
      * Validate WhatsApp template placeholders
      */
-    public function withValidator($validator): void
+    public function withValidator(Validator $validator): void
     {
-        $validator->after(function ($validator) {
+        $validator->after(function (Validator $validator): void {
             $template = $this->input('catalog.whatsapp_message_template', '');
             $allowedPlaceholders = ['{product_name}', '{price}', '{qty}'];
 

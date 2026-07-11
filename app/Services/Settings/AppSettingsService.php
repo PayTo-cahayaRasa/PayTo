@@ -16,10 +16,13 @@ class AppSettingsService
     private const KEY_POS_TARGET = 'pos.cashier_target';
 
     private const DEFAULT_BUSINESS_PROFILE = [
-        'name' => 'Nama Toko',
-        'address' => 'Alamat Toko',
+        'name' => 'Cahaya Rasa',
+        'tagline' => 'Oleh-Oleh Malang',
+        'address' => '2P5W+95R, Jl. Sukoanyar, Nongkosongo, Wringinsongo, Kec. Tumpang, Kabupaten Malang, Jawa Timur 65156',
         'whatsapp_number' => '',
         'operating_hours' => 'Senin-Sabtu 08.00-20.00 WIB',
+        'instagram_url' => 'https://www.instagram.com/cahayarasamalang/',
+        'tiktok_url' => 'https://www.tiktok.com/@cahayarasa_28',
     ];
 
     private const DEFAULT_CATALOG_SETTINGS = [

@@ -1,25 +1,33 @@
 import { Facebook, Instagram, Mail, MapPin, MessageCircle } from 'lucide-react';
 
-import { marketplaceItems, whatsappUrl } from '../constants';
+import { businessWhatsappUrl, marketplaceItems } from '../constants';
+import type { PublicFooterProps } from '../types';
 import { BrandMark } from './BrandMark';
 
-export function PublicFooter() {
+export function PublicFooter({ business }: PublicFooterProps) {
+    const whatsappHref = businessWhatsappUrl(business);
+
     return (
-        <footer className="px-4 pb-8 pt-2 sm:px-5 lg:px-8">
-            <div className="mx-auto max-w-[1848px] px-3 py-4 sm:px-0">
+        <footer id="kontak" className="scroll-mt-24 px-4 pb-8 pt-2 sm:px-5 lg:px-8">
+            <div className="mx-auto max-w-462 px-3 py-4 sm:px-0">
                 <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.12fr_0.8fr_0.8fr_1fr]">
                     <div>
-                        <BrandMark />
+                        <BrandMark business={business} />
                         <p className="mt-4 max-w-xs text-sm leading-7 text-[#6d5948]">
-                            Camilan khas Malang dari Wiyung. Dibuat dengan bahan pilihan dan resep rumahan untuk rasa terbaik.
+                            Camilan khas Malang. Dibuat dengan bahan pilihan dan resep untuk rasa terbaik.
                         </p>
                         <div className="mt-5 flex items-center gap-3">
-                            {[Instagram, Facebook, MessageCircle, Mail].map((Icon, index) => (
+                            {[
+                                { Icon: Instagram, href: business.instagram_url ?? '#footer' },
+                                { Icon: Facebook, href: '#footer' },
+                                { Icon: MessageCircle, href: whatsappHref ?? '#footer' },
+                                { Icon: Mail, href: '#footer' },
+                            ].map(({ Icon, href }, index) => (
                                 <a
                                     key={index}
-                                    href={index === 2 ? whatsappUrl : '#footer'}
-                                    target={index === 2 ? '_blank' : undefined}
-                                    rel={index === 2 ? 'noreferrer' : undefined}
+                                    href={href}
+                                    target={href.startsWith('http') ? '_blank' : undefined}
+                                    rel={href.startsWith('http') ? 'noreferrer' : undefined}
                                     className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#eadfcf] text-[#3a2117]"
                                 >
                                     <Icon size={15} strokeWidth={1.8} />
@@ -56,7 +64,7 @@ export function PublicFooter() {
                         <div className="mt-4 grid gap-4 text-sm leading-7 text-[#6d5948]">
                             <div className="flex items-start gap-3">
                                 <MessageCircle size={16} strokeWidth={1.8} className="mt-1 text-[#3a2117]" />
-                                <span>0812-3456-7890</span>
+                                <span>{business.whatsapp_number || '-'}</span>
                             </div>
                             <div className="flex items-start gap-3">
                                 <Mail size={16} strokeWidth={1.8} className="mt-1 text-[#3a2117]" />
@@ -64,7 +72,7 @@ export function PublicFooter() {
                             </div>
                             <div className="flex items-start gap-3">
                                 <MapPin size={16} strokeWidth={1.8} className="mt-1 text-[#3a2117]" />
-                                <span>Wiyung, Malang, Jawa Timur</span>
+                                <span>{business.address}</span>
                             </div>
                         </div>
                     </div>
@@ -72,7 +80,7 @@ export function PublicFooter() {
 
                 <div className="mt-8 flex flex-col gap-3 border-t border-[#eadfcf] pt-5 text-xs text-[#836b58] sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-2">
-                        <p>&copy; 2025 Cahaya Rasa. All Rights Reserved.</p>
+                        <p>&copy; 2025 {business.name}. All Rights Reserved.</p>
                         <span className="text-[#b69877]">&middot;</span>
                         <span className="text-[10px] text-[#a08568]">Powered by PayTo POS</span>
                     </div>

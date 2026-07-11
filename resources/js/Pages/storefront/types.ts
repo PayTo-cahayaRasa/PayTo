@@ -6,7 +6,18 @@ export type PublicFrameProps = {
     children: ReactNode;
 };
 
+export type BusinessProfile = {
+    name: string;
+    tagline?: string;
+    address: string;
+    whatsapp_number: string;
+    operating_hours: string;
+    instagram_url?: string;
+    tiktok_url?: string;
+};
+
 export type PublicHeaderProps = {
+    business: BusinessProfile;
     cartItems: PublicCartLineItem[];
     onIncreaseCartItem: (productId: number) => void;
     onDecreaseCartItem: (productId: number) => void;
@@ -14,7 +25,7 @@ export type PublicHeaderProps = {
 };
 
 export type HeroSectionProps = {
-    heading: string;
+    business: BusinessProfile;
 };
 
 export type CatalogSidebarProps = {
@@ -34,6 +45,10 @@ export type MinimalPaginationProps = {
     currentPage: number;
     totalPages: number;
     onPageChange: (page: number) => void;
+};
+
+export type PublicFooterProps = {
+    business: BusinessProfile;
 };
 
 export type PublicCartEntry = {

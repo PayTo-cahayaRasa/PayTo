@@ -6,6 +6,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\CurrentUserCredential;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ApprovalRejectRequest extends FormRequest
@@ -22,6 +23,7 @@ class ApprovalRejectRequest extends FormRequest
     {
         return [
             'reason' => ['required', 'string', 'min:5', 'max:255'],
+            'current_credential' => ['required', 'string', new CurrentUserCredential($this->user())],
         ];
     }
 
