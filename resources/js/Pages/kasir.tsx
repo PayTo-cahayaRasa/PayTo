@@ -570,7 +570,7 @@ export default function PosInterface() {
                         page={historyMeta.currentPage}
                         lastPage={historyMeta.lastPage}
                         onPageChange={(page) => setHistoryPage(page)}
-                        onRequestRefund={openRefundModal}
+
                     />
                 )}
 
@@ -606,7 +606,7 @@ export default function PosInterface() {
                     }}
                     onUpdateQty={updateQty}
                     onRemoveFromCart={removeFromCart}
-                    onOpenApprovalModal={() => setShowApprovalModal(true)}
+
                     onCheckout={() => setShowPaymentModal(true)}
                     formatRupiah={formatRupiah}
                 />

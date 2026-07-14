@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { router } from '@inertiajs/react';
-import { LayoutDashboard, Package, Printer, ShieldCheck, Users, Settings, ShoppingBag, LogOut, ShoppingCart } from 'lucide-react';
+import { LayoutDashboard, Package, Printer, Users, Settings, ShoppingBag, LogOut, ShoppingCart } from 'lucide-react';
 import type { AdminTab } from '../types';
 import SidebarItem from './SidebarItem';
 
@@ -57,13 +57,7 @@ export default function Sidebar({ activeTab, onChangeTab, onLogout }: SidebarPro
                     isActive={activeTab === 'RECEIPT'}
                     onClick={() => onChangeTab('RECEIPT')}
                 />
-                <SidebarItem
-                    icon={ShieldCheck}
-                    label="Approval Logs"
-                    id="APPROVALS"
-                    isActive={activeTab === 'APPROVALS'}
-                    onClick={() => onChangeTab('APPROVALS')}
-                />
+
                 <div className="pt-4 pb-2">
                     <div className="h-px bg-slate-200/50 mx-4"></div>
                 </div>

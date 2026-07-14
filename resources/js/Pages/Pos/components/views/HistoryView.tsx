@@ -22,7 +22,7 @@ type HistoryViewProps = {
     page: number;
     lastPage: number;
     onPageChange: (page: number) => void;
-    onRequestRefund: (tx: TransactionHistory) => void;
+
 };
 
 export default function HistoryView({
@@ -38,7 +38,7 @@ export default function HistoryView({
     page,
     lastPage,
     onPageChange,
-    onRequestRefund,
+
 }: HistoryViewProps) {
     const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -254,15 +254,7 @@ export default function HistoryView({
                                                     Refund menunggu persetujuan supervisor.
                                                 </p>
                                             )}
-                                            {tx.canRefund && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => onRequestRefund(tx)}
-                                                    className="mt-2 inline-flex items-center rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-100"
-                                                >
-                                                    Refund
-                                                </button>
-                                            )}
+
                                         </div>
                                     )}
 

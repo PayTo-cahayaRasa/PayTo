@@ -11,7 +11,7 @@ type CartPanelProps = {
     onClearCart: () => void;
     onUpdateQty: (id: number, delta: number) => void;
     onRemoveFromCart: (id: number) => void;
-    onOpenApprovalModal: () => void;
+
     onCheckout: () => void;
     formatRupiah: (num: number) => string;
 };
@@ -24,7 +24,7 @@ export default function CartPanel({
     onClearCart,
     onUpdateQty,
     onRemoveFromCart,
-    onOpenApprovalModal,
+
     onCheckout,
     formatRupiah,
 }: CartPanelProps) {
@@ -101,9 +101,7 @@ export default function CartPanel({
                                             </button>
                                         </div>
 
-                                        <button onClick={onOpenApprovalModal} className="px-2 py-1 rounded-md text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-medium transition-colors border border-indigo-100">
-                                            {item.discount > 0 ? `-${formatRupiah(item.discount)}` : '% Disc'}
-                                        </button>
+
                                     </div>
                                 </div>
                             </div>

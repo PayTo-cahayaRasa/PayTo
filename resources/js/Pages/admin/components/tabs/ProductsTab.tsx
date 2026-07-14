@@ -40,6 +40,8 @@ export default function ProductsTab() {
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [formState, setFormState] = useState<ProductFormState>(defaultFormState);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [showStockModal, setShowStockModal] = useState(false);
     const [stockAction, setStockAction] = useState<StockAction>('ADD');
     const [selectedStockProductId, setSelectedStockProductId] = useState<number | ''>('');
@@ -291,17 +293,22 @@ export default function ProductsTab() {
         }
     };
 
-    const handleDelete = async (product: Product) => {
-        const confirmed = window.confirm(`Hapus produk ${product.name}?`);
-        if (!confirmed) {
+    const handleDelete = async () => {
+        if (!productToDelete || isDeleting) {
             return;
         }
 
+        setIsDeleting(true);
+        setErrorMessage(null);
         try {
-            await axios.delete(`/api/admin/products/${product.id}`);
-            setProducts(items => items.filter(item => item.id !== product.id));
+            await axios.delete(`/api/admin/products/${productToDelete.id}`);
+            setProducts(items => items.filter(item => item.id !== productToDelete.id));
+            setProductToDelete(null);
         } catch (error) {
-            setErrorMessage('Gagal menghapus produk.');
+            const message = axios.isAxiosError(error) ? error.response?.data?.message : null;
+            setErrorMessage(message || 'Gagal menghapus produk.');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -490,7 +497,7 @@ export default function ProductsTab() {
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    onClick={() => handleDelete(product)}
+                                                    onClick={() => setProductToDelete(product)}
                                                     className="inline-flex items-center justify-center p-2.5 bg-white border border-slate-200 rounded-lg text-rose-500 hover:bg-rose-50 hover:border-rose-200 active:scale-95 transition-all"
                                                     aria-label={`Hapus produk ${product.name}`}
                                                     title="Hapus produk"
@@ -512,6 +519,51 @@ export default function ProductsTab() {
                     </table>
                 </div>
             </div>
+
+            {productToDelete && (
+                <div
+                    className="fixed inset-0 z-60 flex items-center justify-center bg-slate-950/35 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="delete-product-title"
+                    onKeyDown={(event) => {
+                        if (event.key === 'Escape' && !isDeleting) {
+                            setProductToDelete(null);
+                        }
+                    }}
+                >
+                    <div className="w-full max-w-md overflow-hidden rounded-4xl border border-white/70 bg-white shadow-2xl">
+                        <div className="p-7 sm:p-8">
+                            <div className="flex size-14 items-center justify-center rounded-2xl border border-rose-100 bg-rose-50 text-rose-600">
+                                <Trash2 size={24} />
+                            </div>
+                            <h3 id="delete-product-title" className="mt-5 text-xl font-bold text-slate-900">Hapus produk?</h3>
+                            <p className="mt-2 text-sm leading-6 text-slate-500">
+                                <strong className="text-slate-700">{productToDelete.name}</strong> akan dihapus dari katalog dan POS. Riwayat transaksi tetap tersimpan.
+                            </p>
+                        </div>
+                        <div className="flex flex-col-reverse gap-2 border-t border-slate-100 bg-slate-50 p-5 sm:flex-row sm:justify-end">
+                            <button
+                                type="button"
+                                autoFocus
+                                disabled={isDeleting}
+                                onClick={() => setProductToDelete(null)}
+                                className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100 disabled:opacity-50"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                disabled={isDeleting}
+                                onClick={handleDelete}
+                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-rose-200 transition-colors hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                <Trash2 size={17} /> {isDeleting ? 'Menghapus...' : 'Hapus Produk'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {showStockModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm animate-in fade-in duration-200">
