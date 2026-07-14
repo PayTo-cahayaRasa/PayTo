@@ -211,11 +211,16 @@ class ProductApiTest extends TestCase
         $this->actingAs($supervisor)->deleteJson("/api/admin/products/{$product->id}")
             ->assertOk();
 
-        $this->assertDatabaseMissing('products', [
+        $this->assertSoftDeleted('products', [
             'id' => $product->id,
         ]);
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'is_active' => false,
+            'is_public' => false,
+        ]);
 
-        $this->assertDatabaseMissing('stock_items', [
+        $this->assertDatabaseHas('stock_items', [
             'product_id' => $product->id,
         ]);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\OnlineOrder;
 use App\Models\Product;
 use App\Services\Settings\AppSettingsService;
 
@@ -57,6 +58,39 @@ class WhatsAppLinkBuilder
 
         // Build wa.me link
         return "https://wa.me/{$whatsappNumber}?text={$encodedMessage}";
+    }
+
+    public function buildShippingUpdateLink(OnlineOrder $order): ?string
+    {
+        $profile = $this->settings->getBusinessProfile();
+        $number = preg_replace('/\D/', '', (string) ($profile['whatsapp_number'] ?? ''));
+        if (strlen($number) < 8 || ! $order->tracking_number) {
+            return null;
+        }
+
+        $trackingUrl = route('orders.track', ['orderNumber' => $order->order_number, 'token' => $order->tracking_token]);
+        $message = implode("\n", [
+            "Halo {$order->customer_name}, pesanan {$order->order_number} sudah dikirim.",
+            "Kurir: {$order->shipping_courier_name} {$order->shipping_service}",
+            "Nomor resi: {$order->tracking_number}",
+            "Lacak pesanan: {$trackingUrl}",
+        ]);
+
+        return "https://wa.me/{$number}?text=".urlencode($message);
+    }
+
+    public function buildPaymentConfirmationLink(OnlineOrder $order): ?string
+    {
+        $profile = $this->settings->getBusinessProfile();
+        $number = preg_replace('/\D/', '', (string) ($profile['whatsapp_number'] ?? ''));
+        if (strlen($number) < 8) {
+            return null;
+        }
+
+        $total = $this->formatRupiah((float) $order->grand_total);
+        $message = "Halo {$profile['name']}, saya sudah membayar pesanan {$order->order_number} sebesar {$total}. Bukti pembayaran saya lampirkan di sini.";
+
+        return "https://wa.me/{$number}?text=".urlencode($message);
     }
 
     /**

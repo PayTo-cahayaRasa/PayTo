@@ -38,6 +38,7 @@ class ProductUpdateRequest extends FormRequest
             'is_public' => ['sometimes', 'boolean'],
             'featured' => ['sometimes', 'boolean'],
             'stock' => ['sometimes', 'required', 'numeric', 'min:0'],
+            'weight_grams' => ['sometimes', 'nullable', 'integer', 'min:1'],
         ];
     }
 

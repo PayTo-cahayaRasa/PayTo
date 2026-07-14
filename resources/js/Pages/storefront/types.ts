@@ -54,6 +54,7 @@ export type PublicFooterProps = {
 export type PublicCartEntry = {
     productId: number;
     quantity: number;
+    product?: PublicCatalogProduct;
 };
 
 export type PublicCartLineItem = {

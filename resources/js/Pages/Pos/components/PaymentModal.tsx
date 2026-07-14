@@ -19,8 +19,6 @@ type PaymentModalProps = {
     onClose: () => void;
     onCheckout: () => void;
     quickCashAmounts: number[];
-    grandTotal: number;
-    taxTotal: number;
     discountTotal: number;
     totalDue: number;
     subtotal: number;
@@ -45,7 +43,6 @@ export default function PaymentModal({
     onCheckout,
     quickCashAmounts,
     discountTotal,
-    taxTotal,
     totalDue,
     subtotal,
     change,
@@ -229,10 +226,7 @@ export default function PaymentModal({
                                     <span>Subtotal</span>
                                     <span className="font-mono font-bold text-slate-700">{formatRupiah(subtotal)}</span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span>Pajak (11%)</span>
-                                    <span className="font-mono font-bold text-slate-700">{formatRupiah(taxTotal)}</span>
-                                </div>
+
                                 {discountTotal > 0 && (
                                     <div className="flex justify-between text-emerald-600 font-semibold">
                                         <span>Diskon</span>

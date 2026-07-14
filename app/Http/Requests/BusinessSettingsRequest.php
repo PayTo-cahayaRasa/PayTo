@@ -36,6 +36,15 @@ class BusinessSettingsRequest extends FormRequest
             'catalog.enabled' => ['required', 'boolean'],
             'catalog.whatsapp_enabled' => ['required', 'boolean'],
             'catalog.whatsapp_message_template' => ['required', 'string', 'max:500'],
+            'online_order.shipping.origin' => ['required_with:online_order', 'string', 'max:50'],
+            'online_order.shipping.packaging_weight_grams' => ['required_with:online_order', 'integer', 'min:0', 'max:100000'],
+            'online_order.shipping.couriers' => ['required_with:online_order', 'array', 'min:1', 'max:3'],
+            'online_order.shipping.couriers.*' => ['required', 'string', 'max:20', 'distinct'],
+            'online_order.payment.bank_name' => ['nullable', 'string', 'max:100'],
+            'online_order.payment.bank_account_number' => ['nullable', 'string', 'max:50'],
+            'online_order.payment.bank_account_name' => ['nullable', 'string', 'max:100'],
+            'online_order.payment.qris_image_url' => ['nullable', 'url', 'max:500'],
+            'online_order.payment.instructions' => ['required_with:online_order', 'string', 'max:1000'],
         ];
     }
 

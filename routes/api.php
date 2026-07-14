@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AdminProfileController;
 use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\BusinessSettingsController;
 use App\Http\Controllers\Api\InventoryRecommendationController;
+use App\Http\Controllers\Api\OnlineOrderController;
 use App\Http\Controllers\Api\PosApiController;
 use App\Http\Controllers\Api\PosCheckoutController;
 use App\Http\Controllers\Api\PosRefundController;
@@ -12,7 +13,13 @@ use App\Http\Controllers\Api\PosSettingsController;
 use App\Http\Controllers\Api\ProductQueryController;
 use App\Http\Controllers\Api\ReceiptSettingsController;
 use App\Http\Controllers\Api\StaffManagementController;
+use App\Http\Controllers\StorefrontCheckoutController;
 use Illuminate\Support\Facades\Route;
+
+Route::middleware(['web', 'throttle:checkout'])->prefix('storefront')->name('api.storefront.')->group(function () {
+    Route::get('/destinations', [StorefrontCheckoutController::class, 'destinations'])->name('destinations');
+    Route::post('/shipping-quote', [StorefrontCheckoutController::class, 'quote'])->name('shipping-quote');
+});
 
 // Admin API endpoints - Supervisor only with rate limiting
 Route::middleware([
@@ -37,9 +44,10 @@ Route::middleware([
     Route::get('/receipt-settings', [ReceiptSettingsController::class, 'index'])->name('receipt-settings.index');
     Route::get('/business-settings', [BusinessSettingsController::class, 'index'])->name('business-settings.index');
 
-    // Approvals (read operations)
-    Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
-    Route::get('/approvals/pending', [ApprovalController::class, 'pending'])->name('approvals.pending');
+    if (config('features.approval_requests')) {
+        Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
+        Route::get('/approvals/pending', [ApprovalController::class, 'pending'])->name('approvals.pending');
+    }
 
     // Staff management (read operations)
     Route::get('/staff', [StaffManagementController::class, 'index'])->name('staff.index');
@@ -64,13 +72,14 @@ Route::middleware([
         ->middleware('throttle:admin-write')
         ->name('business-settings.update');
 
-    // Approvals (write operations)
-    Route::post('/approvals/{approval}/approve', [ApprovalController::class, 'approve'])
-        ->middleware('throttle:admin-write')
-        ->name('approvals.approve');
-    Route::post('/approvals/{approval}/reject', [ApprovalController::class, 'reject'])
-        ->middleware('throttle:admin-write')
-        ->name('approvals.reject');
+    if (config('features.approval_requests')) {
+        Route::post('/approvals/{approval}/approve', [ApprovalController::class, 'approve'])
+            ->middleware('throttle:admin-write')
+            ->name('approvals.approve');
+        Route::post('/approvals/{approval}/reject', [ApprovalController::class, 'reject'])
+            ->middleware('throttle:admin-write')
+            ->name('approvals.reject');
+    }
 
     // Staff management (write operations)
     Route::post('/staff', [StaffManagementController::class, 'store'])
@@ -93,9 +102,25 @@ Route::middleware(['web', 'auth', 'role:CASHIER,SUPERVISOR'])->prefix('pos')->na
     Route::get('/history', [PosApiController::class, 'history'])->name('history');
     Route::get('/profile', [PosApiController::class, 'profile'])->name('profile');
     Route::post('/checkout', [PosCheckoutController::class, 'store'])->middleware('throttle:checkout')->name('checkout');
-    Route::post('/refunds', [PosRefundController::class, 'store'])->middleware('throttle:refund')->name('refunds');
+    if (config('features.refund_requests')) {
+        Route::post('/refunds', [PosRefundController::class, 'store'])->middleware('throttle:refund')->name('refunds');
+    }
     // Settings
     Route::get('/settings', [PosSettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings/printer', [PosSettingsController::class, 'updatePrinter'])->name('settings.printer');
     Route::post('/settings/printer/test', [PosSettingsController::class, 'testPrinter'])->name('settings.printer.test');
 });
+
+Route::middleware(['web', 'auth', 'role:CASHIER,SUPERVISOR', 'throttle:admin-api'])
+    ->prefix('online-orders')
+    ->name('api.online-orders.')
+    ->group(function () {
+        Route::get('/', [OnlineOrderController::class, 'index'])->name('index');
+        Route::get('/{onlineOrder}', [OnlineOrderController::class, 'show'])->name('show');
+        Route::post('/{onlineOrder}/confirm-payment', [OnlineOrderController::class, 'confirmPayment'])
+            ->middleware('throttle:admin-write')
+            ->name('confirm-payment');
+        Route::patch('/{onlineOrder}/status', [OnlineOrderController::class, 'updateStatus'])
+            ->middleware('throttle:admin-write')
+            ->name('status');
+    });

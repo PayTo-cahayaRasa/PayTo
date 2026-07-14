@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -24,6 +25,7 @@ class Product extends Model
         'is_public',
         'featured',
         'image_path',
+        'weight_grams',
     ];
 
     protected function casts(): array
@@ -35,6 +37,7 @@ class Product extends Model
             'is_active' => 'boolean',
             'is_public' => 'boolean',
             'featured' => 'boolean',
+            'weight_grams' => 'integer',
         ];
     }
 

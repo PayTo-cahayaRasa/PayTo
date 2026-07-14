@@ -103,10 +103,7 @@ class CheckoutProcessor
         }
 
         $taxTotal = 0.0;
-        foreach ($lineItems as $lineItem) {
-            $taxTotal += ((float) $lineItem['line_total']) * 0.11;
-        }
-        $grandTotal = ($subtotal - $discountTotal) + $taxTotal;
+        $grandTotal = $subtotal - $discountTotal;
 
         if ($paymentMethod === 'CASH' && $cashReceived < $grandTotal) {
             throw ValidationException::withMessages([

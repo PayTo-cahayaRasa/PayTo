@@ -12,10 +12,12 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "allowImportingTsExtensions": true,
     "noEmit": true,
     "jsx": "react-jsx",
     "types": ["vite/client"]
   },
   "include": ["resources/js"],
+  "exclude": ["resources/js/**/*.test.ts"],
   "references": []
 }

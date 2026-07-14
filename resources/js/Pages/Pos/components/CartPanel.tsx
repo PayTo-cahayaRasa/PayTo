@@ -11,7 +11,7 @@ type CartPanelProps = {
     onClearCart: () => void;
     onUpdateQty: (id: number, delta: number) => void;
     onRemoveFromCart: (id: number) => void;
-    onOpenApprovalModal: () => void;
+
     onCheckout: () => void;
     formatRupiah: (num: number) => string;
 };
@@ -24,7 +24,7 @@ export default function CartPanel({
     onClearCart,
     onUpdateQty,
     onRemoveFromCart,
-    onOpenApprovalModal,
+
     onCheckout,
     formatRupiah,
 }: CartPanelProps) {
@@ -101,9 +101,7 @@ export default function CartPanel({
                                             </button>
                                         </div>
 
-                                        <button onClick={onOpenApprovalModal} className="px-2 py-1 rounded-md text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-medium transition-colors border border-indigo-100">
-                                            {item.discount > 0 ? `-${formatRupiah(item.discount)}` : '% Disc'}
-                                        </button>
+
                                     </div>
                                 </div>
                             </div>
@@ -123,14 +121,10 @@ export default function CartPanel({
                                 <span className="font-mono">-{formatRupiah(totalDiscount)}</span>
                             </div>
                         )}
-                        <div className="flex justify-between text-slate-500 text-xs font-medium">
-                            <span>Tax (11%)</span>
-                            <span className="font-mono text-slate-800 font-bold">{formatRupiah((subtotal - totalDiscount) * 0.11)}</span>
-                        </div>
                         <div className="h-px bg-indigo-100/50 my-2"></div>
                         <div className="flex justify-between items-end">
                             <span className="text-slate-600 font-bold text-sm">Total Tagihan</span>
-                            <span className="text-2xl sm:text-3xl font-bold font-mono text-slate-900 tracking-tight">{formatRupiah(grandTotal + ((subtotal - totalDiscount) * 0.11)).replace(",00", "")}</span>
+                            <span className="text-2xl sm:text-3xl font-bold font-mono text-slate-900 tracking-tight">{formatRupiah(grandTotal).replace(",00", "")}</span>
                         </div>
                     </div>
 

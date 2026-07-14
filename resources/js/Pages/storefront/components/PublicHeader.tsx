@@ -14,9 +14,16 @@ export function PublicHeader({ business, cartItems, onIncreaseCartItem, onDecrea
     const cartRef = useRef<HTMLDivElement | null>(null);
     const cartButtonRef = useRef<HTMLDivElement | null>(null);
     const previousCartItemsCountRef = useRef<number | null>(null);
-    const whatsappUrl = businessWhatsappUrl(business);
+    const hasUnavailableItems = cartItems.some((item) => item.product.stock <= 0 || item.quantity > item.product.stock);
+    const whatsappUrl = cartItems.length > 0 && !hasUnavailableItems && business.whatsapp_number
+        ? `${businessWhatsappUrl(business)}&text=${encodeURIComponent([
+            `Halo ${business.name}, saya ingin memesan:`,
+            ...cartItems.map((item) => `- ${item.product.name} x${item.quantity} (${formatRupiah((item.product.finalPrice ?? item.product.price) * item.quantity)})`),
+            `Subtotal: ${formatRupiah(cartItems.reduce((total, item) => total + (item.product.finalPrice ?? item.product.price) * item.quantity, 0))}`,
+        ].join('\n'))}`
+        : null;
     const totalCartItems = cartItems.reduce((total, item) => total + item.quantity, 0);
-    const cartTotal = cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0);
+    const cartTotal = cartItems.reduce((total, item) => total + (item.product.finalPrice ?? item.product.price) * item.quantity, 0);
 
     function closeCart(): void {
         setIsCartOpen(false);
@@ -76,6 +83,7 @@ export function PublicHeader({ business, cartItems, onIncreaseCartItem, onDecrea
 
                 <div className="hidden items-center gap-1 rounded-full bg-[#f8efe2]/70 p-1 lg:flex">
                     <a href={storefrontShopHref} className="rounded-full px-4 py-2 text-sm font-semibold text-[#6f503c] transition hover:bg-white hover:text-[#3a2117]">Produk</a>
+                    <a href="/lacak-pesanan" className="rounded-full px-4 py-2 text-sm font-semibold text-[#6f503c] transition hover:bg-white hover:text-[#3a2117]">Lacak Pesanan</a>
                     <a href="#kontak" className="rounded-full px-4 py-2 text-sm font-semibold text-[#6f503c] transition hover:bg-white hover:text-[#3a2117]">Kontak</a>
                 </div>
 
@@ -128,14 +136,14 @@ export function PublicHeader({ business, cartItems, onIncreaseCartItem, onDecrea
                                         <div key={item.product.id} className="flex items-center justify-between gap-4 border-b border-[#efe3d4] py-4 last:border-b-0">
                                             <div className="min-w-0">
                                                 <p className="truncate font-semibold text-[#3a2117]">{item.product.name}</p>
-                                                <p className="mt-1 text-sm text-[#8d6b4e]">{formatRupiah(item.product.price)}</p>
+                                                <p className="mt-1 text-sm text-[#8d6b4e]">{formatRupiah(item.product.finalPrice ?? item.product.price)}</p>
                                             </div>
                                             <div className="flex shrink-0 items-center rounded-full border border-[#e6d7c4] bg-[#fffaf3] p-1">
                                                 <button type="button" aria-label={`Kurangi ${item.product.name}`} onClick={() => onDecreaseCartItem(item.product.id)} className="inline-flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-[#f3e4d0] focus-visible:outline-2 focus-visible:outline-[#9b5c22]">
                                                     <Minus size={15} />
                                                 </button>
                                                 <span className="w-8 text-center text-sm font-bold text-[#3a2117]" aria-live="polite">{item.quantity}</span>
-                                                <button type="button" aria-label={`Tambah ${item.product.name}`} onClick={() => onIncreaseCartItem(item.product.id)} className="inline-flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-[#f3e4d0] focus-visible:outline-2 focus-visible:outline-[#9b5c22]">
+                                                <button type="button" disabled={item.product.stock <= 0 || item.quantity >= item.product.stock} aria-label={`Tambah ${item.product.name}`} onClick={() => onIncreaseCartItem(item.product.id)} className="inline-flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-[#f3e4d0] focus-visible:outline-2 focus-visible:outline-[#9b5c22] disabled:cursor-not-allowed disabled:opacity-35">
                                                     <Plus size={15} />
                                                 </button>
                                             </div>
@@ -153,6 +161,11 @@ export function PublicHeader({ business, cartItems, onIncreaseCartItem, onDecrea
                                             Checkout via WhatsApp
                                         </a>
                                     ) : null}
+                                    {hasUnavailableItems ? (
+                                        <p className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-center text-xs font-semibold text-red-700">Stok keranjang tidak mencukupi. Kurangi atau hapus produk sebelum checkout.</p>
+                                    ) : (
+                                        <a href="/checkout" className="mt-3 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#3a2117] px-5 text-sm font-bold text-white transition hover:bg-[#523326]">Checkout melalui Web</a>
+                                    )}
                                     <button type="button" onClick={onClearCart} className="mt-3 inline-flex w-full items-center justify-center gap-2 py-1 text-xs font-semibold text-[#9a6758] transition hover:text-[#713b2f]">
                                         <Trash2 size={13} />
                                         Kosongkan keranjang

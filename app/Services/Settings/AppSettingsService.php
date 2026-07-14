@@ -15,6 +15,8 @@ class AppSettingsService
 
     private const KEY_POS_TARGET = 'pos.cashier_target';
 
+    private const KEY_ONLINE_ORDER_SETTINGS = 'online_order.settings';
+
     private const DEFAULT_BUSINESS_PROFILE = [
         'name' => 'Cahaya Rasa',
         'tagline' => 'Oleh-Oleh Malang',
@@ -37,6 +39,11 @@ class AppSettingsService
     ];
 
     private const DEFAULT_POS_TARGET = 1000000;
+
+    private const DEFAULT_ONLINE_ORDER_SETTINGS = [
+        'shipping' => ['origin' => '', 'packaging_weight_grams' => 0, 'couriers' => ['jne', 'jnt', 'sicepat']],
+        'payment' => ['bank_name' => '', 'bank_account_number' => '', 'bank_account_name' => '', 'qris_image_url' => '', 'instructions' => 'Lakukan pembayaran sesuai total pesanan, lalu kirim bukti pembayaran melalui WhatsApp.'],
+    ];
 
     /**
      * Get business profile settings with defaults merged
@@ -79,6 +86,18 @@ class AppSettingsService
         return [
             'business' => $this->getBusinessProfile(),
             'catalog' => $this->getCatalogSettings(),
+            'online_order' => $this->getOnlineOrderSettings(),
+        ];
+    }
+
+    public function getOnlineOrderSettings(): array
+    {
+        $stored = AppSetting::query()->where('key', self::KEY_ONLINE_ORDER_SETTINGS)->value('value');
+        $stored = is_array($stored) ? $stored : [];
+
+        return [
+            'shipping' => array_merge(self::DEFAULT_ONLINE_ORDER_SETTINGS['shipping'], $stored['shipping'] ?? []),
+            'payment' => array_merge(self::DEFAULT_ONLINE_ORDER_SETTINGS['payment'], $stored['payment'] ?? []),
         ];
     }
 
@@ -100,9 +119,9 @@ class AppSettingsService
     /**
      * Update business profile and catalog settings atomically
      */
-    public function updateBusinessSettings(array $businessProfile, array $catalogSettings): void
+    public function updateBusinessSettings(array $businessProfile, array $catalogSettings, array $onlineOrderSettings): void
     {
-        DB::transaction(function () use ($businessProfile, $catalogSettings) {
+        DB::transaction(function () use ($businessProfile, $catalogSettings, $onlineOrderSettings) {
             AppSetting::query()->updateOrCreate(
                 ['key' => self::KEY_BUSINESS_PROFILE],
                 ['value' => $businessProfile]
@@ -111,6 +130,11 @@ class AppSettingsService
             AppSetting::query()->updateOrCreate(
                 ['key' => self::KEY_CATALOG_SETTINGS],
                 ['value' => $catalogSettings]
+            );
+
+            AppSetting::query()->updateOrCreate(
+                ['key' => self::KEY_ONLINE_ORDER_SETTINGS],
+                ['value' => $onlineOrderSettings]
             );
         });
     }

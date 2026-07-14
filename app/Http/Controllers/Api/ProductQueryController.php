@@ -210,7 +210,10 @@ class ProductQueryController extends Controller
             note: "Produk {$productName} dihapus"
         );
 
-        StockItem::query()->where('product_id', $product->id)->delete();
+        $product->update([
+            'is_active' => false,
+            'is_public' => false,
+        ]);
         $product->delete();
 
         return response()->json([

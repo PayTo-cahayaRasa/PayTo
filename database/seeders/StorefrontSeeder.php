@@ -38,12 +38,17 @@ class StorefrontSeeder extends Seeder
 
         foreach ($this->products() as $productData) {
             $stock = $productData['stock'];
-            unset($productData['stock']);
+            $weight = $productData['weight_grams'];
+            unset($productData['stock'], $productData['weight_grams']);
 
             $product = Product::query()->updateOrCreate(
                 ['sku' => $productData['sku']],
                 $productData
             );
+
+            if ($product->weight_grams === null) {
+                $product->update(['weight_grams' => $weight]);
+            }
 
             StockItem::query()->updateOrCreate(
                 ['product_id' => $product->id],
@@ -72,6 +77,7 @@ class StorefrontSeeder extends Seeder
                 'is_public' => true,
                 'featured' => true,
                 'image_path' => null,
+                'weight_grams' => 250,
                 'stock' => 50,
             ],
             [
@@ -88,6 +94,7 @@ class StorefrontSeeder extends Seeder
                 'is_public' => true,
                 'featured' => true,
                 'image_path' => null,
+                'weight_grams' => 250,
                 'stock' => 35,
             ],
             [
@@ -104,6 +111,7 @@ class StorefrontSeeder extends Seeder
                 'is_public' => true,
                 'featured' => true,
                 'image_path' => null,
+                'weight_grams' => 200,
                 'stock' => 40,
             ],
         ];
