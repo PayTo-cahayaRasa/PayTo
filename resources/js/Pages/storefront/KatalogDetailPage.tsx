@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { ChevronLeft, MessageCircle } from 'lucide-react';
+import { ChevronLeft, MessageCircle, ShoppingBag } from 'lucide-react';
 
 import { formatRupiah } from './data/publicCatalogData';
 import type { PublicCatalogProduct } from './data/publicCatalogData';
@@ -85,6 +85,15 @@ export default function KatalogDetailPage({ business, product }: KatalogDetailPa
                                     </div>
 
                                     <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                                        <button
+                                            type="button"
+                                            disabled={product.stock <= 0}
+                                            onClick={() => addToCart(product.id)}
+                                            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#3a2117] px-6 text-sm font-semibold text-white transition hover:bg-[#523326] disabled:cursor-not-allowed disabled:opacity-45"
+                                        >
+                                            <ShoppingBag size={16} />
+                                            Tambah ke Keranjang
+                                        </button>
                                         {product.whatsappUrl && (
                                             <a
                                                 href={product.whatsappUrl}

@@ -24,6 +24,7 @@ class Product extends Model
         'is_public',
         'featured',
         'image_path',
+        'weight_grams',
     ];
 
     protected function casts(): array
@@ -35,6 +36,7 @@ class Product extends Model
             'is_active' => 'boolean',
             'is_public' => 'boolean',
             'featured' => 'boolean',
+            'weight_grams' => 'integer',
         ];
     }
 

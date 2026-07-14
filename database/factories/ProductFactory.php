@@ -32,6 +32,7 @@ class ProductFactory extends Factory
             'is_public' => false,
             'featured' => false,
             'image_path' => null,
+            'weight_grams' => 250,
         ];
     }
 }

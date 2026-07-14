@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Models\OnlineOrder;
 use App\Models\Product;
 use App\Services\Settings\AppSettingsService;
 use App\Services\WhatsAppLinkBuilder;
@@ -157,6 +158,27 @@ class WhatsAppLinkBuilderTest extends TestCase
         $link = $this->builder->buildProductLink($product, 1);
 
         $this->assertNull($link);
+    }
+
+    #[Test]
+    public function builds_shipping_update_with_order_courier_receipt_and_tracking_link(): void
+    {
+        $this->mockSettings->shouldReceive('getBusinessProfile')->andReturn(['whatsapp_number' => '6281234567890']);
+        $order = new OnlineOrder([
+            'order_number' => 'WEB-20260714-TEST',
+            'tracking_token' => str_repeat('a', 64),
+            'customer_name' => 'Dimas',
+            'shipping_courier_name' => 'JNE',
+            'shipping_service' => 'REG',
+            'tracking_number' => 'JNE123456',
+        ]);
+
+        $link = urldecode((string) $this->builder->buildShippingUpdateLink($order));
+
+        $this->assertStringContainsString('WEB-20260714-TEST', $link);
+        $this->assertStringContainsString('JNE REG', $link);
+        $this->assertStringContainsString('JNE123456', $link);
+        $this->assertStringContainsString('/pesanan/WEB-20260714-TEST?token=', $link);
     }
 
     #[Test]

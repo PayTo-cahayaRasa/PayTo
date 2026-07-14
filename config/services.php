@@ -35,4 +35,19 @@ return [
         ],
     ],
 
+    'rajaongkir' => [
+        'key' => env('RAJAONGKIR_API_KEY'),
+        'base_url' => env('RAJAONGKIR_BASE_URL', 'https://rajaongkir.komerce.id/api/v1'),
+        'origin' => env('RAJAONGKIR_ORIGIN'),
+        'couriers' => array_filter(explode(',', env('RAJAONGKIR_COURIERS', 'jne,jnt,sicepat'))),
+    ],
+
+    'storefront_payment' => [
+        'bank_name' => env('STOREFRONT_BANK_NAME', ''),
+        'bank_account_number' => env('STOREFRONT_BANK_ACCOUNT_NUMBER', ''),
+        'bank_account_name' => env('STOREFRONT_BANK_ACCOUNT_NAME', ''),
+        'qris_image_url' => env('STOREFRONT_QRIS_IMAGE_URL', ''),
+        'instructions' => env('STOREFRONT_PAYMENT_INSTRUCTIONS', 'Lakukan pembayaran sesuai total pesanan, lalu kirim bukti pembayaran melalui WhatsApp.'),
+    ],
+
 ];

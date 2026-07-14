@@ -5,6 +5,7 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
+        "test:frontend": "node --experimental-strip-types --test resources/js/Pages/storefront/hooks/publicCartState.test.ts",
         "typecheck": "tsc --noEmit"
     },
     "devDependencies": {

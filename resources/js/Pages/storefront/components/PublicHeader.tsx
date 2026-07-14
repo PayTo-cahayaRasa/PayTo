@@ -14,9 +14,15 @@ export function PublicHeader({ business, cartItems, onIncreaseCartItem, onDecrea
     const cartRef = useRef<HTMLDivElement | null>(null);
     const cartButtonRef = useRef<HTMLDivElement | null>(null);
     const previousCartItemsCountRef = useRef<number | null>(null);
-    const whatsappUrl = businessWhatsappUrl(business);
+    const whatsappUrl = cartItems.length > 0 && business.whatsapp_number
+        ? `${businessWhatsappUrl(business)}&text=${encodeURIComponent([
+            `Halo ${business.name}, saya ingin memesan:`,
+            ...cartItems.map((item) => `- ${item.product.name} x${item.quantity} (${formatRupiah((item.product.finalPrice ?? item.product.price) * item.quantity)})`),
+            `Subtotal: ${formatRupiah(cartItems.reduce((total, item) => total + (item.product.finalPrice ?? item.product.price) * item.quantity, 0))}`,
+        ].join('\n'))}`
+        : null;
     const totalCartItems = cartItems.reduce((total, item) => total + item.quantity, 0);
-    const cartTotal = cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0);
+    const cartTotal = cartItems.reduce((total, item) => total + (item.product.finalPrice ?? item.product.price) * item.quantity, 0);
 
     function closeCart(): void {
         setIsCartOpen(false);
@@ -128,7 +134,7 @@ export function PublicHeader({ business, cartItems, onIncreaseCartItem, onDecrea
                                         <div key={item.product.id} className="flex items-center justify-between gap-4 border-b border-[#efe3d4] py-4 last:border-b-0">
                                             <div className="min-w-0">
                                                 <p className="truncate font-semibold text-[#3a2117]">{item.product.name}</p>
-                                                <p className="mt-1 text-sm text-[#8d6b4e]">{formatRupiah(item.product.price)}</p>
+                                                <p className="mt-1 text-sm text-[#8d6b4e]">{formatRupiah(item.product.finalPrice ?? item.product.price)}</p>
                                             </div>
                                             <div className="flex shrink-0 items-center rounded-full border border-[#e6d7c4] bg-[#fffaf3] p-1">
                                                 <button type="button" aria-label={`Kurangi ${item.product.name}`} onClick={() => onDecreaseCartItem(item.product.id)} className="inline-flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-[#f3e4d0] focus-visible:outline-2 focus-visible:outline-[#9b5c22]">
@@ -153,6 +159,9 @@ export function PublicHeader({ business, cartItems, onIncreaseCartItem, onDecrea
                                             Checkout via WhatsApp
                                         </a>
                                     ) : null}
+                                    <a href="/checkout" className="mt-3 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#3a2117] px-5 text-sm font-bold text-white transition hover:bg-[#523326]">
+                                        Checkout melalui Web
+                                    </a>
                                     <button type="button" onClick={onClearCart} className="mt-3 inline-flex w-full items-center justify-center gap-2 py-1 text-xs font-semibold text-[#9a6758] transition hover:text-[#713b2f]">
                                         <Trash2 size={13} />
                                         Kosongkan keranjang

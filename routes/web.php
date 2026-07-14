@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\PosLoginController;
 use App\Http\Controllers\Auth\PosLogoutController;
 use App\Http\Controllers\Pos\PosController;
 use App\Http\Controllers\Pos\ReceiptController;
+use App\Http\Controllers\StorefrontCheckoutController;
 use App\Http\Controllers\StorefrontController;
 use Illuminate\Support\Facades\Route;
 
@@ -11,6 +12,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [StorefrontController::class, 'index'])->name('landing');
 Route::get('/katalog', [StorefrontController::class, 'catalog'])->name('catalog.index');
 Route::get('/katalog/{product:slug}', [StorefrontController::class, 'show'])->name('catalog.show');
+Route::get('/checkout', [StorefrontCheckoutController::class, 'index'])->name('checkout.index');
+Route::post('/checkout', [StorefrontCheckoutController::class, 'store'])->middleware('throttle:checkout')->name('checkout.store');
+Route::get('/checkout/sukses/{orderNumber}', [StorefrontCheckoutController::class, 'success'])->name('checkout.success');
+Route::get('/pesanan/{orderNumber}', [StorefrontCheckoutController::class, 'track'])->name('orders.track');
 
 Route::get('/login', function () {
     return inertia('login');

@@ -35,6 +35,7 @@ class ProductStoreRequest extends FormRequest
             'is_public' => ['nullable', 'boolean'],
             'featured' => ['nullable', 'boolean'],
             'stock' => ['required', 'numeric', 'min:0'],
+            'weight_grams' => ['nullable', 'integer', 'min:1'],
         ];
     }
 
