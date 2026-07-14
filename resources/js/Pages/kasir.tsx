@@ -129,8 +129,7 @@ export default function PosInterface() {
     const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
     const totalDiscount = cart.reduce((acc, item) => acc + item.discount, 0);
     const grandTotal = subtotal - totalDiscount;
-    const taxTotal = (subtotal - totalDiscount) * 0.11;
-    const totalDue = grandTotal + taxTotal;
+    const totalDue = grandTotal;
     const totalItems = cart.reduce((acc, item) => acc + item.qty, 0);
 
     const hasRefundSelection = refundTarget
@@ -633,8 +632,6 @@ export default function PosInterface() {
                 onClose={() => setShowPaymentModal(false)}
                 onCheckout={handleCheckout}
                 quickCashAmounts={QUICK_CASH_AMOUNTS}
-                grandTotal={grandTotal}
-                taxTotal={taxTotal}
                 discountTotal={totalDiscount}
                 totalDue={totalDue}
                 subtotal={subtotal}

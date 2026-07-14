@@ -50,6 +50,20 @@ test('invalid and corrupt localStorage values are discarded', () => {
 });
 
 test('cart quantity is capped at 99', () => {
-    const entries = [{ productId: firstProduct.id, quantity: 99, product: firstProduct }];
-    assert.equal(addPublicCartEntry(entries, firstProduct)[0].quantity, 99);
+    const abundant = { ...firstProduct, stock: 200 };
+    const entries = [{ productId: abundant.id, quantity: 99, product: abundant }];
+    assert.equal(addPublicCartEntry(entries, abundant)[0].quantity, 99);
+});
+
+test('out-of-stock products cannot be added to cart', () => {
+    const unavailable = { ...firstProduct, stock: 0 };
+
+    assert.deepEqual(addPublicCartEntry([], unavailable), []);
+});
+
+test('cart quantity cannot exceed current product stock', () => {
+    const limited = { ...firstProduct, stock: 2 };
+    const entries = [{ productId: limited.id, quantity: 2, product: limited }];
+
+    assert.equal(addPublicCartEntry(entries, limited)[0].quantity, 2);
 });

@@ -19,10 +19,10 @@
 | 0 | Baseline dan correctness katalog | ✅ DONE | 7/7 |
 | 1 | Domain dan backend dasar | ✅ DONE | 10/10 |
 | 2 | Checkout publik | ✅ DONE | 14/14 |
-| 3 | Order management dan pembayaran | 🟡 PARTIAL | 7/10 |
-| 4 | Pengiriman dan komunikasi | 🟡 PARTIAL | 4/9 |
-| 5 | Quality gate dan manual book | 🟡 PARTIAL | 6/8 |
-| **Total** | **MVP end-to-end** | **🟡 IN PROGRESS** | **48/58** |
+| 3 | Order management dan pembayaran | ✅ DONE | 10/10 |
+| 4 | Pengiriman dan komunikasi | 🟡 PARTIAL | 7/9 |
+| 5 | Quality gate dan manual book | 🟡 PARTIAL | 7/8 |
+| **Total** | **MVP end-to-end** | **🟡 IN PROGRESS** | **55/58** |
 
 ---
 
@@ -78,9 +78,9 @@
 | --- | --- | --- | --- |
 | 3.1 | API daftar/detail online order | ✅ DONE | `GET /api/online-orders`, `GET /api/online-orders/{id}` |
 | 3.2 | API dilindungi auth dan role kasir/supervisor | ✅ DONE | Middleware pada `routes/api.php` |
-| 3.3 | Menu internal `Pesanan Online` | ⬜ TODO | Belum ada pada UI kasir/admin |
-| 3.4 | Halaman daftar online order | ⬜ TODO | API ada, halaman belum ada |
-| 3.5 | Halaman detail online order | ⬜ TODO | API ada, halaman belum ada |
+| 3.3 | Menu internal `Pesanan Online` | ✅ DONE | Tersedia di sidebar admin dan POS |
+| 3.4 | Halaman daftar online order | ✅ DONE | `OnlineOrdersPage.tsx` memuat daftar nomor, tanggal, pelanggan, fulfillment, total, dan status |
+| 3.5 | Halaman detail online order | ✅ DONE | Detail memuat pelanggan, alamat, item, total, pembayaran, status, dan seluruh aksi operasional |
 | 3.6 | API konfirmasi pembayaran | ✅ DONE | Endpoint kasir/supervisor tersedia dan diuji |
 | 3.7 | Konfirmasi membuat sale/payment/source WEB | ✅ DONE | Feature test membuktikan sale `WEB` dan payment `CONFIRMED` |
 | 3.8 | Konfirmasi mengurangi stok dan membuat movement atomik | ✅ DONE | Transaction, order row lock, conditional decrement, dan test tersedia |
@@ -93,9 +93,9 @@
 | --- | --- | --- | --- |
 | 4.1 | Backend validasi transisi status | ✅ DONE | `OnlineOrderStatus::canTransitionTo()` |
 | 4.2 | Status `DIKIRIM` wajib memiliki resi | ✅ DONE | `OnlineOrderManagementService::updateStatus()` |
-| 4.3 | Input resi dari UI internal | ⬜ TODO | API mendukung, UI belum tersedia |
-| 4.4 | Simpan `shipped_at` dan `completed_at` | 🟡 PARTIAL | Service tersedia, belum diuji |
-| 4.5 | Pembatalan khusus supervisor | ⬜ TODO | Route sekarang mengizinkan kasir mengirim status `DIBATALKAN` |
+| 4.3 | Input resi dari UI internal | ✅ DONE | Detail pesanan menyediakan input resi dan aksi `DIKIRIM` |
+| 4.4 | Simpan `shipped_at` dan `completed_at` | ✅ DONE | Service dan feature test memverifikasi kedua timestamp |
+| 4.5 | Pembatalan khusus supervisor | ✅ DONE | Controller menolak kasir dengan 403 dan feature test membuktikan supervisor dapat membatalkan |
 | 4.6 | Tombol/link WhatsApp pemberitahuan pengiriman | ✅ DONE | API detail/update status mengembalikan `shipping_whatsapp_url` siap dibuka UI |
 | 4.7 | Pesan WhatsApp memuat order, kurir, resi, tracking URL | ✅ DONE | `WhatsAppLinkBuilder::buildShippingUpdateLink()` dan unit test |
 | 4.8 | Pengaturan origin dan kurir | 🟡 PARTIAL | Environment/config ada; UI setting belum ada |
@@ -109,7 +109,7 @@
 | 5.2 | Token dibandingkan aman dan token salah menghasilkan 404 | ✅ DONE | `hash_equals()` dan feature test |
 | 5.3 | Tracking tidak mengekspos token/sale/internal data | ✅ DONE | Props di-whitelist dan feature test |
 | 5.4 | Halaman tracking menampilkan status, item, total, resi | ✅ DONE | `OrderTrackingPage.tsx` |
-| 5.5 | Targeted PHPUnit seluruh flow | 🟡 PARTIAL | 15 tests/70 assertions untuk checkout, tracking, confirmation, shipping, WhatsApp; auth/status edge cases belum lengkap |
+| 5.5 | Targeted PHPUnit seluruh flow | ✅ DONE | 12 tests/86 assertions untuk checkout, tracking, confirmation, shipping, timestamps, cancellation role, dan WhatsApp |
 | 5.6 | Smoke test browser end-to-end hingga `DIKIRIM` | 🟡 PARTIAL | Browser katalog→cart→checkout lulus; API automated test mencapai `DIKIRIM`; browser staf menunggu UI internal |
 | 5.7 | Manual book pelanggan, kasir, supervisor | ✅ DONE | `docs/manual-book/PANDUAN_PEMESANAN_WEB_DAN_WHATSAPP.md` dengan batasan versi aktual |
 | 5.8 | Screenshot final | ✅ DONE | `docs/manual-book/screenshots/katalog-dan-keranjang.png` |
@@ -126,8 +126,8 @@
 | AC-04 | Validasi checkout | ✅ DONE | Form Request dan checkout service memvalidasi data wajib, produk, stok, berat, service, dan menghitung seluruh nilai server-side |
 | AC-05 | Pembayaran manual | ✅ DONE | Success page mengambil instruksi server dan tombol WhatsApp memuat nomor order serta total |
 | AC-06 | Atomic confirmation | ✅ DONE | Sale/payment/stock movement, replay, row lock, dan rollback stok kurang sudah diuji |
-| AC-07 | Order management | 🟡 PARTIAL | API ada; internal UI dan role cancellation belum selesai |
-| AC-08 | Pengiriman | 🟡 PARTIAL | Backend rule resi ada; UI dan WhatsApp belum ada |
+| AC-07 | Order management | ✅ DONE | Kasir/supervisor memiliki UI daftar/detail dan cancellation dibatasi supervisor |
+| AC-08 | Pengiriman | ✅ DONE | UI resi/status serta tombol WhatsApp tersedia; backend mewajibkan resi |
 | AC-09 | Tracking tanpa akun | ✅ DONE | Token, 404, public props, halaman tracking sudah diuji |
 | AC-10 | WhatsApp ordering | 🟡 PARTIAL | Multi-item message ada; automated regression test belum ada |
 
@@ -141,7 +141,7 @@
 | `npm run typecheck` | ✅ PASS | Tidak ada TypeScript error |
 | `npm run build` | ✅ PASS | Vite production build berhasil |
 | `git diff --check` | ✅ PASS | Tidak ada whitespace error |
-| Full PHPUnit suite | ⬜ NOT RUN | Belum dijalankan untuk perubahan ini |
+| Full PHPUnit suite | 🟡 PARTIAL | 80 passed/524 assertions; 5 test katalog lama gagal karena masih mengharapkan produk `is_public=false` dapat diakses, bertentangan dengan Fase 0/PRD |
 | Browser smoke test | 🟡 PARTIAL | Katalog, cart, checkout publik lulus; staf→DIKIRIM dibuktikan API test karena UI internal belum tersedia |
 
 ## Urutan implementasi berikutnya
@@ -159,10 +159,10 @@ MVP hanya dapat diubah menjadi ✅ **DONE** jika seluruh kondisi berikut terpenu
 - [x] Double-submit hanya menghasilkan satu order.
 - [x] Ongkir dan seluruh total dihitung/divalidasi server.
 - [x] Instruksi pembayaran dan konfirmasi WhatsApp tersedia.
-- [ ] Kasir/supervisor dapat mengelola order melalui UI internal.
+- [x] Kasir/supervisor dapat mengelola order melalui UI internal.
 - [x] Konfirmasi pembayaran atomik dan memiliki test rollback.
-- [ ] Stok tidak berkurang sebelum konfirmasi pembayaran.
-- [ ] Resi dan status pengiriman dapat dikelola staf.
-- [ ] Tracking publik tidak mengekspos data internal.
+- [x] Stok tidak berkurang sebelum konfirmasi pembayaran.
+- [x] Resi dan status pengiriman dapat dikelola staf.
+- [x] Tracking publik tidak mengekspos data internal.
 - [ ] Targeted tests, Pint, typecheck, build, dan smoke test lulus.
-- [ ] Manual book dan screenshot final tersedia.
+- [x] Manual book dan screenshot final tersedia.

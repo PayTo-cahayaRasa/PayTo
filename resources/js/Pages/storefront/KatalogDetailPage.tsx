@@ -94,7 +94,7 @@ export default function KatalogDetailPage({ business, product }: KatalogDetailPa
                                             <ShoppingBag size={16} />
                                             Tambah ke Keranjang
                                         </button>
-                                        {product.whatsappUrl && (
+                                        {product.stock > 0 && product.whatsappUrl && (
                                             <a
                                                 href={product.whatsappUrl}
                                                 target="_blank"

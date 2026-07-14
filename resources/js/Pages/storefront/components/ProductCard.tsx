@@ -35,6 +35,8 @@ export function ProductCard({ product, index, detailHref, onAddToCart }: Product
     }, []);
 
     function handleAddToCart(): void {
+        if (product.stock <= 0) return;
+
         onAddToCart?.();
         setIsAddConfirmed(true);
 
@@ -71,15 +73,16 @@ export function ProductCard({ product, index, detailHref, onAddToCart }: Product
                     <button
                         type="button"
                         onClick={handleAddToCart}
+                        disabled={product.stock <= 0}
                         className={`inline-flex min-h-[2.4rem] flex-1 items-center justify-center rounded-xl border px-3 text-[0.8rem] font-semibold transition duration-300 ${
                             isAddConfirmed
                                 ? 'border-[#f59a21] bg-[#f59a21] text-white shadow-[0_18px_30px_-22px_rgba(245,154,33,0.8)] scale-[1.02]'
                                 : 'border-[#eadfcf] bg-[#fff7ea] text-[#3a2117]'
                         }`}
                     >
-                        {isAddConfirmed ? 'Berhasil Ditambahkan' : 'Tambah ke Keranjang'}
+                        {product.stock <= 0 ? 'Stok Habis' : isAddConfirmed ? 'Berhasil Ditambahkan' : 'Tambah ke Keranjang'}
                     </button>
-                    {product.whatsappUrl && (
+                    {product.stock > 0 && product.whatsappUrl && (
                         <a
                             href={product.whatsappUrl}
                             target="_blank"

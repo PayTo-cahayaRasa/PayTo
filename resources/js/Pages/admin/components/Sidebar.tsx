@@ -3,7 +3,8 @@
  */
 
 import React from 'react';
-import { LayoutDashboard, Package, Printer, ShieldCheck, Users, Settings, ShoppingBag, LogOut } from 'lucide-react';
+import { router } from '@inertiajs/react';
+import { LayoutDashboard, Package, Printer, ShieldCheck, Users, Settings, ShoppingBag, LogOut, ShoppingCart } from 'lucide-react';
 import type { AdminTab } from '../types';
 import SidebarItem from './SidebarItem';
 
@@ -41,6 +42,7 @@ export default function Sidebar({ activeTab, onChangeTab, onLogout }: SidebarPro
                     isActive={activeTab === 'PRODUCTS'}
                     onClick={() => onChangeTab('PRODUCTS')}
                 />
+                <SidebarItem icon={ShoppingCart} label="Pesanan Online" id="ONLINE_ORDERS" isActive={false} onClick={() => router.visit('/pesanan-online')} />
                 <SidebarItem
                     icon={Package}
                     label="Smart Inventory"

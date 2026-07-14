@@ -15,6 +15,8 @@ Route::get('/katalog/{product:slug}', [StorefrontController::class, 'show'])->na
 Route::get('/checkout', [StorefrontCheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [StorefrontCheckoutController::class, 'store'])->middleware('throttle:checkout')->name('checkout.store');
 Route::get('/checkout/sukses/{orderNumber}', [StorefrontCheckoutController::class, 'success'])->name('checkout.success');
+Route::get('/lacak-pesanan', [StorefrontCheckoutController::class, 'trackingLookup'])->name('orders.lookup');
+Route::post('/lacak-pesanan', [StorefrontCheckoutController::class, 'findTracking'])->middleware('throttle:checkout')->name('orders.find');
 Route::get('/pesanan/{orderNumber}', [StorefrontCheckoutController::class, 'track'])->name('orders.track');
 
 Route::get('/login', function () {
@@ -33,6 +35,10 @@ Route::post('/logout', [PosLogoutController::class, 'store'])
 Route::get('/kasir', [PosController::class, 'index'])
     ->middleware(['auth', 'role:CASHIER,SUPERVISOR'])
     ->name('pos.index');
+
+Route::get('/pesanan-online', fn () => inertia('online-orders/OnlineOrdersPage', ['role' => request()->user()->role]))
+    ->middleware(['auth', 'role:CASHIER,SUPERVISOR'])
+    ->name('online-orders.index');
 
 // Receipt route - Cashier and Supervisor
 Route::get('/pos/sales/{sale}/receipt', [ReceiptController::class, 'show'])

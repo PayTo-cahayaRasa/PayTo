@@ -33,6 +33,7 @@ export default function CheckoutPage({ business, couriers, products }: CheckoutP
     const [idempotencyKey, setIdempotencyKey] = useState(() => window.crypto.randomUUID());
     const subtotal = useMemo(() => cartItems.reduce((sum, item) => sum + (item.product.finalPrice ?? item.product.price) * item.quantity, 0), [cartItems]);
     const grandTotal = subtotal + (quote?.cost ?? 0);
+    const hasUnavailableItems = cartItems.some((item) => item.product.stock <= 0 || item.quantity > item.product.stock);
 
     useEffect(() => {
         if (fulfillmentMethod !== 'DELIVERY' || destinationQuery.trim().length < 3 || destination?.label === destinationQuery) {
@@ -127,7 +128,8 @@ export default function CheckoutPage({ business, couriers, products }: CheckoutP
                         <label className="block text-sm font-semibold">Metode pembayaran<select value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value)} className="mt-2 min-h-12 w-full rounded-2xl border border-[#dfcfbb] bg-white px-4"><option value="BANK_TRANSFER">Transfer Bank</option><option value="QRIS_MANUAL">QRIS Manual</option>{fulfillmentMethod === 'PICKUP' && <option value="PAY_AT_STORE">Bayar di Toko</option>}</select></label>
                         <label className="block text-sm font-semibold">Catatan (opsional)<textarea value={customerNote} onChange={(event) => setCustomerNote(event.target.value)} className="mt-2 min-h-28 w-full rounded-2xl border border-[#dfcfbb] bg-white p-4" maxLength={1000} /></label>
                         {Object.values(errors).flat().map((error) => <p key={error} className="text-sm font-semibold text-red-700">{error}</p>)}
-                        <button disabled={submitting || entries.length === 0 || deliveryIncomplete} className="min-h-12 w-full rounded-full bg-[#3a2117] px-6 font-bold text-white disabled:opacity-45">{submitting ? 'Membuat pesanan…' : 'Buat Pesanan Web'}</button>
+                        {hasUnavailableItems && <p className="text-sm font-semibold text-red-700">Stok salah satu produk habis atau tidak mencukupi. Kembali ke katalog dan perbarui keranjang.</p>}
+                        <button disabled={submitting || entries.length === 0 || deliveryIncomplete || hasUnavailableItems} className="min-h-12 w-full rounded-full bg-[#3a2117] px-6 font-bold text-white disabled:opacity-45">{submitting ? 'Membuat pesanan…' : 'Buat Pesanan Web'}</button>
                     </form>
                     <aside className="border-l border-[#eadfcf] pl-0 lg:pl-7"><h2 className="font-display text-2xl font-semibold">Ringkasan pesanan</h2><div className="mt-4 divide-y divide-[#eadfcf]">{cartItems.map((item) => <div key={item.product.id} className="py-3 text-sm"><div className="flex justify-between gap-4"><span>{item.product.name} × {item.quantity}</span><strong>{formatRupiah((item.product.finalPrice ?? item.product.price) * item.quantity)}</strong></div></div>)}</div>{fulfillmentMethod === 'DELIVERY' && <div className="mt-3 flex justify-between text-sm"><span>Ongkir</span><strong>{quote ? formatRupiah(quote.cost) : '-'}</strong></div>}<div className="mt-4 flex justify-between border-t border-[#3a2117] pt-4 text-lg"><strong>Total</strong><strong>{formatRupiah(grandTotal)}</strong></div>{entries.length === 0 && <p className="mt-4 text-sm text-red-700">Keranjang kosong. Tambahkan produk dari katalog.</p>}</aside>
                 </div>

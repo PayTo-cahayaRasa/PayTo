@@ -30,10 +30,12 @@ export function resolvePublicCart(entries: PublicCartEntry[], products: PublicCa
 }
 
 export function addPublicCartEntry(entries: PublicCartEntry[], product: PublicCatalogProduct): PublicCartEntry[] {
+    if (product.stock <= 0) return entries;
+
     const current = entries.find((entry) => entry.productId === product.id);
     if (current) {
         return entries.map((entry) => entry.productId === product.id
-            ? { ...entry, quantity: Math.min(entry.quantity + 1, MAX_CART_QUANTITY), product }
+            ? { ...entry, quantity: Math.min(entry.quantity + 1, MAX_CART_QUANTITY, product.stock), product }
             : entry);
     }
 

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Clock, LayoutGrid, LogOut, Settings, Star, User } from 'lucide-react';
+import { router } from '@inertiajs/react';
+import { Clock, LayoutGrid, LogOut, Settings, ShoppingCart, Star, User } from 'lucide-react';
 
 type SidebarProps = {
     activeView: 'menu' | 'history' | 'favorites' | 'profile' | 'settings';
@@ -56,6 +57,10 @@ export default function Sidebar({
                 >
                     <Star size={22} fill={activeView === 'favorites' ? 'currentColor' : 'none'} />
                     <span className="absolute left-full ml-4 px-2 py-1 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg">Favorit</span>
+                </button>
+                <button onClick={() => router.visit('/pesanan-online')} className="group relative flex h-12 w-12 items-center justify-center rounded-2xl text-slate-400 transition-all hover:bg-white/60 hover:text-slate-600">
+                    <ShoppingCart size={22} />
+                    <span className="pointer-events-none absolute left-full z-50 ml-4 whitespace-nowrap rounded-lg bg-slate-800 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">Pesanan Online</span>
                 </button>
             </div>
 

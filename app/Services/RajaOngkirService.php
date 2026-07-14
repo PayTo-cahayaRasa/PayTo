@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Services\Settings\AppSettingsService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -9,6 +10,8 @@ use Illuminate\Validation\ValidationException;
 
 class RajaOngkirService
 {
+    public function __construct(private readonly AppSettingsService $settings) {}
+
     /**
      * @return array<int, array{id: string, label: string}>
      */
@@ -42,7 +45,7 @@ class RajaOngkirService
      */
     public function quote(string $destination, int $weight, string $courier): array
     {
-        $origin = (string) config('services.rajaongkir.origin');
+        $origin = (string) ($this->settings->getOnlineOrderSettings()['shipping']['origin'] ?: config('services.rajaongkir.origin'));
         if ($origin === '' || $weight < 1) {
             throw ValidationException::withMessages(['shipping' => 'Pengaturan pengiriman toko belum lengkap.']);
         }

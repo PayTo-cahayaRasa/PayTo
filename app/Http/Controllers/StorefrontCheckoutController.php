@@ -10,6 +10,7 @@ use App\Services\RajaOngkirService;
 use App\Services\Settings\AppSettingsService;
 use App\Services\WhatsAppLinkBuilder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -97,6 +98,32 @@ class StorefrontCheckoutController extends Controller
                 'grand_total', 'payment_method', 'status', 'tracking_number', 'created_at', 'updated_at',
             ]) + ['items' => $order->items->map->only(['product_name_snapshot', 'unit_price', 'quantity', 'discount_amount', 'line_total'])],
         ]);
+    }
+
+    public function trackingLookup(): Response
+    {
+        return Inertia::render('storefront/OrderTrackingLookupPage', [
+            'business' => $this->settings->getBusinessProfile(),
+        ]);
+    }
+
+    public function findTracking(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'customer_name' => ['required', 'string', 'max:255'],
+            'tracking_number' => ['required', 'string', 'max:100'],
+        ]);
+
+        $order = OnlineOrder::query()
+            ->whereRaw('LOWER(customer_name) = ?', [mb_strtolower(trim($validated['customer_name']))])
+            ->where('tracking_number', trim($validated['tracking_number']))
+            ->first();
+
+        if (! $order) {
+            return back()->withErrors(['tracking_number' => 'Pesanan tidak ditemukan. Periksa kembali nama pemesan dan nomor resi.'])->withInput();
+        }
+
+        return redirect()->route('orders.track', ['orderNumber' => $order->order_number, 'token' => $order->tracking_token]);
     }
 
     private function publicOrder(string $orderNumber, Request $request, bool $withItems = false): OnlineOrder

@@ -142,6 +142,32 @@ class OnlineOrderCheckoutTest extends TestCase
                 ->where('order.order_number', $order->order_number));
     }
 
+    public function test_guest_can_find_tracking_by_exact_customer_name_and_tracking_number(): void
+    {
+        [$order] = $this->createPendingOrder(1, 2);
+        $order->update(['customer_name' => 'Pelanggan Web', 'tracking_number' => 'JNE123456']);
+
+        $this->get('/lacak-pesanan')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('storefront/OrderTrackingLookupPage'));
+
+        $this->post('/lacak-pesanan', [
+            'customer_name' => 'pelanggan web',
+            'tracking_number' => 'JNE123456',
+        ])->assertRedirect(route('orders.track', ['orderNumber' => $order->order_number, 'token' => $order->tracking_token]));
+    }
+
+    public function test_tracking_lookup_uses_a_generic_error_for_invalid_credentials(): void
+    {
+        [$order] = $this->createPendingOrder(1, 2);
+        $order->update(['customer_name' => 'Pelanggan Web', 'tracking_number' => 'JNE123456']);
+
+        $this->from('/lacak-pesanan')->post('/lacak-pesanan', [
+            'customer_name' => 'Nama Salah',
+            'tracking_number' => 'JNE123456',
+        ])->assertRedirect('/lacak-pesanan')->assertSessionHasErrors('tracking_number');
+    }
+
     public function test_success_page_exposes_server_payment_instructions_and_payment_whatsapp_link(): void
     {
         config()->set('services.storefront_payment', [
@@ -232,6 +258,32 @@ class OnlineOrderCheckoutTest extends TestCase
             ->assertJsonPath('data.tracking_number', 'JNE123456')
             ->assertJsonPath('shipping_whatsapp_url', fn ($url) => str_contains($url, 'JNE123456'));
         $this->assertNotNull($order->fresh()->shipped_at);
+    }
+
+    public function test_only_supervisor_can_cancel_an_online_order(): void
+    {
+        [$order] = $this->createPendingOrder(1, 2);
+        $cashier = User::factory()->create(['role' => 'CASHIER', 'is_active' => true]);
+        $supervisor = User::factory()->create(['role' => 'SUPERVISOR', 'is_active' => true]);
+
+        $this->actingAs($cashier)->patchJson("/api/online-orders/{$order->id}/status", ['status' => 'DIBATALKAN'])->assertForbidden();
+        $this->actingAs($supervisor)->patchJson("/api/online-orders/{$order->id}/status", ['status' => 'DIBATALKAN'])->assertOk();
+        $this->assertDatabaseHas('online_orders', ['id' => $order->id, 'status' => 'DIBATALKAN']);
+    }
+
+    public function test_shipping_and_completion_timestamps_are_persisted(): void
+    {
+        [$order] = $this->createPendingOrder(1, 2);
+        $cashier = User::factory()->create(['role' => 'CASHIER', 'is_active' => true]);
+        $order->update(['fulfillment_method' => 'DELIVERY', 'shipping_courier_name' => 'JNE']);
+
+        $this->actingAs($cashier)->postJson("/api/online-orders/{$order->id}/confirm-payment")->assertOk();
+        $this->actingAs($cashier)->patchJson("/api/online-orders/{$order->id}/status", ['status' => 'DIKIRIM', 'tracking_number' => 'JNE123'])->assertOk();
+        $this->actingAs($cashier)->patchJson("/api/online-orders/{$order->id}/status", ['status' => 'SELESAI'])->assertOk();
+
+        $order->refresh();
+        $this->assertNotNull($order->shipped_at);
+        $this->assertNotNull($order->completed_at);
     }
 
     private function createPendingOrder(int $quantity, int $stock): array

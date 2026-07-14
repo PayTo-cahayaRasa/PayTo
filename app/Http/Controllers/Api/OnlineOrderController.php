@@ -36,6 +36,10 @@ class OnlineOrderController extends Controller
 
     public function updateStatus(OnlineOrderStatusRequest $request, OnlineOrder $onlineOrder): JsonResponse
     {
+        if ($request->enum('status', \App\Enums\OnlineOrderStatus::class) === \App\Enums\OnlineOrderStatus::Cancelled) {
+            abort_unless($request->user()?->role === 'SUPERVISOR', 403);
+        }
+
         $order = $this->orders->updateStatus(
             $onlineOrder,
             $request->enum('status', \App\Enums\OnlineOrderStatus::class),
