@@ -17,7 +17,7 @@ class KatalogPageTest extends TestCase
             'name' => 'Keripik Pisang',
             'slug' => 'keripik-pisang',
             'is_active' => true,
-            'is_public' => false,
+            'is_public' => true,
             'featured' => false,
         ]);
 
@@ -37,7 +37,7 @@ class KatalogPageTest extends TestCase
             'name' => 'Keripik Pisang',
             'slug' => 'keripik-pisang',
             'is_active' => true,
-            'is_public' => false,
+            'is_public' => true,
         ]);
 
         $response = $this->get('/katalog');
@@ -56,13 +56,13 @@ class KatalogPageTest extends TestCase
             'name' => 'Keripik Pisang',
             'slug' => 'keripik-pisang',
             'is_active' => true,
-            'is_public' => false,
+            'is_public' => true,
         ]);
         Product::factory()->create([
             'name' => 'Stik Talas',
             'slug' => 'stik-talas',
             'is_active' => true,
-            'is_public' => false,
+            'is_public' => true,
         ]);
 
         $response = $this->get('/katalog?q=pisang');
@@ -81,7 +81,7 @@ class KatalogPageTest extends TestCase
         $product = Product::factory()->create([
             'slug' => 'keripik-pisang',
             'is_active' => true,
-            'is_public' => false,
+            'is_public' => true,
         ]);
 
         $response = $this->get('/katalog/keripik-pisang');

@@ -69,7 +69,7 @@ class StorefrontTest extends TestCase
                 ->missing('product.cost'));
     }
 
-    public function test_guest_can_access_active_product_detail_regardless_of_legacy_public_flag(): void
+    public function test_guest_cannot_access_non_public_product_detail(): void
     {
         Product::factory()->create([
             'slug' => 'produk-internal',
@@ -77,7 +77,7 @@ class StorefrontTest extends TestCase
             'is_public' => false,
         ]);
 
-        $this->get('/katalog/produk-internal')->assertOk();
+        $this->get('/katalog/produk-internal')->assertNotFound();
     }
 
     public function test_catalog_can_be_disabled_without_exposing_products(): void

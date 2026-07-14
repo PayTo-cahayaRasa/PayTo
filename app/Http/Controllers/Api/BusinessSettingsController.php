@@ -35,7 +35,7 @@ class BusinessSettingsController extends Controller
         $this->settingsService->updateBusinessSettings(
             businessProfile: $validated['business'],
             catalogSettings: $validated['catalog'],
-            onlineOrderSettings: $validated['online_order']
+            onlineOrderSettings: $validated['online_order'] ?? $this->settingsService->getOnlineOrderSettings()
         );
 
         return response()->json([
