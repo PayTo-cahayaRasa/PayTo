@@ -11,6 +11,7 @@ import FavoritesView from './Pos/components/views/FavoritesView';
 import HistoryView from './Pos/components/views/HistoryView';
 import ProfileView from './Pos/components/views/ProfileView';
 import SettingsView from './Pos/components/views/SettingsView';
+import OnlineOrdersPage from './online-orders/OnlineOrdersPage';
 import UniversalModal from '../Components/UniversalModal';
 // import { CATEGORIES, QUICK_CASH_AMOUNTS } from './Pos/data';
 import type { CartItem, Product, SaleSource, TransactionHistory } from './Pos/types';
@@ -29,7 +30,7 @@ export default function PosInterface() {
     // authentication and role will be validated by the backend header/profile controller
 
     // State Management
-    const [activeView, setActiveView] = useState<'menu' | 'history' | 'favorites' | 'profile' | 'settings'>('menu');
+    const [activeView, setActiveView] = useState<'menu' | 'history' | 'favorites' | 'online-orders' | 'profile' | 'settings'>('menu');
     const [cart, setCart] = useState<CartItem[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
@@ -579,6 +580,10 @@ export default function PosInterface() {
                     <FavoritesView favorites={favoriteProducts} onAddToCart={addToCart} formatRupiah={formatRupiah} />
                 )}
 
+                {activeView === 'online-orders' && (
+                    <OnlineOrdersPage role="CASHIER" embedded />
+                )}
+
                 {/* --- VIEW: PROFILE --- */}
                 {activeView === 'profile' && (
                     <ProfileView profile={PROFILE} />
@@ -592,7 +597,7 @@ export default function PosInterface() {
             </div>
 
             {/* 3. CART PANEL (Unchanged Style) */}
-            {activeView !== 'profile' && activeView !== 'settings' && (
+            {activeView !== 'profile' && activeView !== 'settings' && activeView !== 'online-orders' && (
                 <CartPanel
                     cart={cart}
                     subtotal={subtotal}

@@ -111,16 +111,25 @@ class StorefrontCheckoutController extends Controller
     {
         $validated = $request->validate([
             'customer_name' => ['required', 'string', 'max:255'],
-            'tracking_number' => ['required', 'string', 'max:100'],
+            'order_reference' => ['nullable', 'string', 'max:100', 'required_without:tracking_number'],
+            'tracking_number' => ['nullable', 'string', 'max:100', 'required_without:order_reference'],
         ]);
+
+        $orderReference = trim((string) ($validated['order_reference'] ?? $validated['tracking_number']));
 
         $order = OnlineOrder::query()
             ->whereRaw('LOWER(customer_name) = ?', [mb_strtolower(trim($validated['customer_name']))])
-            ->where('tracking_number', trim($validated['tracking_number']))
+            ->where(function ($query) use ($orderReference): void {
+                $query
+                    ->where('order_number', $orderReference)
+                    ->orWhere('tracking_number', $orderReference);
+            })
             ->first();
 
         if (! $order) {
-            return back()->withErrors(['tracking_number' => 'Pesanan tidak ditemukan. Periksa kembali nama pemesan dan nomor resi.'])->withInput();
+            $errorField = array_key_exists('order_reference', $validated) ? 'order_reference' : 'tracking_number';
+
+            return back()->withErrors([$errorField => 'Pesanan tidak ditemukan. Periksa kembali nama pemesan dan nomor pesanan atau resi.'])->withInput();
         }
 
         return redirect()->route('orders.track', ['orderNumber' => $order->order_number, 'token' => $order->tracking_token]);

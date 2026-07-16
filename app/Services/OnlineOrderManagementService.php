@@ -17,7 +17,7 @@ use Illuminate\Validation\ValidationException;
 
 class OnlineOrderManagementService
 {
-    public function confirmPayment(OnlineOrder $order, User $cashier): OnlineOrder
+    public function confirmPayment(OnlineOrder $order, User $cashier, ?string $selectedPaymentMethod = null): OnlineOrder
     {
         if ($order->sale_id) {
             return $order;
@@ -27,7 +27,7 @@ class OnlineOrderManagementService
             throw ValidationException::withMessages(['status' => 'Pesanan tidak dapat dikonfirmasi.']);
         }
 
-        return DB::transaction(function () use ($order, $cashier): OnlineOrder {
+        return DB::transaction(function () use ($order, $cashier, $selectedPaymentMethod): OnlineOrder {
             $order = OnlineOrder::query()->lockForUpdate()->findOrFail($order->id);
             $order->load('items.product');
             if ($order->sale_id) {
@@ -37,6 +37,8 @@ class OnlineOrderManagementService
             if (! in_array($order->status, [OnlineOrderStatus::AwaitingPayment, OnlineOrderStatus::PaymentUnderReview], true)) {
                 throw ValidationException::withMessages(['status' => 'Pesanan tidak dapat dikonfirmasi.']);
             }
+
+            $paymentMethod = $this->resolvePaymentMethod($order, $selectedPaymentMethod);
 
             $sale = Sale::query()->create([
                 'local_txn_uuid' => (string) Str::uuid(),
@@ -87,7 +89,7 @@ class OnlineOrderManagementService
 
             Payment::query()->create([
                 'sale_id' => $sale->id,
-                'method' => $order->payment_method,
+                'method' => $paymentMethod,
                 'amount' => $order->grand_total,
                 'status' => 'CONFIRMED',
             ]);
@@ -100,6 +102,21 @@ class OnlineOrderManagementService
 
             return $order->fresh(['items']);
         });
+    }
+
+    private function resolvePaymentMethod(OnlineOrder $order, ?string $selectedPaymentMethod): string
+    {
+        if ($order->fulfillment_method !== 'PICKUP' || $order->payment_method !== 'PAY_AT_STORE') {
+            return $order->payment_method;
+        }
+
+        if (! in_array($selectedPaymentMethod, ['CASH', 'QRIS_MANUAL', 'BANK_TRANSFER'], true)) {
+            throw ValidationException::withMessages([
+                'payment_method' => 'Pilih metode pembayaran toko sebelum mengonfirmasi pesanan.',
+            ]);
+        }
+
+        return $selectedPaymentMethod;
     }
 
     public function updateStatus(OnlineOrder $order, OnlineOrderStatus $status, ?string $trackingNumber = null): OnlineOrder

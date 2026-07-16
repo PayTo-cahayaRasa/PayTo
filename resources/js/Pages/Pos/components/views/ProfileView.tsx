@@ -16,6 +16,8 @@ type ProfileViewProps = {
     };
 };
 
+const isShiftInformationVisible = false;
+
 export default function ProfileView({ profile = {} }: ProfileViewProps) {
     const totalToday = profile.totalToday ?? 0;
     const target = profile.target ?? 100000;
@@ -58,7 +60,7 @@ export default function ProfileView({ profile = {} }: ProfileViewProps) {
                     </div>
                 </div>
 
-                <div className="md:col-span-2 bg-white/40 backdrop-blur-md border border-white/60 rounded-4xl p-6 shadow-sm">
+                {isShiftInformationVisible && (<div className="md:col-span-2 bg-white/40 backdrop-blur-md border border-white/60 rounded-4xl p-6 shadow-sm">
                     <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
                         <Clock size={20} className="text-slate-400" /> Informasi Shift
                     </h3>
@@ -80,7 +82,7 @@ export default function ProfileView({ profile = {} }: ProfileViewProps) {
                             <div className="font-bold text-lg text-slate-800">{profile.transactionsToday ?? 0} Struk</div>
                         </div>
                     </div>
-                </div>
+                </div>)}
             </div>
         </div>
     );

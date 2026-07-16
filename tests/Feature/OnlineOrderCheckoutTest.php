@@ -157,6 +157,35 @@ class OnlineOrderCheckoutTest extends TestCase
         ])->assertRedirect(route('orders.track', ['orderNumber' => $order->order_number, 'token' => $order->tracking_token]));
     }
 
+    public function test_guest_can_find_pickup_order_by_order_number(): void
+    {
+        [$order] = $this->createPendingOrder(1, 2);
+
+        $this->post('/lacak-pesanan', [
+            'customer_name' => $order->customer_name,
+            'order_reference' => $order->order_number,
+        ])->assertRedirect(route('orders.track', ['orderNumber' => $order->order_number, 'token' => $order->tracking_token]));
+    }
+
+    public function test_cashier_receives_configured_payment_instructions_for_pickup_confirmation(): void
+    {
+        config()->set('services.storefront_payment', [
+            'bank_name' => 'Bank Test',
+            'bank_account_number' => '1234567890',
+            'bank_account_name' => 'Cahaya Rasa',
+            'qris_image_url' => 'https://example.test/qris.png',
+            'instructions' => 'Pastikan pembayaran sesuai total pesanan.',
+        ]);
+        [$order] = $this->createPendingOrder(1, 2);
+        $cashier = User::factory()->create(['role' => 'CASHIER', 'is_active' => true]);
+
+        $this->actingAs($cashier)
+            ->getJson("/api/online-orders/{$order->id}")
+            ->assertOk()
+            ->assertJsonPath('payment.bank_name', 'Bank Test')
+            ->assertJsonPath('payment.qris_image_url', 'https://example.test/qris.png');
+    }
+
     public function test_tracking_lookup_uses_a_generic_error_for_invalid_credentials(): void
     {
         [$order] = $this->createPendingOrder(1, 2);
@@ -206,6 +235,35 @@ class OnlineOrderCheckoutTest extends TestCase
         $this->assertDatabaseHas('payments', ['sale_id' => $order->sale_id, 'status' => 'CONFIRMED']);
         $this->assertDatabaseHas('stock_items', ['product_id' => $product->id, 'on_hand' => 1]);
         $this->assertDatabaseHas('stock_movements', ['product_id' => $product->id, 'type' => 'SALE_OUT', 'qty_delta' => -2]);
+    }
+
+    public function test_pickup_pay_at_store_order_requires_cashier_to_select_the_final_payment_method(): void
+    {
+        [$order] = $this->createPendingOrder(1, 2);
+        $order->update(['payment_method' => 'PAY_AT_STORE']);
+        $cashier = User::factory()->create(['role' => 'CASHIER', 'is_active' => true]);
+
+        $this->actingAs($cashier)
+            ->postJson("/api/online-orders/{$order->id}/confirm-payment")
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('payment_method');
+
+        $this->assertDatabaseHas('online_orders', [
+            'id' => $order->id,
+            'sale_id' => null,
+            'status' => 'MENUNGGU_PEMBAYARAN',
+        ]);
+
+        $this->actingAs($cashier)
+            ->postJson("/api/online-orders/{$order->id}/confirm-payment", ['payment_method' => 'QRIS_MANUAL'])
+            ->assertOk()
+            ->assertJsonPath('data.status', 'DIPROSES');
+
+        $this->assertDatabaseHas('payments', [
+            'sale_id' => $order->fresh()->sale_id,
+            'method' => 'QRIS_MANUAL',
+            'status' => 'CONFIRMED',
+        ]);
     }
 
     public function test_repeated_confirmation_does_not_create_duplicates(): void
@@ -296,7 +354,7 @@ class OnlineOrderCheckoutTest extends TestCase
             'customer_name' => 'Pelanggan Web', 'customer_phone' => '081234567890',
             'fulfillment_method' => 'PICKUP', 'shipping_cost' => 0, 'shipping_weight_grams' => 0,
             'subtotal' => 10000 * $quantity, 'discount_total' => 0, 'grand_total' => 10000 * $quantity,
-            'payment_method' => 'PAY_AT_STORE', 'status' => 'MENUNGGU_PEMBAYARAN',
+            'payment_method' => 'BANK_TRANSFER', 'status' => 'MENUNGGU_PEMBAYARAN',
         ]);
         $order->items()->create([
             'product_id' => $product->id, 'product_name_snapshot' => $product->name,
