@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ConfirmOnlineOrderPaymentRequest;
 use App\Http\Requests\OnlineOrderStatusRequest;
 use App\Models\OnlineOrder;
 use App\Services\OnlineOrderManagementService;
 use App\Services\WhatsAppLinkBuilder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class OnlineOrderController extends Controller
 {
@@ -26,12 +26,22 @@ class OnlineOrderController extends Controller
     {
         $onlineOrder->load('items');
 
-        return response()->json(['data' => $onlineOrder, 'shipping_whatsapp_url' => $this->whatsAppLinks->buildShippingUpdateLink($onlineOrder)]);
+        return response()->json([
+            'data' => $onlineOrder,
+            'payment' => config('services.storefront_payment'),
+            'shipping_whatsapp_url' => $this->whatsAppLinks->buildShippingUpdateLink($onlineOrder),
+        ]);
     }
 
-    public function confirmPayment(OnlineOrder $onlineOrder, Request $request): JsonResponse
+    public function confirmPayment(OnlineOrder $onlineOrder, ConfirmOnlineOrderPaymentRequest $request): JsonResponse
     {
-        return response()->json(['data' => $this->orders->confirmPayment($onlineOrder, $request->user())]);
+        return response()->json([
+            'data' => $this->orders->confirmPayment(
+                $onlineOrder,
+                $request->user(),
+                $request->validated('payment_method'),
+            ),
+        ]);
     }
 
     public function updateStatus(OnlineOrderStatusRequest $request, OnlineOrder $onlineOrder): JsonResponse

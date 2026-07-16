@@ -1,9 +1,8 @@
 import React from 'react';
-import { router } from '@inertiajs/react';
-import { Clock, LayoutGrid, LogOut, Settings, ShoppingCart, Star, User } from 'lucide-react';
+import { Clock, LayoutGrid, LogOut, ShoppingCart, Star, User } from 'lucide-react';
 
 type SidebarProps = {
-    activeView: 'menu' | 'history' | 'favorites' | 'profile' | 'settings';
+    activeView: 'menu' | 'history' | 'favorites' | 'online-orders' | 'profile' | 'settings';
     showUserMenu: boolean;
     onToggleUserMenu: () => void;
     onNavigate: (view: SidebarProps['activeView']) => void;
@@ -22,7 +21,7 @@ export default function Sidebar({
     return (
         <nav className="w-20 my-4 ml-4 flex flex-col items-center py-6 gap-8 z-30 relative bg-white/40 backdrop-blur-xl border border-white/50 shadow-2xl shadow-indigo-100/20 rounded-[2.5rem]">
             <div className="w-10 h-10 bg-linear-to-tr from-indigo-300 to-violet-200 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-300/50">
-                <img src="../storage/logs-removed.png" alt="PayTo Logo" />
+                <img src="../images/logo-removed.png" alt="PayTo Logo" />
             </div>
 
             <div className="flex flex-col gap-6 w-full px-2 items-center">
@@ -58,7 +57,13 @@ export default function Sidebar({
                     <Star size={22} fill={activeView === 'favorites' ? 'currentColor' : 'none'} />
                     <span className="absolute left-full ml-4 px-2 py-1 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg">Favorit</span>
                 </button>
-                <button onClick={() => router.visit('/pesanan-online')} className="group relative flex h-12 w-12 items-center justify-center rounded-2xl text-slate-400 transition-all hover:bg-white/60 hover:text-slate-600">
+                <button
+                    onClick={() => onNavigate('online-orders')}
+                    className={`group relative flex h-12 w-12 items-center justify-center rounded-2xl transition-all ${activeView === 'online-orders'
+                        ? 'bg-white text-indigo-600 shadow-md scale-105'
+                        : 'text-slate-400 hover:bg-white/60 hover:text-slate-600'
+                        }`}
+                >
                     <ShoppingCart size={22} />
                     <span className="pointer-events-none absolute left-full z-50 ml-4 whitespace-nowrap rounded-lg bg-slate-800 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">Pesanan Online</span>
                 </button>
@@ -81,12 +86,6 @@ export default function Sidebar({
                                 className="flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:bg-white hover:text-indigo-600 rounded-xl transition-colors text-left"
                             >
                                 <User size={16} /> Profil Saya
-                            </button>
-                            <button
-                                onClick={() => onNavigate('settings')}
-                                className="flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:bg-white hover:text-indigo-600 rounded-xl transition-colors text-left"
-                            >
-                                <Settings size={16} /> Pengaturan
                             </button>
                             <div className="h-px bg-slate-200/50 my-1"></div>
                             <button

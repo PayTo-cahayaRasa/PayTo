@@ -7,7 +7,7 @@ import { PublicHeader, SkipLink, usePublicCart } from '.';
 import { PublicFrame } from '.';
 
 export default function OrderTrackingLookupPage({ business }: { business: BusinessProfile }) {
-    const form = useForm({ customer_name: '', tracking_number: '' });
+    const form = useForm({ customer_name: '', order_reference: '' });
     const { cartItems, clearCart, decreaseCartItem, addToCart } = usePublicCart([]);
     const fieldBaseClass = 'mt-2 min-h-12 w-full rounded-2xl border border-[#ded0bf] bg-white px-4 text-[0.98rem] text-[#3a2117] shadow-[0_1px_0_rgba(58,33,23,0.03)] outline-none transition duration-200 placeholder:text-[#ad9a87] focus:border-[#9b5c22] focus:ring-4 focus:ring-[#ef921e]/12 motion-reduce:transition-none';
 
@@ -38,7 +38,7 @@ export default function OrderTrackingLookupPage({ business }: { business: Busine
                             Lacak pesanan
                         </h1>
                         <p className="mt-4 max-w-xl text-[1.02rem] leading-8 text-[#7d6047] sm:text-[1.05rem]">
-                            Masukkan nama pemesan dan nomor resi untuk melihat status pesanan Anda.
+                            Masukkan nama pemesan dan nomor pesanan atau nomor resi untuk melihat status pesanan Anda.
                         </p>
                     </header>
 
@@ -65,15 +65,15 @@ export default function OrderTrackingLookupPage({ business }: { business: Busine
                             </label>
 
                             <label className="block text-sm font-semibold text-[#3a2117]">
-                                Nomor resi
+                                Nomor pesanan atau resi
                                 <input
-                                    value={form.data.tracking_number}
-                                    onChange={event => form.setData('tracking_number', event.target.value)}
+                                    value={form.data.order_reference}
+                                    onChange={event => form.setData('order_reference', event.target.value)}
                                     required
                                     maxLength={100}
                                     autoComplete="off"
                                     className={`${fieldBaseClass} uppercase tracking-[0.12em]`}
-                                    placeholder="Masukkan nomor resi"
+                                    placeholder="Contoh: WEB-202607-000001 atau JNE123456"
                                 />
                             </label>
 
@@ -85,7 +85,7 @@ export default function OrderTrackingLookupPage({ business }: { business: Busine
                             </button>
 
                             <p className="pt-2 text-center text-xs leading-6 text-[#8b6a52]">
-                                Setelah dikirim, sistem akan menampilkan detail status pesanan yang tersimpan di toko.
+                                Pesanan pickup dapat dilacak memakai nomor pesanan, sedangkan delivery dapat memakai nomor pesanan atau resi.
                             </p>
                         </form>
                     </section>
