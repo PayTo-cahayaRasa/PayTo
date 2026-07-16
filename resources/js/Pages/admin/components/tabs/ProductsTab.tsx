@@ -807,7 +807,11 @@ export default function ProductsTab() {
 
                         <div className="p-8 overflow-y-auto custom-scrollbar-light space-y-6">
                             <div className="flex justify-center">
-                                <label className="relative flex h-32 w-32 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 text-slate-400 transition-all hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-500">
+                                <button
+                                    type="button"
+                                    onClick={() => productImageInputRef.current?.click()}
+                                    className="relative flex h-32 w-32 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 text-slate-400 transition-all hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-500"
+                                >
                                     {productImagePreview ? (
                                         <img src={productImagePreview} alt="Preview produk" className="h-full w-full object-cover" />
                                     ) : (
@@ -816,14 +820,14 @@ export default function ProductsTab() {
                                             <span className="text-xs font-bold">Upload Foto</span>
                                         </>
                                     )}
-                                    <input
-                                        ref={productImageInputRef}
-                                        type="file"
-                                        accept="image/jpeg,image/png,image/webp"
-                                        className="sr-only"
-                                        onChange={handleProductImageChange}
-                                    />
-                                </label>
+                                </button>
+                                <input
+                                    ref={productImageInputRef}
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    className="hidden"
+                                    onChange={handleProductImageChange}
+                                />
                             </div>
 
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
