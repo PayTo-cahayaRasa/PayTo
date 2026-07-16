@@ -16,14 +16,16 @@ type SidebarProps = {
 
 export default function Sidebar({ activeTab, onChangeTab, onLogout }: SidebarProps) {
     return (
-        <aside className="w-[calc(100vw-1.5rem)] max-w-72 h-[calc(100vh-1.5rem)] my-3 ml-3 flex flex-col bg-white/40 backdrop-blur-2xl border border-white/50 rounded-[2rem] shadow-2xl shadow-indigo-100/20 p-4 z-20 sm:w-[calc(100vw-2rem)] sm:h-[calc(100vh-2rem)] sm:m-4 sm:rounded-[2.5rem] sm:p-6 lg:w-64 lg:max-w-64">
+        <aside className="z-20 my-3 ml-3 flex h-[calc(100vh-1.5rem)] w-[calc(100vw-1.5rem)] max-w-72 flex-col rounded-[2rem] border border-[#eadfcf] bg-[linear-gradient(180deg,rgba(255,250,243,0.97),rgba(247,240,229,0.95))] p-4 shadow-[0_32px_62px_-38px_rgba(58,33,23,0.3)] sm:m-4 sm:h-[calc(100vh-2rem)] sm:w-[calc(100vw-2rem)] sm:rounded-[2.5rem] sm:p-6 lg:w-72 lg:max-w-72">
             <div className="flex items-center gap-3 px-1 sm:px-2 mb-8 sm:mb-10">
-                <div className="w-10 h-10 bg-gradient-to-tr from-slate-800 to-slate-700 rounded-xl flex items-center justify-center text-white shadow-lg">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#3d281b] text-white shadow-[0_18px_34px_-24px_rgba(61,40,27,0.78)]">
                     <LayoutDashboard size={20} />
                 </div>
                 <div>
-                    <h1 className="font-bold text-base sm:text-lg leading-tight">Admin<span className="text-indigo-600">Panel</span></h1>
-                    <p className="text-[10px] text-slate-500 font-medium">Supervisor Access</p>
+                    <h1 className="text-base font-semibold leading-tight tracking-[-0.03em] text-[#2f241c] sm:text-lg">
+                        Supervisor Panel
+                    </h1>
+                    <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-[#8e6847]">Cahaya Rasa control</p>
                 </div>
             </div>
 
@@ -59,7 +61,7 @@ export default function Sidebar({ activeTab, onChangeTab, onLogout }: SidebarPro
                 />
 
                 <div className="pt-4 pb-2">
-                    <div className="h-px bg-slate-200/50 mx-4"></div>
+                    <div className="mx-4 h-px bg-[#e3d5c3]"></div>
                 </div>
                 <SidebarItem
                     icon={Users}
@@ -79,7 +81,7 @@ export default function Sidebar({ activeTab, onChangeTab, onLogout }: SidebarPro
 
             <button
                 onClick={onLogout}
-                className="flex items-center gap-3 px-4 py-3 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors mt-auto font-medium text-sm shrink-0"
+                className="mt-auto flex shrink-0 items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-[#9d4f40] transition-colors hover:bg-[#fff1ea]"
             >
                 <LogOut size={18} />
                 <span>Logout</span>

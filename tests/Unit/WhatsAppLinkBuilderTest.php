@@ -13,6 +13,8 @@ use Tests\TestCase;
 
 class WhatsAppLinkBuilderTest extends TestCase
 {
+    private const WHATSAPP_NUMBER = '6281234567890';
+
     private AppSettingsService&MockInterface $mockSettings;
 
     private WhatsAppLinkBuilder $builder;
@@ -47,7 +49,7 @@ class WhatsAppLinkBuilderTest extends TestCase
 
         $link = $this->builder->buildProductLink($product, 1);
 
-        $this->assertStringStartsWith('https://wa.me/6281234567890?text=', $link);
+        $this->assertStringStartsWith('https://wa.me/'.self::WHATSAPP_NUMBER.'?text=', $link);
         $this->assertStringContainsString('Kopi+Latte', $link);
         $this->assertStringContainsString('Rp25.000', urldecode($link));
     }
@@ -136,7 +138,7 @@ class WhatsAppLinkBuilderTest extends TestCase
     }
 
     #[Test]
-    public function returns_null_when_whatsapp_number_invalid(): void
+    public function returns_null_when_product_link_number_is_missing_in_settings(): void
     {
         $this->mockSettings->shouldReceive('getCatalogSettings')
             ->andReturn([
@@ -175,10 +177,48 @@ class WhatsAppLinkBuilderTest extends TestCase
 
         $link = urldecode((string) $this->builder->buildShippingUpdateLink($order));
 
+        $this->assertStringContainsString('https://wa.me/'.self::WHATSAPP_NUMBER.'?text=', $link);
         $this->assertStringContainsString('WEB-20260714-TEST', $link);
         $this->assertStringContainsString('JNE REG', $link);
         $this->assertStringContainsString('JNE123456', $link);
         $this->assertStringContainsString('/pesanan/WEB-20260714-TEST?token=', $link);
+    }
+
+    #[Test]
+    public function builds_payment_confirmation_link_with_configured_storefront_whatsapp_number(): void
+    {
+        $this->mockSettings->shouldReceive('getBusinessProfile')->andReturn([
+            'name' => 'Cahaya Rasa',
+            'whatsapp_number' => '6281234567890',
+        ]);
+
+        $order = new OnlineOrder([
+            'order_number' => 'WEB-20260714-TEST',
+            'grand_total' => 10000,
+        ]);
+
+        $link = urldecode((string) $this->builder->buildPaymentConfirmationLink($order));
+
+        $this->assertStringContainsString('https://wa.me/'.self::WHATSAPP_NUMBER.'?text=', $link);
+        $this->assertStringContainsString('Cahaya Rasa', $link);
+        $this->assertStringContainsString('WEB-20260714-TEST', $link);
+        $this->assertStringContainsString('Rp10.000', $link);
+    }
+
+    #[Test]
+    public function returns_null_when_payment_confirmation_number_is_missing_in_settings(): void
+    {
+        $this->mockSettings->shouldReceive('getBusinessProfile')->andReturn([
+            'name' => 'Cahaya Rasa',
+            'whatsapp_number' => '',
+        ]);
+
+        $order = new OnlineOrder([
+            'order_number' => 'WEB-20260714-TEST',
+            'grand_total' => 10000,
+        ]);
+
+        $this->assertNull($this->builder->buildPaymentConfirmationLink($order));
     }
 
     #[Test]

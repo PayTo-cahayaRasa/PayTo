@@ -86,7 +86,7 @@ export function ProductCard({ product, index, detailHref, onAddToCart }: Product
                         <a
                             href={product.whatsappUrl}
                             target="_blank"
-                            rel="noreferrer"
+                            rel="noopener noreferrer"
                             className="inline-flex h-[2.4rem] w-[2.4rem] shrink-0 items-center justify-center rounded-xl bg-[#3a2117] text-white"
                             aria-label="Pesan via WhatsApp"
                         >

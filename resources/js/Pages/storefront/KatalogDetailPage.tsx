@@ -98,7 +98,7 @@ export default function KatalogDetailPage({ business, product }: KatalogDetailPa
                                             <a
                                                 href={product.whatsappUrl}
                                                 target="_blank"
-                                                rel="noreferrer"
+                                                rel="noopener noreferrer"
                                                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#f5941d] px-6 text-sm font-semibold text-white transition duration-300 hover:-translate-y-px hover:bg-[#ee8a14]"
                                             >
                                                 <MessageCircle size={16} strokeWidth={2} />

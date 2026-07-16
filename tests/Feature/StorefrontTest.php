@@ -104,4 +104,45 @@ class StorefrontTest extends TestCase
                 ->where('catalog.enabled', false)
                 ->where('products', null));
     }
+
+    public function test_storefront_uses_current_business_whatsapp_number_for_business_profile_and_product_links(): void
+    {
+        AppSetting::query()->updateOrCreate(
+            ['key' => 'business.profile'],
+            ['value' => [
+                'name' => 'Cahaya Rasa',
+                'tagline' => 'Oleh-Oleh Malang',
+                'address' => 'Malang',
+                'whatsapp_number' => '6285732915325',
+                'operating_hours' => 'Senin-Sabtu 08.00-20.00 WIB',
+            ]]
+        );
+
+        AppSetting::query()->updateOrCreate(
+            ['key' => 'catalog.settings'],
+            ['value' => [
+                'enabled' => true,
+                'whatsapp_enabled' => true,
+                'whatsapp_message_template' => 'Halo, saya tertarik dengan {product_name} seharga {price}. Qty: {qty}.',
+            ]]
+        );
+
+        $product = Product::factory()->create([
+            'name' => 'Keripik Pisang Original',
+            'slug' => 'keripik-pisang-original',
+            'price' => 18000,
+            'discount' => 0,
+            'is_active' => true,
+            'is_public' => true,
+            'featured' => true,
+        ]);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('storefront/LandingPage')
+                ->where('business.whatsapp_number', '6285732915325')
+                ->where('products.data.0.id', $product->id)
+                ->where('products.data.0.whatsappUrl', fn (string $url) => str_starts_with($url, 'https://wa.me/6285732915325?text=')));
+    }
 }
