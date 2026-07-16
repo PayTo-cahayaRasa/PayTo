@@ -141,10 +141,6 @@ export function getPublicCatalogProduct(productId: number): PublicCatalogProduct
     return PUBLIC_PRODUCTS.find((product) => product.id === productId);
 }
 
-export function getProductWhatsappUrl(productName: string): string {
-    return `https://wa.me/6281284719284?text=${encodeURIComponent(`Halo PayTo, saya ingin memesan produk ${productName}.`)}`;
-}
-
 export function formatRupiah(amount: number): string {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',

@@ -66,23 +66,26 @@ export default function Header({
 }: HeaderProps) {
     return (
         <header className="relative z-30 px-4 pt-4 pb-5 sm:px-6 sm:pt-5 sm:pb-6 lg:px-8">
-            <div className="rounded-[1.75rem] border border-white/60 bg-white/55 backdrop-blur-xl shadow-lg shadow-indigo-100/20 px-4 py-4 sm:px-5 sm:py-5">
+            <div className="rounded-[1.75rem] border border-[#eadfcf] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(250,243,233,0.92))] px-4 py-4 shadow-[0_28px_56px_-42px_rgba(58,33,23,0.34)] sm:px-5 sm:py-5">
                 <div className="flex items-start justify-between gap-3 sm:gap-4">
                     <div className="flex items-start gap-3 min-w-0 sm:items-center">
                         <button
                             onClick={onToggleSidebar}
                             aria-label="Toggle sidebar"
                             aria-expanded={isSidebarOpen}
-                            className="lg:hidden w-10 h-10 rounded-xl border border-white/40 bg-white/70 backdrop-blur transition hover:bg-white"
+                            className="h-10 w-10 rounded-xl border border-[#e3d5c3] bg-white/85 transition hover:bg-white lg:hidden"
                         >
                             <Menu size={20} />
                         </button>
 
                         <div className="min-w-0">
-                            <h2 className="text-xl font-bold text-slate-800 break-words sm:text-2xl">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8e6847]">
+                                Area supervisor
+                            </p>
+                            <h2 className="break-words text-xl font-semibold tracking-[-0.04em] text-[#2f241c] sm:text-[2rem]">
                                 {headerTitleMap[activeTab]}
                             </h2>
-                            <p className="mt-1 text-sm text-slate-500 break-words">
+                            <p className="mt-1 break-words text-sm text-[#806049]">
                                 {headerSubtitleMap[activeTab]}
                             </p>
                         </div>
@@ -92,11 +95,11 @@ export default function Header({
                         <div className="relative" ref={notificationRef}>
                             <button
                                 onClick={onToggleNotifications}
-                                className="w-10 h-10 bg-white/70 backdrop-blur-sm border border-white/70 rounded-xl flex items-center justify-center text-slate-600 hover:bg-white transition-all shadow-sm relative"
+                                className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-[#e3d5c3] bg-white/85 text-[#6f5948] shadow-[0_16px_26px_-24px_rgba(58,33,23,0.42)] transition-all hover:bg-white"
                             >
                                 <Bell size={18} />
                                 {notifications.some(n => !n.read) && (
-                                    <span className="absolute top-2 right-2.5 w-2 h-2 bg-rose-500 rounded-full border border-white animate-pulse"></span>
+                                    <span className="absolute right-2.5 top-2 h-2 w-2 rounded-full border border-white bg-[#c87153] animate-pulse"></span>
                                 )}
                             </button>
 
@@ -109,9 +112,9 @@ export default function Header({
                             <button
                                 type="button"
                                 onClick={onToggleUserMenu}
-                                className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-100 to-white p-0.5 shadow-md cursor-pointer hover:ring-2 hover:ring-indigo-200 transition-all"
+                                className="h-10 w-10 cursor-pointer rounded-full bg-[#f4e7d4] p-0.5 shadow-[0_18px_28px_-22px_rgba(58,33,23,0.34)] transition-all hover:ring-2 hover:ring-[#e4d0b7]"
                             >
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Supervisor" className="rounded-full bg-white w-full h-full" alt="Admin" />
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Supervisor" className="h-full w-full rounded-full bg-white object-cover" alt="Admin" />
                             </button>
 
                             {showUserMenu && (

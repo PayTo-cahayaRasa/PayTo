@@ -6,6 +6,7 @@ use App\Http\Controllers\Pos\PosController;
 use App\Http\Controllers\Pos\ReceiptController;
 use App\Http\Controllers\StorefrontCheckoutController;
 use App\Http\Controllers\StorefrontController;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 
 // Public storefront routes
@@ -19,9 +20,15 @@ Route::get('/lacak-pesanan', [StorefrontCheckoutController::class, 'trackingLook
 Route::post('/lacak-pesanan', [StorefrontCheckoutController::class, 'findTracking'])->middleware('throttle:checkout')->name('orders.find');
 Route::get('/pesanan/{orderNumber}', [StorefrontCheckoutController::class, 'track'])->name('orders.track');
 
-Route::get('/login', function () {
+Route::get('/login', function (): \Inertia\Response|RedirectResponse {
+    $user = request()->user();
+
+    if ($user) {
+        return redirect()->route($user->role === 'SUPERVISOR' ? 'admin.index' : 'pos.index');
+    }
+
     return inertia('login');
-})->middleware('guest')->name('login');
+})->name('login');
 
 Route::post('/login', [PosLoginController::class, 'store'])
     ->middleware(['guest', 'throttle:login'])

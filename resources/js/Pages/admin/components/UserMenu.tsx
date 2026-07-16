@@ -15,30 +15,30 @@ type UserMenuProps = {
 
 export default function UserMenu({ profile, onNavigateProfile, onNavigateSettings, onLogout }: UserMenuProps) {
     return (
-        <div className="absolute top-full right-0 mt-3 w-[min(16rem,calc(100vw-1rem))] bg-white/95 backdrop-blur-xl border border-white/70 rounded-2xl shadow-2xl p-2 z-50 animate-in slide-in-from-top-2 duration-200">
-            <div className="px-4 py-3 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl mb-1 border border-indigo-100">
-                <p className="font-bold text-sm text-slate-800 break-words">{profile.name || 'Supervisor'}</p>
+        <div className="absolute right-0 top-full z-50 mt-3 w-[min(16rem,calc(100vw-1rem))] rounded-2xl border border-[#eadfcf] bg-[#fffaf3] p-2 shadow-[0_30px_48px_-34px_rgba(58,33,23,0.34)] animate-in slide-in-from-top-2 duration-200">
+            <div className="mb-1 rounded-xl border border-[#eadfcf] bg-[#f8f2e7] px-4 py-3">
+                <p className="break-words text-sm font-semibold text-[#2f241c]">{profile.name || 'Supervisor'}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-                    <p className="text-xs text-slate-500">{profile.role || 'SUPERVISOR'}</p>
+                    <span className="h-2 w-2 rounded-full bg-[#375c3f]"></span>
+                    <p className="text-xs uppercase tracking-[0.16em] text-[#806049]">{profile.role || 'SUPERVISOR'}</p>
                 </div>
             </div>
             <button
                 onClick={onNavigateProfile}
-                className="flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:bg-white hover:text-indigo-600 rounded-xl transition-colors w-full text-left"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-[#6f5948] transition-colors hover:bg-white hover:text-[#2f241c]"
             >
                 <User size={16} /> Profil Saya
             </button>
             <button
                 onClick={onNavigateSettings}
-                className="flex items-center gap-3 px-3 py-2.5 text-sm text-slate-600 hover:bg-white hover:text-indigo-600 rounded-xl transition-colors w-full text-left"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-[#6f5948] transition-colors hover:bg-white hover:text-[#2f241c]"
             >
                 <Settings size={16} /> Pengaturan
             </button>
-            <div className="h-px bg-slate-200/50 my-1"></div>
+            <div className="my-1 h-px bg-[#eadfcf]"></div>
             <button
                 onClick={onLogout}
-                className="flex items-center gap-3 px-3 py-2.5 text-sm text-rose-500 hover:bg-rose-50 rounded-xl transition-colors w-full text-left font-bold"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#9d4f40] transition-colors hover:bg-[#fff1ea]"
             >
                 <LogOut size={16} /> Logout
             </button>

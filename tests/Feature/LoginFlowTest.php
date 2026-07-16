@@ -35,7 +35,7 @@ class LoginFlowTest extends TestCase
 
         $response = $this->actingAs($user)->get('/login');
 
-        $response->assertRedirect('/');
+        $response->assertRedirect('/kasir');
     }
 
     /** @test */

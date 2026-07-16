@@ -20,7 +20,7 @@ class StorefrontSeeder extends Seeder
                 'name' => 'Cahaya Rasa',
                 'tagline' => 'Oleh-Oleh Malang',
                 'address' => '2P5W+95R, Jl. Sukoanyar, Nongkosongo, Wringinsongo, Kec. Tumpang, Kabupaten Malang, Jawa Timur 65156',
-                'whatsapp_number' => '6281284719284',
+                'whatsapp_number' => '6285732915325',
                 'operating_hours' => 'Senin-Sabtu 08.00-20.00 WIB',
                 'instagram_url' => 'https://www.instagram.com/cahayarasamalang/',
                 'tiktok_url' => 'https://www.tiktok.com/@cahayarasa_28',

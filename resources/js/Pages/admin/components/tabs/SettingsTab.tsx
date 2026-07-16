@@ -60,7 +60,10 @@ export default function SettingsTab() {
         try {
             setLoading(true);
             const response = await axios.get('/api/admin/business-settings');
-            setSettings(response.data.data);
+            setSettings({
+                business: response.data.data.business,
+                catalog: response.data.data.catalog,
+            });
         } catch (error: any) {
             console.error('Failed to load settings:', error);
             setErrorMessage('Gagal memuat pengaturan. Silakan refresh halaman.');
@@ -76,7 +79,20 @@ export default function SettingsTab() {
             setErrorMessage('');
             setSaveStatus('idle');
 
-            await axios.put('/api/admin/business-settings', settings);
+            const payload = {
+                business: {
+                    ...settings.business,
+                    whatsapp_number: settings.business.whatsapp_number.replace(/\D/g, ''),
+                },
+                catalog: settings.catalog,
+            };
+
+            const response = await axios.put('/api/admin/business-settings', payload);
+
+            setSettings({
+                business: response.data.data.business,
+                catalog: response.data.data.catalog,
+            });
 
             setSaveStatus('success');
             setTimeout(() => setSaveStatus('idle'), 3000);
@@ -229,7 +245,7 @@ export default function SettingsTab() {
                                 onChange={(e) =>
                                     setSettings({
                                         ...settings,
-                                        business: { ...settings.business, whatsapp_number: e.target.value },
+                                        business: { ...settings.business, whatsapp_number: e.target.value.replace(/\D/g, '') },
                                     })
                                 }
                                 className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none ${

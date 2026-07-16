@@ -1,7 +1,8 @@
+import { Link } from '@inertiajs/react';
 import { LogIn, Menu, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-import { businessWhatsappUrl, storefrontShopHref } from '../constants';
+import { getCheckoutWhatsappUrl, storefrontShopHref } from '../constants';
 import { formatRupiah } from '../data/publicCatalogData';
 import type { PublicHeaderProps } from '../types';
 import { BrandMark } from './BrandMark';
@@ -15,12 +16,12 @@ export function PublicHeader({ business, cartItems, onIncreaseCartItem, onDecrea
     const cartButtonRef = useRef<HTMLDivElement | null>(null);
     const previousCartItemsCountRef = useRef<number | null>(null);
     const hasUnavailableItems = cartItems.some((item) => item.product.stock <= 0 || item.quantity > item.product.stock);
-    const whatsappUrl = cartItems.length > 0 && !hasUnavailableItems && business.whatsapp_number
-        ? `${businessWhatsappUrl(business)}&text=${encodeURIComponent([
+    const whatsappUrl = cartItems.length > 0 && !hasUnavailableItems
+        ? getCheckoutWhatsappUrl(business, [
             `Halo ${business.name}, saya ingin memesan:`,
             ...cartItems.map((item) => `- ${item.product.name} x${item.quantity} (${formatRupiah((item.product.finalPrice ?? item.product.price) * item.quantity)})`),
             `Subtotal: ${formatRupiah(cartItems.reduce((total, item) => total + (item.product.finalPrice ?? item.product.price) * item.quantity, 0))}`,
-        ].join('\n'))}`
+        ].join('\n'))
         : null;
     const totalCartItems = cartItems.reduce((total, item) => total + item.quantity, 0);
     const cartTotal = cartItems.reduce((total, item) => total + (item.product.finalPrice ?? item.product.price) * item.quantity, 0);
@@ -100,10 +101,10 @@ export function PublicHeader({ business, cartItems, onIncreaseCartItem, onDecrea
                         </HeaderIconButton>
                     </div>
 
-                    <a href="/login" className="hidden min-h-11 items-center gap-2 rounded-2xl px-3.5 text-sm font-semibold text-[#3a2117] transition hover:bg-[#f8ead6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9b5c22] sm:inline-flex">
+                    <Link href="/login" className="hidden min-h-11 items-center gap-2 rounded-2xl px-3.5 text-sm font-semibold text-[#3a2117] transition hover:bg-[#f8ead6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9b5c22] sm:inline-flex">
                         <LogIn size={18} strokeWidth={1.8} />
                         Masuk
-                    </a>
+                    </Link>
 
                     <div className="lg:hidden">
                         <HeaderIconButton ariaLabel="Buka menu">
@@ -157,7 +158,7 @@ export function PublicHeader({ business, cartItems, onIncreaseCartItem, onDecrea
                                         <span className="font-display text-xl font-semibold text-[#3a2117]">{formatRupiah(cartTotal)}</span>
                                     </div>
                                     {whatsappUrl ? (
-                                        <a href={whatsappUrl} target="_blank" rel="noreferrer" className="mt-4 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#168c45] px-5 text-sm font-bold text-white shadow-[0_18px_28px_-20px_rgba(22,140,69,0.8)] transition hover:-translate-y-px hover:bg-[#127a3c]">
+                                        <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#168c45] px-5 text-sm font-bold text-white shadow-[0_18px_28px_-20px_rgba(22,140,69,0.8)] transition hover:-translate-y-px hover:bg-[#127a3c]">
                                             Checkout via WhatsApp
                                         </a>
                                     ) : null}

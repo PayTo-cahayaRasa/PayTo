@@ -6,6 +6,7 @@ import { BrandMark } from './BrandMark';
 
 export function PublicFooter({ business }: PublicFooterProps) {
     const whatsappHref = businessWhatsappUrl(business);
+    const whatsappDisplay = formatWhatsAppNumber(business.whatsapp_number);
 
     return (
         <footer id="kontak" className="scroll-mt-24 px-4 pb-8 pt-2 sm:px-5 lg:px-8">
@@ -18,14 +19,15 @@ export function PublicFooter({ business }: PublicFooterProps) {
                         </p>
                         <div className="mt-5 flex items-center gap-3">
                             {[
-                                { Icon: Instagram, href: business.instagram_url ?? '#footer' },
-                                { Icon: Facebook, href: '#footer' },
-                                { Icon: MessageCircle, href: whatsappHref ?? '#footer' },
-                                { Icon: Mail, href: '#footer' },
-                            ].map(({ Icon, href }, index) => (
+                                { Icon: Instagram, href: business.instagram_url ?? '#footer', label: 'Instagram' },
+                                { Icon: Facebook, href: '#footer', label: 'Facebook' },
+                                { Icon: MessageCircle, href: whatsappHref ?? '#footer', label: 'WhatsApp' },
+                                { Icon: Mail, href: '#footer', label: 'Email' },
+                            ].map(({ Icon, href, label }, index) => (
                                 <a
                                     key={index}
                                     href={href}
+                                    aria-label={label}
                                     target={href.startsWith('http') ? '_blank' : undefined}
                                     rel={href.startsWith('http') ? 'noreferrer' : undefined}
                                     className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#eadfcf] text-[#3a2117]"
@@ -64,7 +66,7 @@ export function PublicFooter({ business }: PublicFooterProps) {
                         <div className="mt-4 grid gap-4 text-sm leading-7 text-[#6d5948]">
                             <div className="flex items-start gap-3">
                                 <MessageCircle size={16} strokeWidth={1.8} className="mt-1 text-[#3a2117]" />
-                                <span>{business.whatsapp_number || '-'}</span>
+                                <span>{whatsappDisplay}</span>
                             </div>
                             <div className="flex items-start gap-3">
                                 <Mail size={16} strokeWidth={1.8} className="mt-1 text-[#3a2117]" />
@@ -92,4 +94,23 @@ export function PublicFooter({ business }: PublicFooterProps) {
             </div>
         </footer>
     );
+}
+
+function formatWhatsAppNumber(number: string | null | undefined): string {
+    const digits = (number ?? '').replace(/\D/g, '');
+
+    if (!digits) {
+        return '-';
+    }
+
+    if (digits.startsWith('62') && digits.length === 13) {
+        const localPart = digits.slice(2);
+        return `+62 ${localPart.slice(0, 3)}-${localPart.slice(3, 7)}-${localPart.slice(7)}`;
+    }
+
+    if (digits.startsWith('62')) {
+        return `+${digits}`;
+    }
+
+    return `+${digits}`;
 }

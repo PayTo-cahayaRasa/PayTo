@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 
+import { getCheckoutWhatsappUrl } from './constants';
 import { formatRupiah } from './data/publicCatalogData';
 import type { BusinessProfile } from './types';
 
@@ -30,6 +31,8 @@ type TrackingOrder = {
 };
 
 export default function OrderTrackingPage({ business, order }: { business: BusinessProfile; order: TrackingOrder }) {
+    const whatsappUrl = getCheckoutWhatsappUrl(business, `Halo ${business.name}, saya ingin menanyakan pesanan ${order.order_number}.`);
+
     return (
         <>
             <Head title={`Pesanan ${order.order_number}`} />
@@ -65,7 +68,9 @@ export default function OrderTrackingPage({ business, order }: { business: Busin
                             <p className="mt-2 text-xs text-[#806049]">Terakhir diperbarui {new Date(order.updated_at).toLocaleString('id-ID')}</p>
                         </aside>
                     </div>
-                    {business.whatsapp_number && <a href={`https://wa.me/${business.whatsapp_number.replace(/\D/g, '')}?text=${encodeURIComponent(`Halo ${business.name}, saya ingin menanyakan pesanan ${order.order_number}.`)}`} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center rounded-full bg-[#168c45] px-6 text-sm font-bold text-white">Hubungi Toko via WhatsApp</a>}
+                    {whatsappUrl ? (
+                        <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center rounded-full bg-[#168c45] px-6 text-sm font-bold text-white">Hubungi Toko via WhatsApp</a>
+                    ) : null}
                 </div>
             </main>
         </>
