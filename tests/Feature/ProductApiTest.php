@@ -6,6 +6,8 @@ use App\Models\Product;
 use App\Models\StockItem;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ProductApiTest extends TestCase
@@ -183,6 +185,35 @@ class ProductApiTest extends TestCase
             'product_id' => $product->id,
             'on_hand' => 12,
         ]);
+    }
+
+    public function test_supervisor_can_upload_product_image_when_creating_and_updating_product(): void
+    {
+        $storage = Storage::fake('public');
+        $supervisor = User::factory()->create(['role' => 'SUPERVISOR', 'is_active' => true]);
+
+        $created = $this->actingAs($supervisor)->post('/api/admin/products', [
+            'name' => 'Produk Bergambar',
+            'price' => 15000,
+            'stock' => 5,
+            'image' => UploadedFile::fake()->image('produk-awal.jpg'),
+        ])->assertCreated();
+
+        $product = Product::query()->findOrFail($created->json('data.id'));
+        $this->assertNotNull($product->image_path);
+        $storage->assertExists($product->image_path);
+        $created->assertJsonPath('data.image_url', $storage->url($product->image_path));
+
+        $oldImagePath = $product->image_path;
+        $this->actingAs($supervisor)->post("/api/admin/products/{$product->id}", [
+            '_method' => 'PUT',
+            'image' => UploadedFile::fake()->image('produk-baru.png'),
+        ])->assertOk();
+
+        $product->refresh();
+        $this->assertNotSame($oldImagePath, $product->image_path);
+        $storage->assertMissing($oldImagePath);
+        $storage->assertExists($product->image_path);
     }
 
     public function test_can_delete_product_and_stock_item(): void

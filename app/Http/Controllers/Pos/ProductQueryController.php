@@ -13,7 +13,6 @@ class ProductQueryController
             ->leftJoin('stock_items', 'products.id', '=', 'stock_items.product_id')
             ->select('products.id', 'products.name', 'products.sku', 'products.price', 'products.discount', 'products.uom', DB::raw('COALESCE(stock_items.on_hand, 0) as stock'))
             ->where('products.is_active', true)
-            ->where('products.is_public', true)
             ->orderBy('products.name')
             ->get()
             ->map(function ($r) {

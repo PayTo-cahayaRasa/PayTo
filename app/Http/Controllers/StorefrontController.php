@@ -57,7 +57,7 @@ class StorefrontController extends Controller
 
     public function show(Product $product): Response
     {
-        abort_unless($product->is_active && $product->is_public && $this->settings->getCatalogSettings()['enabled'], 404);
+        abort_unless($product->is_active && $this->settings->getCatalogSettings()['enabled'], 404);
 
         return Inertia::render('storefront/KatalogDetailPage', [
             'business' => $this->settings->getBusinessProfile(),
@@ -70,7 +70,6 @@ class StorefrontController extends Controller
         return Product::query()
             ->with('stockItem')
             ->where('is_active', true)
-            ->where('is_public', true)
             ->orderByDesc('featured')
             ->orderBy('name');
     }

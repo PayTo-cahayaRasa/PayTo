@@ -19,7 +19,7 @@ class OnlineOrderCheckoutService
 
         foreach ($items as $item) {
             $product = $products->get($item['product_id']);
-            if (! $product?->is_active || ! $product->is_public || ! $product->weight_grams) {
+            if (! $product?->is_active || ! $product->weight_grams) {
                 throw ValidationException::withMessages(['items' => 'Produk tidak tersedia atau berat produk belum diatur.']);
             }
 
@@ -40,7 +40,6 @@ class OnlineOrderCheckoutService
             ->with('stockItem')
             ->whereIn('id', collect($payload['items'])->pluck('product_id'))
             ->where('is_active', true)
-            ->where('is_public', true)
             ->get()
             ->keyBy('id');
 

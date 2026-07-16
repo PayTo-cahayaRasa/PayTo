@@ -10,7 +10,10 @@ use App\Models\ProductHistory;
 use App\Models\StockItem;
 use App\Models\StockMovement;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Filesystem\FilesystemAdapter;
 
 class ProductQueryController extends Controller
 {
@@ -45,6 +48,10 @@ class ProductQueryController extends Controller
             'is_public',
             'featured',
         ]));
+
+        if ($request->hasFile('image')) {
+            $this->replaceProductImage($product, $request->file('image'));
+        }
 
         // Create initial stock
         StockItem::query()->firstOrCreate(
@@ -126,6 +133,10 @@ class ProductQueryController extends Controller
             'featured',
         ]));
         $product->save();
+
+        if ($request->hasFile('image')) {
+            $this->replaceProductImage($product, $request->file('image'));
+        }
 
         // Handle stock changes with validation
         $stockChanged = false;
@@ -214,6 +225,9 @@ class ProductQueryController extends Controller
             'is_active' => false,
             'is_public' => false,
         ]);
+        if ($product->image_path) {
+            Storage::disk('public')->delete($product->image_path);
+        }
         $product->delete();
 
         return response()->json([
@@ -272,6 +286,8 @@ class ProductQueryController extends Controller
         $price = (float) $product->price;
         $discount = (float) ($product->discount ?? 0);
         $priceAfterDiscount = max(0, $price - ($price * $discount / 100));
+        /** @var FilesystemAdapter $publicDisk */
+        $publicDisk = Storage::disk('public');
 
         return [
             'id' => $product->id,
@@ -286,7 +302,18 @@ class ProductQueryController extends Controller
             'stock' => $product->stockItem?->on_hand !== null ? (float) $product->stockItem->on_hand : 0.0,
             'is_active' => (bool) $product->is_active,
             'status' => $product->is_active ? 'ACTIVE' : 'INACTIVE',
+            'image_url' => $product->image_path ? $publicDisk->url($product->image_path) : null,
         ];
+    }
+
+    private function replaceProductImage(Product $product, UploadedFile $image): void
+    {
+        $oldImagePath = $product->image_path;
+        $product->update(['image_path' => $image->store('products', 'public')]);
+
+        if ($oldImagePath) {
+            Storage::disk('public')->delete($oldImagePath);
+        }
     }
 
     /**

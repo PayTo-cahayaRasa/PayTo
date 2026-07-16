@@ -43,7 +43,8 @@ class BusinessSettingsRequest extends FormRequest
             'online_order.payment.bank_name' => ['nullable', 'string', 'max:100'],
             'online_order.payment.bank_account_number' => ['nullable', 'string', 'max:50'],
             'online_order.payment.bank_account_name' => ['nullable', 'string', 'max:100'],
-            'online_order.payment.qris_image_url' => ['nullable', 'url', 'max:500'],
+            'online_order.payment.qris_image_url' => ['nullable', 'string', 'max:500'],
+            'online_order.payment.qris_image_path' => ['nullable', 'string', 'max:255'],
             'online_order.payment.instructions' => ['required_with:online_order', 'string', 'max:1000'],
         ];
     }

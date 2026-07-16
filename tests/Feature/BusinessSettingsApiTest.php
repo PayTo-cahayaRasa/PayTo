@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class BusinessSettingsApiTest extends TestCase
@@ -66,6 +68,47 @@ class BusinessSettingsApiTest extends TestCase
         $this->assertDatabaseHas('app_settings', [
             'key' => 'catalog.settings',
         ]);
+    }
+
+    public function test_supervisor_can_save_bank_details_and_upload_qris_image(): void
+    {
+        $storage = Storage::fake('public');
+        $supervisor = User::factory()->create(['role' => 'SUPERVISOR', 'is_active' => true]);
+
+        $upload = $this->actingAs($supervisor)->post('/api/admin/business-settings/qris-image', [
+            'qris_image' => UploadedFile::fake()->image('qris.png'),
+        ])->assertOk();
+
+        $qrisImageUrl = $upload->json('data.online_order.payment.qris_image_url');
+        $qrisImagePath = $upload->json('data.online_order.payment.qris_image_path');
+        $storage->assertExists($qrisImagePath);
+
+        $this->actingAs($supervisor)->putJson('/api/admin/business-settings', [
+            'business' => [
+                'name' => 'Cahaya Rasa',
+                'address' => 'Malang',
+                'whatsapp_number' => '6281234567890',
+                'operating_hours' => '08.00-20.00',
+            ],
+            'catalog' => [
+                'enabled' => true,
+                'whatsapp_enabled' => true,
+                'whatsapp_message_template' => 'Halo {product_name}',
+            ],
+            'online_order' => [
+                'shipping' => ['origin' => '123', 'packaging_weight_grams' => 100, 'couriers' => ['jne']],
+                'payment' => [
+                    'bank_name' => 'Bank Test',
+                    'bank_account_number' => '1234567890',
+                    'bank_account_name' => 'Cahaya Rasa',
+                    'qris_image_url' => $qrisImageUrl,
+                    'qris_image_path' => $qrisImagePath,
+                    'instructions' => 'Bayar sesuai nominal pesanan.',
+                ],
+            ],
+        ])->assertOk()
+            ->assertJsonPath('data.online_order.payment.bank_name', 'Bank Test')
+            ->assertJsonPath('data.online_order.payment.qris_image_url', $qrisImageUrl);
     }
 
     /** @test */

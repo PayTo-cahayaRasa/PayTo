@@ -7,6 +7,7 @@ use App\Http\Requests\ConfirmOnlineOrderPaymentRequest;
 use App\Http\Requests\OnlineOrderStatusRequest;
 use App\Models\OnlineOrder;
 use App\Services\OnlineOrderManagementService;
+use App\Services\Settings\AppSettingsService;
 use App\Services\WhatsAppLinkBuilder;
 use Illuminate\Http\JsonResponse;
 
@@ -14,6 +15,7 @@ class OnlineOrderController extends Controller
 {
     public function __construct(
         private readonly OnlineOrderManagementService $orders,
+        private readonly AppSettingsService $settings,
         private readonly WhatsAppLinkBuilder $whatsAppLinks,
     ) {}
 
@@ -28,7 +30,7 @@ class OnlineOrderController extends Controller
 
         return response()->json([
             'data' => $onlineOrder,
-            'payment' => config('services.storefront_payment'),
+            'payment' => $this->settings->getOnlineOrderSettings()['payment'],
             'shipping_whatsapp_url' => $this->whatsAppLinks->buildShippingUpdateLink($onlineOrder),
         ]);
     }

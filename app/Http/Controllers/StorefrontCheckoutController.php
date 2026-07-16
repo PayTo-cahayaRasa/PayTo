@@ -29,7 +29,7 @@ class StorefrontCheckoutController extends Controller
         return Inertia::render('storefront/CheckoutPage', [
             'business' => $this->settings->getBusinessProfile(),
             'couriers' => array_values(config('services.rajaongkir.couriers')),
-            'products' => Product::query()->with('stockItem')->where('is_active', true)->where('is_public', true)->get()
+            'products' => Product::query()->with('stockItem')->where('is_active', true)->get()
                 ->map(fn (Product $product): array => [
                     'id' => $product->id, 'name' => $product->name, 'price' => (float) $product->price,
                     'finalPrice' => max(0, (float) $product->price * (1 - (float) $product->discount / 100)),
@@ -80,7 +80,7 @@ class StorefrontCheckoutController extends Controller
         return Inertia::render('storefront/CheckoutSuccessPage', [
             'business' => $this->settings->getBusinessProfile(),
             'order' => $order->only(['order_number', 'grand_total', 'payment_method']),
-            'payment' => config('services.storefront_payment'),
+            'payment' => $this->settings->getOnlineOrderSettings()['payment'],
             'payment_whatsapp_url' => $this->whatsAppLinks->buildPaymentConfirmationLink($order),
             'tracking_url' => route('orders.track', ['orderNumber' => $order->order_number, 'token' => $order->tracking_token]),
         ]);

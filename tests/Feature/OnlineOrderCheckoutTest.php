@@ -21,7 +21,7 @@ class OnlineOrderCheckoutTest extends TestCase
             'price' => 20000,
             'discount' => 10,
             'is_active' => true,
-            'is_public' => true,
+            'is_public' => false,
         ]);
         StockItem::query()->create(['product_id' => $product->id, 'on_hand' => 3]);
 
@@ -169,13 +169,15 @@ class OnlineOrderCheckoutTest extends TestCase
 
     public function test_cashier_receives_configured_payment_instructions_for_pickup_confirmation(): void
     {
-        config()->set('services.storefront_payment', [
-            'bank_name' => 'Bank Test',
-            'bank_account_number' => '1234567890',
-            'bank_account_name' => 'Cahaya Rasa',
-            'qris_image_url' => 'https://example.test/qris.png',
-            'instructions' => 'Pastikan pembayaran sesuai total pesanan.',
-        ]);
+        AppSetting::query()->updateOrCreate(['key' => 'online_order.settings'], ['value' => [
+            'payment' => [
+                'bank_name' => 'Bank Test',
+                'bank_account_number' => '1234567890',
+                'bank_account_name' => 'Cahaya Rasa',
+                'qris_image_url' => 'https://example.test/qris.png',
+                'instructions' => 'Pastikan pembayaran sesuai total pesanan.',
+            ],
+        ]]);
         [$order] = $this->createPendingOrder(1, 2);
         $cashier = User::factory()->create(['role' => 'CASHIER', 'is_active' => true]);
 
@@ -199,11 +201,13 @@ class OnlineOrderCheckoutTest extends TestCase
 
     public function test_success_page_exposes_server_payment_instructions_and_payment_whatsapp_link(): void
     {
-        config()->set('services.storefront_payment', [
-            'bank_name' => 'Bank Test', 'bank_account_number' => '1234567890',
-            'bank_account_name' => 'Cahaya Rasa', 'qris_image_url' => 'https://example.test/qris.png',
-            'instructions' => 'Bayar sebelum pukul 20.00.',
-        ]);
+        AppSetting::query()->updateOrCreate(['key' => 'online_order.settings'], ['value' => [
+            'payment' => [
+                'bank_name' => 'Bank Test', 'bank_account_number' => '1234567890',
+                'bank_account_name' => 'Cahaya Rasa', 'qris_image_url' => 'https://example.test/qris.png',
+                'instructions' => 'Bayar sebelum pukul 20.00.',
+            ],
+        ]]);
         AppSetting::query()->updateOrCreate(['key' => 'business.profile'], ['value' => ['name' => 'Cahaya Rasa', 'whatsapp_number' => '6281234567890']]);
         [$order] = $this->createPendingOrder(1, 2);
         $order->update(['payment_method' => 'BANK_TRANSFER']);

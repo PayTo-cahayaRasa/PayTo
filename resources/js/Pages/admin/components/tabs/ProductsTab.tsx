@@ -39,6 +39,8 @@ export default function ProductsTab() {
     const [showProductModal, setShowProductModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [formState, setFormState] = useState<ProductFormState>(defaultFormState);
+    const [productImageFile, setProductImageFile] = useState<File | null>(null);
+    const [productImagePreview, setProductImagePreview] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -53,6 +55,7 @@ export default function ProductsTab() {
     const [stockSuccess, setStockSuccess] = useState<string | null>(null);
     const [stockSubmitting, setStockSubmitting] = useState(false);
     const stockProductDropdownRef = useRef<HTMLDivElement | null>(null);
+    const productImageInputRef = useRef<HTMLInputElement | null>(null);
 
     const currencyFormatter = useMemo(() => new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -175,6 +178,8 @@ export default function ProductsTab() {
     const handleOpenCreate = () => {
         setEditingProduct(null);
         setFormState(defaultFormState);
+        setProductImageFile(null);
+        setProductImagePreview(null);
         setShowProductModal(true);
     };
 
@@ -189,6 +194,8 @@ export default function ProductsTab() {
             discount: product.discount.toString(),
             is_active: product.is_active,
         });
+        setProductImageFile(null);
+        setProductImagePreview(product.image_url ?? null);
         setShowProductModal(true);
     };
 
@@ -256,6 +263,16 @@ export default function ProductsTab() {
         }));
     };
 
+    const handleProductImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const image = event.target.files?.[0];
+        if (!image) {
+            return;
+        }
+
+        setProductImageFile(image);
+        setProductImagePreview(URL.createObjectURL(image));
+    };
+
     const handleSave = async () => {
         if (isSubmitting) {
             return;
@@ -264,19 +281,22 @@ export default function ProductsTab() {
         setIsSubmitting(true);
         setErrorMessage(null);
 
-        const payload = {
-            name: formState.name.trim(),
-            sku: formState.sku.trim() || null,
-            uom: formState.uom.trim() || 'pcs',
-            price: Number(formState.price) || 0,
-            stock: Number(formState.stock) || 0,
-            discount: Number(formState.discount) || 0,
-            is_active: formState.is_active,
-        };
+        const payload = new FormData();
+        payload.append('name', formState.name.trim());
+        payload.append('sku', formState.sku.trim());
+        payload.append('uom', formState.uom.trim() || 'pcs');
+        payload.append('price', String(Number(formState.price) || 0));
+        payload.append('stock', String(Number(formState.stock) || 0));
+        payload.append('discount', String(Number(formState.discount) || 0));
+        payload.append('is_active', formState.is_active ? '1' : '0');
+        if (productImageFile) {
+            payload.append('image', productImageFile);
+        }
 
         try {
             if (editingProduct) {
-                const response = await axios.put(`/api/admin/products/${editingProduct.id}`, payload);
+                payload.append('_method', 'PUT');
+                const response = await axios.post(`/api/admin/products/${editingProduct.id}`, payload);
                 const updated = response.data?.data;
                 setProducts(items => items.map(item => (item.id === updated.id ? updated : item)));
             } else {
@@ -438,8 +458,12 @@ export default function ProductsTab() {
                                     <tr key={product.id} className="hover:bg-white/40 transition-colors group">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-300">
-                                                    <span className="text-[10px]">IMG</span>
+                                                <div className="w-12 h-12 overflow-hidden rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-300">
+                                                    {product.image_url ? (
+                                                        <img src={product.image_url} alt="" className="h-full w-full object-cover" />
+                                                    ) : (
+                                                        <span className="text-[10px]">IMG</span>
+                                                    )}
                                                 </div>
                                                 <div className="min-w-0">
                                                     <div className="font-bold text-slate-800 wrap-break-word">{product.name}</div>
@@ -783,10 +807,23 @@ export default function ProductsTab() {
 
                         <div className="p-8 overflow-y-auto custom-scrollbar-light space-y-6">
                             <div className="flex justify-center">
-                                <div className="w-32 h-32 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 flex flex-col items-center justify-center text-slate-400 cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-500 transition-all group">
-                                    <UploadCloud size={32} className="mb-2 group-hover:scale-110 transition-transform" />
-                                    <span className="text-xs font-bold">Upload Foto</span>
-                                </div>
+                                <label className="relative flex h-32 w-32 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 text-slate-400 transition-all hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-500">
+                                    {productImagePreview ? (
+                                        <img src={productImagePreview} alt="Preview produk" className="h-full w-full object-cover" />
+                                    ) : (
+                                        <>
+                                            <UploadCloud size={32} className="mb-2" />
+                                            <span className="text-xs font-bold">Upload Foto</span>
+                                        </>
+                                    )}
+                                    <input
+                                        ref={productImageInputRef}
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/webp"
+                                        className="sr-only"
+                                        onChange={handleProductImageChange}
+                                    />
+                                </label>
                             </div>
 
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">

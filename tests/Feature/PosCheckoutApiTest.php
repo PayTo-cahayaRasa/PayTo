@@ -65,7 +65,7 @@ class PosCheckoutApiTest extends TestCase
         $this->assertDatabaseHas('stock_movements', ['product_id' => $product->id, 'type' => 'SALE_OUT']);
     }
 
-    public function test_pos_catalog_only_returns_products_visible_in_public_catalog(): void
+    public function test_pos_catalog_returns_all_active_owner_products(): void
     {
         $cashier = User::factory()->create(['role' => 'CASHIER', 'is_active' => true]);
         $publicProduct = Product::factory()->create(['name' => 'Produk Publik', 'is_active' => true, 'is_public' => true]);
@@ -76,6 +76,6 @@ class PosCheckoutApiTest extends TestCase
         $this->actingAs($cashier)->getJson('/api/pos/products')
             ->assertOk()
             ->assertJsonFragment(['name' => 'Produk Publik'])
-            ->assertJsonMissing(['name' => 'Produk Internal']);
+            ->assertJsonFragment(['name' => 'Produk Internal']);
     }
 }

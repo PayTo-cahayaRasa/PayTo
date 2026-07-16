@@ -71,6 +71,9 @@ Route::middleware([
     Route::put('/business-settings', [BusinessSettingsController::class, 'update'])
         ->middleware('throttle:admin-write')
         ->name('business-settings.update');
+    Route::post('/business-settings/qris-image', [BusinessSettingsController::class, 'uploadQrisImage'])
+        ->middleware('throttle:admin-write')
+        ->name('business-settings.qris-image');
 
     if (config('features.approval_requests')) {
         Route::post('/approvals/{approval}/approve', [ApprovalController::class, 'approve'])
