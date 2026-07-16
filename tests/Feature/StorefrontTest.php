@@ -52,6 +52,20 @@ class StorefrontTest extends TestCase
                 ->missing('products.data.0.cost'));
     }
 
+    public function test_storefront_catalog_returns_all_active_owner_products(): void
+    {
+        $product = Product::factory()->create([
+            'name' => 'Produk Owner Aktif',
+            'slug' => 'produk-owner-aktif',
+            'is_active' => true,
+            'is_public' => false,
+        ]);
+
+        $this->get('/katalog')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('products.data.0.id', $product->id));
+    }
+
     public function test_guest_can_access_public_product_detail_by_slug(): void
     {
         $product = Product::factory()->create([
@@ -69,15 +83,17 @@ class StorefrontTest extends TestCase
                 ->missing('product.cost'));
     }
 
-    public function test_guest_cannot_access_non_public_product_detail(): void
+    public function test_guest_can_access_active_owner_product_regardless_of_legacy_public_flag(): void
     {
-        Product::factory()->create([
+        $product = Product::factory()->create([
             'slug' => 'produk-internal',
             'is_active' => true,
             'is_public' => false,
         ]);
 
-        $this->get('/katalog/produk-internal')->assertNotFound();
+        $this->get('/katalog/produk-internal')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('product.id', $product->id));
     }
 
     public function test_catalog_can_be_disabled_without_exposing_products(): void

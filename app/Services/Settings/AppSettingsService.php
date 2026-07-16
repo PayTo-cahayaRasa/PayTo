@@ -3,7 +3,10 @@
 namespace App\Services\Settings;
 
 use App\Models\AppSetting;
+use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class AppSettingsService
 {
@@ -42,7 +45,7 @@ class AppSettingsService
 
     private const DEFAULT_ONLINE_ORDER_SETTINGS = [
         'shipping' => ['origin' => '', 'packaging_weight_grams' => 0, 'couriers' => ['jne', 'jnt', 'sicepat']],
-        'payment' => ['bank_name' => '', 'bank_account_number' => '', 'bank_account_name' => '', 'qris_image_url' => '', 'instructions' => 'Lakukan pembayaran sesuai total pesanan, lalu kirim bukti pembayaran melalui WhatsApp.'],
+        'payment' => ['bank_name' => '', 'bank_account_number' => '', 'bank_account_name' => '', 'qris_image_url' => '', 'qris_image_path' => '', 'instructions' => 'Lakukan pembayaran sesuai total pesanan, lalu kirim bukti pembayaran melalui WhatsApp.'],
     ];
 
     /**
@@ -121,6 +124,10 @@ class AppSettingsService
      */
     public function updateBusinessSettings(array $businessProfile, array $catalogSettings, array $onlineOrderSettings): void
     {
+        $existingOnlineOrderSettings = $this->getOnlineOrderSettings();
+        $onlineOrderSettings['payment']['qris_image_path'] = $onlineOrderSettings['payment']['qris_image_path']
+            ?? $existingOnlineOrderSettings['payment']['qris_image_path'];
+
         DB::transaction(function () use ($businessProfile, $catalogSettings, $onlineOrderSettings) {
             AppSetting::query()->updateOrCreate(
                 ['key' => self::KEY_BUSINESS_PROFILE],
@@ -137,6 +144,29 @@ class AppSettingsService
                 ['value' => $onlineOrderSettings]
             );
         });
+    }
+
+    public function updateQrisImage(UploadedFile $image): array
+    {
+        $onlineOrderSettings = $this->getOnlineOrderSettings();
+        $oldImagePath = $onlineOrderSettings['payment']['qris_image_path'] ?? null;
+        $imagePath = $image->store('payment/qris', 'public');
+        /** @var FilesystemAdapter $publicDisk */
+        $publicDisk = Storage::disk('public');
+
+        $onlineOrderSettings['payment']['qris_image_path'] = $imagePath;
+        $onlineOrderSettings['payment']['qris_image_url'] = $publicDisk->url($imagePath);
+
+        AppSetting::query()->updateOrCreate(
+            ['key' => self::KEY_ONLINE_ORDER_SETTINGS],
+            ['value' => $onlineOrderSettings]
+        );
+
+        if ($oldImagePath) {
+            $publicDisk->delete($oldImagePath);
+        }
+
+        return $this->getAllBusinessSettings();
     }
 
     /**

@@ -2,8 +2,8 @@
  * Pengaturan Toko tab - Business settings integration
  */
 
-import React, { useState, useEffect } from 'react';
-import { Save, Settings, Globe, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Save, Settings, Globe, AlertCircle, CheckCircle, Loader2, Landmark, QrCode, UploadCloud } from 'lucide-react';
 import axios from 'axios';
 
 type BusinessSettings = {
@@ -20,6 +20,21 @@ type BusinessSettings = {
         enabled: boolean;
         whatsapp_enabled: boolean;
         whatsapp_message_template: string;
+    };
+    online_order: {
+        shipping: {
+            origin: string;
+            packaging_weight_grams: number;
+            couriers: string[];
+        };
+        payment: {
+            bank_name: string;
+            bank_account_number: string;
+            bank_account_name: string;
+            qris_image_url: string;
+            qris_image_path: string;
+            instructions: string;
+        };
     };
 };
 
@@ -43,6 +58,21 @@ export default function SettingsTab() {
             whatsapp_enabled: true,
             whatsapp_message_template: '',
         },
+        online_order: {
+            shipping: {
+                origin: '',
+                packaging_weight_grams: 0,
+                couriers: ['jne', 'jnt', 'sicepat'],
+            },
+            payment: {
+                bank_name: '',
+                bank_account_number: '',
+                bank_account_name: '',
+                qris_image_url: '',
+                qris_image_path: '',
+                instructions: 'Lakukan pembayaran sesuai total pesanan, lalu kirim bukti pembayaran melalui WhatsApp.',
+            },
+        },
     });
 
     const [loading, setLoading] = useState(true);
@@ -50,6 +80,8 @@ export default function SettingsTab() {
     const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [errors, setErrors] = useState<ValidationErrors>({});
     const [errorMessage, setErrorMessage] = useState('');
+    const [isUploadingQris, setIsUploadingQris] = useState(false);
+    const qrisImageInputRef = useRef<HTMLInputElement | null>(null);
 
     // Load settings on mount
     useEffect(() => {
@@ -63,6 +95,7 @@ export default function SettingsTab() {
             setSettings({
                 business: response.data.data.business,
                 catalog: response.data.data.catalog,
+                online_order: response.data.data.online_order,
             });
         } catch (error: any) {
             console.error('Failed to load settings:', error);
@@ -85,6 +118,7 @@ export default function SettingsTab() {
                     whatsapp_number: settings.business.whatsapp_number.replace(/\D/g, ''),
                 },
                 catalog: settings.catalog,
+                online_order: settings.online_order,
             };
 
             const response = await axios.put('/api/admin/business-settings', payload);
@@ -92,6 +126,7 @@ export default function SettingsTab() {
             setSettings({
                 business: response.data.data.business,
                 catalog: response.data.data.catalog,
+                online_order: response.data.data.online_order,
             });
 
             setSaveStatus('success');
@@ -111,6 +146,29 @@ export default function SettingsTab() {
             }
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleQrisImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const qrisImage = event.target.files?.[0];
+        if (!qrisImage) {
+            return;
+        }
+
+        const payload = new FormData();
+        payload.append('qris_image', qrisImage);
+
+        try {
+            setIsUploadingQris(true);
+            setErrorMessage('');
+            const response = await axios.post('/api/admin/business-settings/qris-image', payload);
+            setSettings(response.data.data);
+        } catch (error: any) {
+            setSaveStatus('error');
+            setErrorMessage(error.response?.data?.message || 'Gagal mengunggah gambar QRIS.');
+        } finally {
+            setIsUploadingQris(false);
+            event.target.value = '';
         }
     };
 
@@ -419,6 +477,106 @@ export default function SettingsTab() {
                                     {getFieldError('catalog.whatsapp_message_template')}
                                 </p>
                             )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="md:col-span-2 bg-white/40 backdrop-blur-xl border border-white/60 rounded-4xl p-6 shadow-sm">
+                    <h3 className="font-bold text-lg text-slate-800 mb-2 flex items-center gap-2">
+                        <Landmark size={20} className="text-slate-400" /> Pembayaran Pesanan Online
+                    </h3>
+                    <p className="mb-6 text-sm text-slate-500">Informasi ini akan ditampilkan saat pelanggan memilih transfer bank atau QRIS.</p>
+
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Bank</label>
+                            <input
+                                type="text"
+                                value={settings.online_order.payment.bank_name}
+                                onChange={(event) => setSettings({
+                                    ...settings,
+                                    online_order: {
+                                        ...settings.online_order,
+                                        payment: { ...settings.online_order.payment, bank_name: event.target.value },
+                                    },
+                                })}
+                                placeholder="Contoh: BCA"
+                                className="w-full p-4 bg-white/60 border border-white/60 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nomor Rekening</label>
+                            <input
+                                type="text"
+                                value={settings.online_order.payment.bank_account_number}
+                                onChange={(event) => setSettings({
+                                    ...settings,
+                                    online_order: {
+                                        ...settings.online_order,
+                                        payment: { ...settings.online_order.payment, bank_account_number: event.target.value },
+                                    },
+                                })}
+                                placeholder="Contoh: 1234567890"
+                                className="w-full p-4 bg-white/60 border border-white/60 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Atas Nama</label>
+                            <input
+                                type="text"
+                                value={settings.online_order.payment.bank_account_name}
+                                onChange={(event) => setSettings({
+                                    ...settings,
+                                    online_order: {
+                                        ...settings.online_order,
+                                        payment: { ...settings.online_order.payment, bank_account_name: event.target.value },
+                                    },
+                                })}
+                                placeholder="Contoh: Cahaya Rasa"
+                                className="w-full p-4 bg-white/60 border border-white/60 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,1fr)_220px]">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Instruksi Pembayaran</label>
+                            <textarea
+                                rows={5}
+                                value={settings.online_order.payment.instructions}
+                                onChange={(event) => setSettings({
+                                    ...settings,
+                                    online_order: {
+                                        ...settings.online_order,
+                                        payment: { ...settings.online_order.payment, instructions: event.target.value },
+                                    },
+                                })}
+                                className="w-full resize-none p-4 bg-white/60 border border-white/60 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none"
+                            />
+                        </div>
+                        <div>
+                            <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">QRIS</span>
+                            <label className="flex h-[180px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 bg-white/60 text-slate-400 transition-colors hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-500">
+                                {settings.online_order.payment.qris_image_url ? (
+                                    <img src={settings.online_order.payment.qris_image_url} alt="QRIS toko" className="h-full w-full object-contain p-3" />
+                                ) : (
+                                    <>
+                                        <QrCode size={32} className="mb-2" />
+                                        <span className="text-xs font-bold">Upload QRIS</span>
+                                    </>
+                                )}
+                                <input
+                                    ref={qrisImageInputRef}
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    className="sr-only"
+                                    onChange={handleQrisImageChange}
+                                />
+                            </label>
+                            <p className="mt-2 flex items-center gap-1 text-[11px] text-slate-400">
+                                {isUploadingQris ? <Loader2 size={12} className="animate-spin" /> : <UploadCloud size={12} />}
+                                {isUploadingQris ? 'Mengunggah QRIS...' : 'JPG, PNG, atau WEBP, maks. 4 MB.'}
+                            </p>
                         </div>
                     </div>
                 </div>

@@ -34,6 +34,7 @@ class ProductStoreRequest extends FormRequest
             'is_active' => ['nullable', 'boolean'],
             'is_public' => ['nullable', 'boolean'],
             'featured' => ['nullable', 'boolean'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'stock' => ['required', 'numeric', 'min:0'],
             'weight_grams' => ['nullable', 'integer', 'min:1'],
         ];
@@ -57,6 +58,9 @@ class ProductStoreRequest extends FormRequest
             'cost.min' => 'Harga modal tidak valid.',
             'stock.required' => 'Stok awal wajib diisi.',
             'stock.min' => 'Stok awal tidak valid.',
+            'image.image' => 'Foto produk harus berupa gambar.',
+            'image.mimes' => 'Foto produk harus berformat JPG, PNG, atau WEBP.',
+            'image.max' => 'Ukuran foto produk maksimal 4 MB.',
         ];
     }
 }

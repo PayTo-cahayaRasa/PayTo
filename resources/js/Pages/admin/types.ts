@@ -52,7 +52,7 @@ export type Product = {
     stock: number;
     is_active: boolean;
     status: 'ACTIVE' | 'INACTIVE';
-    image?: string;
+    image_url?: string | null;
 };
 
 export type Notification = {
