@@ -202,7 +202,7 @@ class ProductApiTest extends TestCase
         $product = Product::query()->findOrFail($created->json('data.id'));
         $this->assertNotNull($product->image_path);
         $storage->assertExists($product->image_path);
-        $created->assertJsonPath('data.image_url', $storage->url($product->image_path));
+        $created->assertJsonPath('data.image_url', '/storage/'.$product->image_path);
 
         $oldImagePath = $product->image_path;
         $this->actingAs($supervisor)->post("/api/admin/products/{$product->id}", [
@@ -254,5 +254,13 @@ class ProductApiTest extends TestCase
         $this->assertDatabaseHas('stock_items', [
             'product_id' => $product->id,
         ]);
+    }
+
+    public function test_public_product_image_urls_use_the_current_application_origin(): void
+    {
+        $this->assertSame(
+            '/storage/products/example.jpg',
+            Storage::disk('public')->url('products/example.jpg'),
+        );
     }
 }

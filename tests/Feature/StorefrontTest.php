@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\AppSetting;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class StorefrontTest extends TestCase
@@ -68,11 +69,14 @@ class StorefrontTest extends TestCase
 
     public function test_guest_can_access_public_product_detail_by_slug(): void
     {
+        Storage::fake('public');
+
         $product = Product::factory()->create([
             'name' => 'Stik Talas',
             'slug' => 'stik-talas',
             'is_active' => true,
             'is_public' => true,
+            'image_path' => 'products/stik-talas.jpg',
         ]);
 
         $this->get('/katalog/stik-talas')
@@ -80,6 +84,7 @@ class StorefrontTest extends TestCase
             ->assertInertia(fn ($page) => $page
                 ->component('storefront/KatalogDetailPage')
                 ->where('product.id', $product->id)
+                ->where('product.imageUrl', '/storage/products/stik-talas.jpg')
                 ->missing('product.cost'));
     }
 

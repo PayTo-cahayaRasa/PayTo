@@ -51,7 +51,7 @@ export default function KatalogDetailPage({ business, product }: KatalogDetailPa
                         <section className="overflow-hidden rounded-[2.4rem] border border-[rgba(58,35,24,0.08)] bg-[rgba(255,250,243,0.95)] shadow-[0_30px_60px_-48px_rgba(58,35,24,0.72)]">
                             <div className="grid gap-8 px-6 py-8 lg:grid-cols-[0.95fr_1.05fr] lg:px-8 lg:py-9">
                                 <div className="rounded-4xl bg-[linear-gradient(180deg,#fff9f1,#f6e6cf)] p-4 shadow-[inset_0_0_0_1px_rgba(58,35,24,0.05)]">
-                                    <ProductVisual index={product.id} product={product} />
+                                    <ProductVisual index={product.id} product={product} variant="detail" />
                                 </div>
 
                                 <div className="max-w-2xl">

@@ -56,7 +56,13 @@ function ProductPile({ type }: ProductPileProps) {
     );
 }
 
-export function ProductVisual({ product, index }: { product: PublicCatalogProduct; index: number }) {
+type ProductVisualProps = {
+    product: PublicCatalogProduct;
+    index: number;
+    variant?: 'card' | 'detail';
+};
+
+export function ProductVisual({ product, index, variant = 'card' }: ProductVisualProps) {
     const visualType =
         product.category === 'Minuman'
             ? 'drink'
@@ -68,14 +74,14 @@ export function ProductVisual({ product, index }: { product: PublicCatalogProduc
 
     if (product.imageUrl) {
         return (
-            <div className="relative h-50 overflow-hidden rounded-[1.4rem] bg-[#f7ead4]">
+            <div className={`relative overflow-hidden rounded-[1.4rem] bg-[#f7ead4] ${variant === 'detail' ? 'h-full min-h-80' : 'h-50'}`}>
                 <img src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
             </div>
         );
     }
 
     return (
-        <div className="relative h-50 overflow-hidden rounded-[1.4rem] bg-[radial-gradient(circle_at_top_left,#fff9f1_0%,#f7ead4_55%,#f2dfbd_100%)]">
+        <div className={`relative overflow-hidden rounded-[1.4rem] bg-[radial-gradient(circle_at_top_left,#fff9f1_0%,#f7ead4_55%,#f2dfbd_100%)] ${variant === 'detail' ? 'h-full min-h-80' : 'h-50'}`}>
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.42),transparent_46%)]" />
             <div className="absolute left-1/2 top-3 h-38 w-26 -translate-x-1/2 rounded-[1.3rem_1.3rem_0.85rem_0.85rem] bg-[linear-gradient(180deg,#d89b4f_0%,#c17c36_45%,#d39549_100%)] shadow-[0_18px_28px_-15px_rgba(58,33,23,0.45)]" />
             <div className="absolute left-1/2 top-6 h-[7.2rem] w-[5.2rem] -translate-x-1/2 rounded-[1.05rem_1.05rem_0.65rem_0.65rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.26),rgba(255,255,255,0.02))] border border-white/30" />

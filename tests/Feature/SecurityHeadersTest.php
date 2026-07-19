@@ -19,6 +19,9 @@ class SecurityHeadersTest extends TestCase
         $this->assertSame('max-age=31536000; includeSubDomains', $response->headers->get('Strict-Transport-Security'));
         $csp = (string) $response->headers->get('Content-Security-Policy');
         $this->assertStringContainsString("object-src 'none'", $csp);
+        $this->assertStringContainsString('https://fonts.googleapis.com', $csp);
+        $this->assertStringContainsString('https://fonts.gstatic.com', $csp);
+        $this->assertStringContainsString("img-src 'self' data: blob: https:", $csp);
         $this->assertStringNotContainsString("'unsafe-eval'", $csp);
     }
 }
