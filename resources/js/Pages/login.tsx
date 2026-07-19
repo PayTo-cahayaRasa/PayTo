@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { router } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import axios from 'axios';
 import {
     AlertCircle,
+    ArrowLeft,
     ArrowRight,
     Check,
     Download,
@@ -377,10 +378,10 @@ export default function PosLoginPage() {
                     </div>
 
                     <div className="mt-5 flex items-center justify-between gap-4 text-xs text-[#8d6b4e]">
-                        <div className="flex items-center gap-2">
-                            <ShieldCheck size={14} className="text-[#375c3f]" />
-                            <span>Keamanan login tetap aktif dan semua aktivitas tercatat.</span>
-                        </div>
+                        <Link href="/" prefetch className="inline-flex items-center gap-2 rounded-lg font-semibold text-[#6d4c36] transition-colors hover:text-[#2f241c] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#8e6847]">
+                            <ArrowLeft size={14} aria-hidden="true" />
+                            Kembali ke beranda
+                        </Link>
                         <span>v2.4.1</span>
                     </div>
                 </div>
