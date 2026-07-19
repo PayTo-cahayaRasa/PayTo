@@ -1,12 +1,14 @@
-import { Facebook, Instagram, Mail, MapPin, MessageCircle } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { Instagram, MapPin, MessageCircle, Music2, Phone } from 'lucide-react';
 
-import { businessWhatsappUrl, marketplaceItems } from '../constants';
+import { businessWhatsappUrl, storefrontShopHref } from '../constants';
 import type { PublicFooterProps } from '../types';
 import { BrandMark } from './BrandMark';
 
 export function PublicFooter({ business }: PublicFooterProps) {
     const whatsappHref = businessWhatsappUrl(business);
     const whatsappDisplay = formatWhatsAppNumber(business.whatsapp_number);
+    const tiktokHref = business.tiktok_url ?? 'https://www.tiktok.com/@cahayarasa_28?_r=1&_t=ZS-989XRWXa7BR';
 
     return (
         <footer id="kontak" className="scroll-mt-24 px-4 pb-8 pt-2 sm:px-5 lg:px-8">
@@ -20,12 +22,11 @@ export function PublicFooter({ business }: PublicFooterProps) {
                         <div className="mt-5 flex items-center gap-3">
                             {[
                                 { Icon: Instagram, href: business.instagram_url ?? '#footer', label: 'Instagram' },
-                                { Icon: Facebook, href: '#footer', label: 'Facebook' },
+                                { Icon: Music2, href: tiktokHref, label: 'TikTok' },
                                 { Icon: MessageCircle, href: whatsappHref ?? '#footer', label: 'WhatsApp' },
-                                { Icon: Mail, href: '#footer', label: 'Email' },
-                            ].map(({ Icon, href, label }, index) => (
+                            ].filter(({ href }) => href !== '#footer').map(({ Icon, href, label }) => (
                                 <a
-                                    key={index}
+                                    key={label}
                                     href={href}
                                     aria-label={label}
                                     target={href.startsWith('http') ? '_blank' : undefined}
@@ -41,23 +42,19 @@ export function PublicFooter({ business }: PublicFooterProps) {
                     <div>
                         <h3 className="font-semibold text-[#3a2117]">Bantuan</h3>
                         <div className="mt-4 grid gap-3 text-sm text-[#6d5948]">
-                            <a href="#footer">Cara Belanja</a>
-                            <a href="#footer">Pengiriman</a>
-                            <a href="#footer">Pembayaran</a>
-                            <a href="#footer">Retur & Refund</a>
-                            <a href="#footer">FAQ</a>
+                            <Link href={storefrontShopHref}>Belanja Produk</Link>
+                            <Link href="/lacak-pesanan">Lacak Pesanan</Link>
+                            {whatsappHref ? <a href={whatsappHref} target="_blank" rel="noreferrer">Hubungi via WhatsApp</a> : null}
                         </div>
                     </div>
 
                     <div>
                         <h3 className="font-semibold text-[#3a2117]">Marketplace</h3>
                         <div className="mt-4 grid gap-3 text-sm text-[#6d5948]">
-                            {marketplaceItems.map((item) => (
-                                <div key={item.label} className="flex items-center gap-3">
-                                    <span className={`h-3 w-3 rounded-full ${item.dot}`} />
-                                    <span>{item.label}</span>
-                                </div>
-                            ))}
+                            <a href={tiktokHref} target="_blank" rel="noreferrer" className="flex items-center gap-3">
+                                <Music2 size={16} strokeWidth={1.8} className="text-[#3a2117]" />
+                                <span>TikTok Shop</span>
+                            </a>
                         </div>
                     </div>
 
@@ -65,12 +62,8 @@ export function PublicFooter({ business }: PublicFooterProps) {
                         <h3 className="font-semibold text-[#3a2117]">Kontak</h3>
                         <div className="mt-4 grid gap-4 text-sm leading-7 text-[#6d5948]">
                             <div className="flex items-start gap-3">
-                                <MessageCircle size={16} strokeWidth={1.8} className="mt-1 text-[#3a2117]" />
-                                <span>{whatsappDisplay}</span>
-                            </div>
-                            <div className="flex items-start gap-3">
-                                <Mail size={16} strokeWidth={1.8} className="mt-1 text-[#3a2117]" />
-                                <span>hello@cahayarasa.id</span>
+                                <Phone size={16} strokeWidth={1.8} className="mt-1 text-[#3a2117]" />
+                                <a href={`tel:+${business.whatsapp_number.replace(/\D/g, '')}`}>{whatsappDisplay}</a>
                             </div>
                             <div className="flex items-start gap-3">
                                 <MapPin size={16} strokeWidth={1.8} className="mt-1 text-[#3a2117]" />
@@ -80,15 +73,11 @@ export function PublicFooter({ business }: PublicFooterProps) {
                     </div>
                 </div>
 
-                <div className="mt-8 flex flex-col gap-3 border-t border-[#eadfcf] pt-5 text-xs text-[#836b58] sm:flex-row sm:items-center sm:justify-between">
+                <div className="mt-8 border-t border-[#eadfcf] pt-5 text-xs text-[#836b58]">
                     <div className="flex items-center gap-2">
                         <p>&copy; 2025 {business.name}. All Rights Reserved.</p>
                         <span className="text-[#b69877]">&middot;</span>
                         <span className="text-[10px] text-[#a08568]">Powered by PayTo POS</span>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-                        <a href="#footer">Syarat & Ketentuan</a>
-                        <a href="#footer">Kebijakan Privasi</a>
                     </div>
                 </div>
             </div>

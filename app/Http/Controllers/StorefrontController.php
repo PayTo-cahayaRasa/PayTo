@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Services\Settings\AppSettingsService;
 use App\Services\WhatsAppLinkBuilder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -55,16 +56,6 @@ class StorefrontController extends Controller
         ]);
     }
 
-    public function show(Product $product): Response
-    {
-        abort_unless($product->is_active && $this->settings->getCatalogSettings()['enabled'], 404);
-
-        return Inertia::render('storefront/KatalogDetailPage', [
-            'business' => $this->settings->getBusinessProfile(),
-            'product' => $this->mapProduct($product),
-        ]);
-    }
-
     private function publicProductQuery(): \Illuminate\Database\Eloquent\Builder
     {
         return Product::query()
@@ -94,7 +85,7 @@ class StorefrontController extends Controller
             'category' => $product->uom === 'cup' ? 'Minuman' : 'Makanan',
             'description' => $product->description,
             'stock' => (float) ($product->stockItem?->on_hand ?? 0),
-            'imageUrl' => $product->image_path ? asset('storage/'.$product->image_path) : null,
+            'imageUrl' => $product->image_path ? Storage::disk('public')->url($product->image_path) : null,
             'whatsappUrl' => $this->whatsAppLinks->buildProductLink($product),
         ];
     }

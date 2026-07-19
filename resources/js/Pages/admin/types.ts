@@ -42,6 +42,7 @@ export type StaffMember = {
 export type Product = {
     id: number;
     name: string;
+    description: string | null;
     sku: string | null;
     barcode?: string | null;
     price: number;

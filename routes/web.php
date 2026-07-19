@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Route;
 // Public storefront routes
 Route::get('/', [StorefrontController::class, 'index'])->name('landing');
 Route::get('/katalog', [StorefrontController::class, 'catalog'])->name('catalog.index');
-Route::get('/katalog/{product:slug}', [StorefrontController::class, 'show'])->name('catalog.show');
 Route::get('/checkout', [StorefrontCheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [StorefrontCheckoutController::class, 'store'])->middleware('throttle:checkout')->name('checkout.store');
 Route::get('/checkout/sukses/{orderNumber}', [StorefrontCheckoutController::class, 'success'])->name('checkout.success');

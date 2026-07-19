@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\AppSetting;
 use App\Models\Product;
+use App\Models\StockItem;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class StorefrontTest extends TestCase
@@ -48,6 +50,7 @@ class StorefrontTest extends TestCase
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('storefront/LandingPage')
+                ->where('search', 'pisang')
                 ->where('products.data.0.name', 'Keripik Pisang')
                 ->missing('products.data.0.cost'));
     }
@@ -66,34 +69,41 @@ class StorefrontTest extends TestCase
             ->assertInertia(fn ($page) => $page->where('products.data.0.id', $product->id));
     }
 
-    public function test_guest_can_access_public_product_detail_by_slug(): void
+    public function test_catalog_product_exposes_information_for_inline_display(): void
     {
+        Storage::fake('public');
+
         $product = Product::factory()->create([
             'name' => 'Stik Talas',
             'slug' => 'stik-talas',
             'is_active' => true,
             'is_public' => true,
+            'image_path' => 'products/stik-talas.jpg',
+            'description' => 'Stik talas renyah dengan bumbu gurih.',
         ]);
+        StockItem::query()->create(['product_id' => $product->id, 'on_hand' => 12]);
 
-        $this->get('/katalog/stik-talas')
+        $this->get('/katalog')
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->component('storefront/KatalogDetailPage')
-                ->where('product.id', $product->id)
-                ->missing('product.cost'));
+                ->component('storefront/LandingPage')
+                ->where('products.data.0.id', $product->id)
+                ->where('products.data.0.description', 'Stik talas renyah dengan bumbu gurih.')
+                ->where('products.data.0.stock', 12)
+                ->where('products.data.0.imageUrl', '/storage/products/stik-talas.jpg')
+                ->missing('products.data.0.cost'));
     }
 
-    public function test_guest_can_access_active_owner_product_regardless_of_legacy_public_flag(): void
+    public function test_removed_detail_url_returns_not_found(): void
     {
-        $product = Product::factory()->create([
+        Product::factory()->create([
             'slug' => 'produk-internal',
             'is_active' => true,
             'is_public' => false,
         ]);
 
         $this->get('/katalog/produk-internal')
-            ->assertOk()
-            ->assertInertia(fn ($page) => $page->where('product.id', $product->id));
+            ->assertNotFound();
     }
 
     public function test_catalog_can_be_disabled_without_exposing_products(): void

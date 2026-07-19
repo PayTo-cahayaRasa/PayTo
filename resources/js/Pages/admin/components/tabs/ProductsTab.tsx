@@ -6,9 +6,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { Edit, Minus, Package, Plus, Save, Settings, Trash2, UploadCloud, X } from 'lucide-react';
 import type { Product } from '../../types';
+import ProductImageCropper from '../products/ProductImageCropper';
 
 type ProductFormState = {
     name: string;
+    description: string;
     sku: string;
     uom: string;
     price: string;
@@ -21,6 +23,7 @@ type StockAction = 'ADD' | 'SUBTRACT' | 'SET';
 
 const defaultFormState: ProductFormState = {
     name: '',
+    description: '',
     sku: '',
     uom: 'pcs',
     price: '0',
@@ -41,6 +44,8 @@ export default function ProductsTab() {
     const [formState, setFormState] = useState<ProductFormState>(defaultFormState);
     const [productImageFile, setProductImageFile] = useState<File | null>(null);
     const [productImagePreview, setProductImagePreview] = useState<string | null>(null);
+    const [productImageToCrop, setProductImageToCrop] = useState<File | null>(null);
+    const [productImageError, setProductImageError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -134,6 +139,12 @@ export default function ProductsTab() {
         };
     }, []);
 
+    useEffect(() => () => {
+        if (productImagePreview?.startsWith('blob:')) {
+            URL.revokeObjectURL(productImagePreview);
+        }
+    }, [productImagePreview]);
+
     useEffect(() => {
         const timeoutId = window.setTimeout(() => {
             setDebouncedStockProductKeyword(stockProductKeyword);
@@ -180,6 +191,7 @@ export default function ProductsTab() {
         setFormState(defaultFormState);
         setProductImageFile(null);
         setProductImagePreview(null);
+        setProductImageError(null);
         setShowProductModal(true);
     };
 
@@ -187,6 +199,7 @@ export default function ProductsTab() {
         setEditingProduct(product);
         setFormState({
             name: product.name,
+            description: product.description ?? '',
             sku: product.sku ?? '',
             uom: product.uom ?? 'pcs',
             price: product.price.toString(),
@@ -196,6 +209,7 @@ export default function ProductsTab() {
         });
         setProductImageFile(null);
         setProductImagePreview(product.image_url ?? null);
+        setProductImageError(null);
         setShowProductModal(true);
     };
 
@@ -255,7 +269,7 @@ export default function ProductsTab() {
         setStockSuccess(null);
     };
 
-    const handleChange = (field: keyof ProductFormState) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (field: keyof ProductFormState) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const value = field === 'is_active' ? (event.target as HTMLInputElement).checked : event.target.value;
         setFormState(state => ({
             ...state,
@@ -265,12 +279,30 @@ export default function ProductsTab() {
 
     const handleProductImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const image = event.target.files?.[0];
+        event.target.value = '';
         if (!image) {
             return;
         }
 
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(image.type)) {
+            setProductImageError('Foto produk harus berformat JPG, PNG, atau WEBP.');
+            return;
+        }
+
+        if (image.size > 10 * 1024 * 1024) {
+            setProductImageError('Ukuran foto sebelum crop maksimal 10 MB.');
+            return;
+        }
+
+        setProductImageError(null);
+        setProductImageToCrop(image);
+    };
+
+    const handleApplyProductImage = (image: File) => {
         setProductImageFile(image);
         setProductImagePreview(URL.createObjectURL(image));
+        setProductImageError(null);
+        setProductImageToCrop(null);
     };
 
     const handleSave = async () => {
@@ -283,6 +315,7 @@ export default function ProductsTab() {
 
         const payload = new FormData();
         payload.append('name', formState.name.trim());
+        payload.append('description', formState.description.trim());
         payload.append('sku', formState.sku.trim());
         payload.append('uom', formState.uom.trim() || 'pcs');
         payload.append('price', String(Number(formState.price) || 0));
@@ -306,6 +339,8 @@ export default function ProductsTab() {
             }
 
             setShowProductModal(false);
+            setProductImageFile(null);
+            setProductImagePreview(null);
         } catch (error) {
             setErrorMessage('Gagal menyimpan data produk.');
         } finally {
@@ -460,7 +495,7 @@ export default function ProductsTab() {
                                             <div className="flex items-center gap-3">
                                                 <div className="w-12 h-12 overflow-hidden rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-300">
                                                     {product.image_url ? (
-                                                        <img src={product.image_url} alt="" className="h-full w-full object-cover" />
+                                                        <img src={product.image_url} alt="" className="h-full w-full object-contain p-1" />
                                                     ) : (
                                                         <span className="text-[10px]">IMG</span>
                                                     )}
@@ -810,10 +845,11 @@ export default function ProductsTab() {
                                 <button
                                     type="button"
                                     onClick={() => productImageInputRef.current?.click()}
-                                    className="relative flex h-32 w-32 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 text-slate-400 transition-all hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-500"
+                                    aria-label={productImagePreview ? 'Ganti dan crop foto produk' : 'Upload dan crop foto produk'}
+                                    className="relative flex size-48 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 text-slate-400 transition-colors hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-500"
                                 >
                                     {productImagePreview ? (
-                                        <img src={productImagePreview} alt="Preview produk" className="h-full w-full object-cover" />
+                                        <img src={productImagePreview} alt="Preview produk" className="h-full w-full object-contain p-2" />
                                     ) : (
                                         <>
                                             <UploadCloud size={32} className="mb-2" />
@@ -829,6 +865,10 @@ export default function ProductsTab() {
                                     onChange={handleProductImageChange}
                                 />
                             </div>
+                            <p className="-mt-4 text-center text-xs text-slate-400">JPG, PNG, atau WEBP • Rasio vertikal/horizontal terdeteksi otomatis</p>
+                            {productImageError ? (
+                                <p className="-mt-3 text-center text-xs font-semibold text-rose-600">{productImageError}</p>
+                            ) : null}
 
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                 <div className="sm:col-span-2">
@@ -839,6 +879,22 @@ export default function ProductsTab() {
                                         onChange={handleChange('name')}
                                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
                                         placeholder="Contoh: Kopi Susu Gula Aren"
+                                    />
+                                </div>
+
+                                <div className="sm:col-span-2">
+                                    <div className="mb-2 flex items-center justify-between gap-3">
+                                        <label htmlFor="product-description" className="text-xs font-bold uppercase tracking-wider text-slate-500">Deskripsi Produk</label>
+                                        <span className="text-[10px] font-semibold text-slate-400">Opsional</span>
+                                    </div>
+                                    <textarea
+                                        id="product-description"
+                                        value={formState.description}
+                                        onChange={handleChange('description')}
+                                        rows={4}
+                                        maxLength={2000}
+                                        className="w-full resize-y rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700 outline-none transition-all focus:ring-2 focus:ring-indigo-200"
+                                        placeholder="Tulis deskripsi singkat produk"
                                     />
                                 </div>
 
@@ -946,6 +1002,14 @@ export default function ProductsTab() {
                     </div>
                 </div>
             )}
+
+            {productImageToCrop ? (
+                <ProductImageCropper
+                    file={productImageToCrop}
+                    onApply={handleApplyProductImage}
+                    onCancel={() => setProductImageToCrop(null)}
+                />
+            ) : null}
         </div>
     );
 }

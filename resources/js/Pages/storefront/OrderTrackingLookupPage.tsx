@@ -1,22 +1,21 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowRight, LoaderCircle, PackageSearch, Search, ShieldCheck } from 'lucide-react';
 import type { FormEvent } from 'react';
 
 import type { BusinessProfile } from './types';
-import { PublicFooter } from './components/PublicFooter';
-import { PublicHeader, SkipLink, usePublicCart } from '.';
-import { PublicFrame } from '.';
+import { PublicFooter, PublicFrame, PublicHeader, SkipLink, usePublicCart } from '.';
+
+const fieldClass = 'mt-2 min-h-12 w-full rounded-xl border border-[#ded0bf] bg-white px-4 text-[0.95rem] text-[#3a2117] outline-none transition-colors placeholder:text-[#ad9a87] focus:border-[#9b5c22] focus:ring-4 focus:ring-[#ef921e]/15 motion-reduce:transition-none';
 
 export default function OrderTrackingLookupPage({ business }: { business: BusinessProfile }) {
     const form = useForm({ customer_name: '', order_reference: '' });
     const { cartItems, clearCart, decreaseCartItem, addToCart } = usePublicCart([]);
-    const fieldBaseClass = 'mt-2 min-h-12 w-full rounded-2xl border border-[#ded0bf] bg-white px-4 text-[0.98rem] text-[#3a2117] shadow-[0_1px_0_rgba(58,33,23,0.03)] outline-none transition duration-200 placeholder:text-[#ad9a87] focus:border-[#9b5c22] focus:ring-4 focus:ring-[#ef921e]/12 motion-reduce:transition-none';
+    const errorMessages = Object.values(form.errors);
 
     function submit(event: FormEvent): void {
         event.preventDefault();
-        form.post('/lacak-pesanan');
+        form.post('/lacak-pesanan', { preserveScroll: true });
     }
-
-    const errorMessages = Object.values(form.errors);
 
     return <>
         <Head title={`Lacak Pesanan - ${business.name}`} />
@@ -30,64 +29,55 @@ export default function OrderTrackingLookupPage({ business }: { business: Busine
                 onClearCart={clearCart}
             />
 
-            <main className="order-tracking-page px-4 pb-6 pt-4 text-[#3a2117] sm:px-5 lg:px-8 lg:pb-8 lg:pt-5">
-                <div className="mx-auto max-w-3xl">
-                    <header className="mt-8 max-w-2xl sm:mt-10">
-                        <p className="text-sm font-bold uppercase tracking-[0.24em] text-[#a5764e]">Status pesanan</p>
-                        <h1 className="mt-4 font-display text-[2.65rem] font-semibold leading-[0.92] tracking-[-0.06em] text-[#3a2117] sm:text-[3.6rem] lg:text-[4.8rem]">
-                            Lacak pesanan
-                        </h1>
-                        <p className="mt-4 max-w-xl text-[1.02rem] leading-8 text-[#7d6047] sm:text-[1.05rem]">
-                            Masukkan nama pemesan dan nomor pesanan atau nomor resi untuk melihat status pesanan Anda.
-                        </p>
-                    </header>
+            <main id="main-content" className="px-4 pb-10 pt-5 text-[#3a2117] sm:px-5 lg:px-8 lg:pb-14">
+                <div className="mx-auto grid max-w-5xl overflow-hidden rounded-[2rem] border border-[#dfcfbb] bg-[#fffdf9] shadow-[0_26px_70px_rgba(72,42,22,0.10)] lg:grid-cols-[0.9fr_1.1fr]">
+                    <section className="relative overflow-hidden bg-[#3a2117] p-7 text-white sm:p-9 lg:p-11">
+                        <div aria-hidden="true" className="absolute -right-20 -top-20 size-64 rounded-full border-[3rem] border-[#ef921e]/12" />
+                        <div className="relative">
+                            <span className="grid size-12 place-items-center rounded-2xl bg-white/10"><PackageSearch aria-hidden="true" className="size-6 text-[#ffbd62]" /></span>
+                            <p className="mt-8 text-xs font-bold uppercase tracking-[0.22em] text-[#ffbd62]">Status pesanan</p>
+                            <h1 className="mt-3 max-w-sm font-display text-4xl font-semibold leading-[1.02] tracking-[-0.04em] sm:text-5xl">Tahu posisi pesanan tanpa menunggu.</h1>
+                            <p className="mt-5 max-w-md text-sm leading-7 text-[#ead8ca]">Cukup siapkan nama pemesan dan nomor pesanan atau resi. Status terbaru akan langsung ditampilkan.</p>
 
-                    <section className="mt-8 sm:mt-10">
-                        <form onSubmit={submit} className="space-y-5">
-                            {errorMessages.length > 0 && <div className="rounded-[1.25rem] border border-[#f1c6c6] bg-[#fff6f6] px-4 py-4 text-sm text-[#9b2c2c]">
-                                <p className="font-semibold">Periksa kembali data yang Anda masukkan.</p>
-                                <ul className="mt-2 space-y-1.5">
-                                    {errorMessages.map((error) => <li key={error} className="leading-6">{error}</li>)}
-                                </ul>
+                            <ol className="mt-8 space-y-4 border-t border-white/15 pt-6 text-sm">
+                                <li className="flex items-center gap-3"><span className="grid size-7 place-items-center rounded-full bg-[#ef921e] text-xs font-bold text-[#3a2117]">1</span>Masukkan data pesanan</li>
+                                <li className="flex items-center gap-3"><span className="grid size-7 place-items-center rounded-full border border-white/25 text-xs font-bold">2</span>Lihat status dan detail terbaru</li>
+                            </ol>
+                        </div>
+                    </section>
+
+                    <section aria-labelledby="tracking-form-heading" className="p-7 sm:p-9 lg:p-11">
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#a2642f]">Lacak sekarang</p>
+                        <h2 id="tracking-form-heading" className="mt-2 font-display text-3xl font-semibold tracking-[-0.03em]">Temukan pesanan Anda</h2>
+                        <p className="mt-2 text-sm leading-6 text-[#806049]">Gunakan data yang sama seperti saat checkout.</p>
+
+                        <form onSubmit={submit} className="mt-7 space-y-5">
+                            {errorMessages.length > 0 && <div role="alert" aria-live="polite" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                                <p className="font-bold">Pesanan belum ditemukan.</p>
+                                <ul className="mt-1.5 list-disc space-y-1 pl-5">{errorMessages.map((error) => <li key={error}>{error}</li>)}</ul>
                             </div>}
 
-                            <label className="block text-sm font-semibold text-[#3a2117]">
+                            <label htmlFor="tracking-customer-name" className="block text-sm font-semibold">
                                 Nama pemesan
-                                <input
-                                    value={form.data.customer_name}
-                                    onChange={event => form.setData('customer_name', event.target.value)}
-                                    required
-                                    maxLength={255}
-                                    autoComplete="name"
-                                    className={fieldBaseClass}
-                                    placeholder="Masukkan nama sesuai pesanan"
-                                />
+                                <input id="tracking-customer-name" name="customer_name" value={form.data.customer_name} onChange={(event) => form.setData('customer_name', event.target.value)} required maxLength={255} autoComplete="name" className={fieldClass} placeholder="Masukkan nama sesuai pesanan…" />
                             </label>
 
-                            <label className="block text-sm font-semibold text-[#3a2117]">
+                            <label htmlFor="tracking-reference" className="block text-sm font-semibold">
                                 Nomor pesanan atau resi
-                                <input
-                                    value={form.data.order_reference}
-                                    onChange={event => form.setData('order_reference', event.target.value)}
-                                    required
-                                    maxLength={100}
-                                    autoComplete="off"
-                                    className={`${fieldBaseClass} uppercase tracking-[0.12em]`}
-                                    placeholder="Contoh: WEB-202607-000001 atau JNE123456"
-                                />
+                                <input id="tracking-reference" name="order_reference" value={form.data.order_reference} onChange={(event) => form.setData('order_reference', event.target.value)} required maxLength={100} autoComplete="off" spellCheck={false} className={`${fieldClass} uppercase tracking-[0.08em]`} placeholder="Contoh: WEB-202607-000001…" />
                             </label>
 
-                            <button
-                                disabled={form.processing}
-                                className="inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#3a2117] px-6 text-sm font-bold text-white shadow-[0_14px_30px_rgba(58,33,23,0.2)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#4a2a1b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9b5c22] disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-45 motion-reduce:transition-none"
-                            >
-                                {form.processing ? 'Mencari…' : 'Lihat status pesanan'}
+                            <button disabled={form.processing} className="inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-full bg-[#ef921e] px-6 text-sm font-bold text-[#3a2117] shadow-[0_14px_30px_rgba(239,146,30,0.22)] transition-colors hover:bg-[#ffad42] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#9b5c22] disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none">
+                                {form.processing ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin motion-reduce:animate-none" /> : <Search aria-hidden="true" className="size-4" />}
+                                {form.processing ? 'Mencari pesanan…' : 'Lihat status pesanan'}
                             </button>
-
-                            <p className="pt-2 text-center text-xs leading-6 text-[#8b6a52]">
-                                Pesanan pickup dapat dilacak memakai nomor pesanan, sedangkan delivery dapat memakai nomor pesanan atau resi.
-                            </p>
                         </form>
+
+                        <div className="mt-6 flex items-start gap-2.5 rounded-xl bg-[#f8f1e8] px-4 py-3 text-xs leading-5 text-[#806049]">
+                            <ShieldCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-[#9b5c22]" />
+                            Data hanya digunakan untuk menemukan pesanan Anda.
+                        </div>
+                        <Link href="/katalog" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-[#8d5f3b] hover:text-[#3a2117] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9b5c22]">Kembali ke katalog <ArrowRight aria-hidden="true" className="size-4" /></Link>
                     </section>
                 </div>
             </main>

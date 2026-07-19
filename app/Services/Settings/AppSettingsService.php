@@ -24,10 +24,10 @@ class AppSettingsService
         'name' => 'Cahaya Rasa',
         'tagline' => 'Oleh-Oleh Malang',
         'address' => '2P5W+95R, Jl. Sukoanyar, Nongkosongo, Wringinsongo, Kec. Tumpang, Kabupaten Malang, Jawa Timur 65156',
-        'whatsapp_number' => '',
+        'whatsapp_number' => '6282337079892',
         'operating_hours' => 'Senin-Sabtu 08.00-20.00 WIB',
         'instagram_url' => 'https://www.instagram.com/cahayarasamalang/',
-        'tiktok_url' => 'https://www.tiktok.com/@cahayarasa_28',
+        'tiktok_url' => 'https://www.tiktok.com/@cahayarasa_28?_r=1&_t=ZS-989XRWXa7BR',
     ];
 
     private const DEFAULT_CATALOG_SETTINGS = [

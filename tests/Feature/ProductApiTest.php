@@ -38,12 +38,14 @@ class ProductApiTest extends TestCase
         $response
             ->assertCreated()
             ->assertJsonPath('data.name', 'Teh Manis')
+            ->assertJsonPath('data.description', null)
             ->assertJsonPath('data.stock', 20)
             ->assertJsonPath('data.status', 'ACTIVE');
 
         $this->assertDatabaseHas('products', [
             'name' => 'Teh Manis',
             'sku' => 'BV-010',
+            'description' => null,
         ]);
 
         $this->assertDatabaseHas('stock_items', [
@@ -63,6 +65,7 @@ class ProductApiTest extends TestCase
             'sku' => 'LIST-001',
             'barcode' => 'LIST-BC',
             'price' => 10000,
+            'description' => 'Deskripsi produk untuk form edit.',
             'discount' => 0,
             'cost' => 4000,
             'uom' => 'pcs',
@@ -85,6 +88,7 @@ class ProductApiTest extends TestCase
         $this->actingAs($supervisor)->getJson("/api/admin/products/{$product->id}")
             ->assertOk()
             ->assertJsonPath('data.name', 'Produk List')
+            ->assertJsonPath('data.description', 'Deskripsi produk untuk form edit.')
             ->assertJsonPath('data.stock', 7);
     }
 
@@ -167,6 +171,7 @@ class ProductApiTest extends TestCase
 
         $payload = [
             'name' => 'Produk Baru',
+            'description' => 'Deskripsi produk yang diperbarui.',
             'price' => 12000,
             'stock' => 12,
         ];
@@ -174,11 +179,13 @@ class ProductApiTest extends TestCase
         $this->actingAs($supervisor)->putJson("/api/admin/products/{$product->id}", $payload)
             ->assertOk()
             ->assertJsonPath('data.name', 'Produk Baru')
+            ->assertJsonPath('data.description', 'Deskripsi produk yang diperbarui.')
             ->assertJsonPath('data.stock', 12);
 
         $this->assertDatabaseHas('products', [
             'id' => $product->id,
             'name' => 'Produk Baru',
+            'description' => 'Deskripsi produk yang diperbarui.',
         ]);
 
         $this->assertDatabaseHas('stock_items', [
@@ -202,7 +209,7 @@ class ProductApiTest extends TestCase
         $product = Product::query()->findOrFail($created->json('data.id'));
         $this->assertNotNull($product->image_path);
         $storage->assertExists($product->image_path);
-        $created->assertJsonPath('data.image_url', $storage->url($product->image_path));
+        $created->assertJsonPath('data.image_url', '/storage/'.$product->image_path);
 
         $oldImagePath = $product->image_path;
         $this->actingAs($supervisor)->post("/api/admin/products/{$product->id}", [
@@ -254,5 +261,13 @@ class ProductApiTest extends TestCase
         $this->assertDatabaseHas('stock_items', [
             'product_id' => $product->id,
         ]);
+    }
+
+    public function test_public_product_image_urls_use_the_current_application_origin(): void
+    {
+        $this->assertSame(
+            '/storage/products/example.jpg',
+            Storage::url('products/example.jpg'),
+        );
     }
 }

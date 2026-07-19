@@ -9,11 +9,11 @@ use App\Models\Product;
 use App\Models\ProductHistory;
 use App\Models\StockItem;
 use App\Models\StockMovement;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Filesystem\FilesystemAdapter;
 
 class ProductQueryController extends Controller
 {
@@ -292,6 +292,7 @@ class ProductQueryController extends Controller
         return [
             'id' => $product->id,
             'name' => $product->name,
+            'description' => $product->description,
             'sku' => $product->sku,
             'barcode' => $product->barcode,
             'price' => $price,

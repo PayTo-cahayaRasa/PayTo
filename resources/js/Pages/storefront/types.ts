@@ -36,9 +36,9 @@ export type CatalogSidebarProps = {
 
 export type ProductCardProps = {
     product: PublicCatalogProduct;
-    index: number;
-    detailHref: string;
+    quantity?: number;
     onAddToCart?: () => void;
+    onDecreaseCartItem?: () => void;
 };
 
 export type MinimalPaginationProps = {
