@@ -1,35 +1,14 @@
-import { Info, Package, ShoppingCart } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { Info, Minus, Package, Plus, ShoppingCart } from 'lucide-react';
 
 import { formatRupiah } from '../data/publicCatalogData';
 import type { ProductCardProps } from '../types';
 import { ProductVisual } from './ProductVisual';
 
-export function ProductCard({ product, onAddToCart }: ProductCardProps) {
-    const [isAddConfirmed, setIsAddConfirmed] = useState(false);
-    const addConfirmationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    useEffect(() => {
-        return () => {
-            if (addConfirmationTimerRef.current) {
-                window.clearTimeout(addConfirmationTimerRef.current);
-            }
-        };
-    }, []);
-
+export function ProductCard({ product, quantity = 0, onAddToCart, onDecreaseCartItem }: ProductCardProps) {
     function handleAddToCart(): void {
         if (product.stock <= 0) return;
 
         onAddToCart?.();
-        setIsAddConfirmed(true);
-
-        if (addConfirmationTimerRef.current) {
-            window.clearTimeout(addConfirmationTimerRef.current);
-        }
-
-        addConfirmationTimerRef.current = window.setTimeout(() => {
-            setIsAddConfirmed(false);
-        }, 1300);
     }
 
     return (
@@ -63,35 +42,47 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                     <Package size={13} strokeWidth={1.9} aria-hidden="true" />
                     <span>{product.stock > 0 ? `${product.stock} tersedia` : 'Stok habis'}</span>
                 </div>
-                <div className="mt-2">
+                <div className="mt-2 flex min-h-[3.1rem] flex-col justify-start">
                     <p className="text-[1.15rem] font-semibold tracking-[-0.04em] text-[#3a2117] sm:text-[1.3rem]">{formatRupiah(product.finalPrice ?? product.price)}</p>
                     {(product.discount ?? 0) > 0 && (
                         <p className="text-xs font-semibold text-[#9b7860] line-through">{formatRupiah(product.price)}</p>
                     )}
                 </div>
-                <div className="mt-2.5 flex items-center gap-2">
-                    <button
-                        type="button"
-                        onClick={handleAddToCart}
-                        disabled={product.stock <= 0}
-                        className={`inline-flex min-h-[2.4rem] flex-1 items-center justify-center rounded-xl border px-3 text-[0.8rem] font-semibold transition duration-300 ${
-                            isAddConfirmed
-                                ? 'border-[#f59a21] bg-[#f59a21] text-white shadow-[0_18px_30px_-22px_rgba(245,154,33,0.8)] scale-[1.02]'
-                                : 'border-[#eadfcf] bg-[#fff7ea] text-[#3a2117]'
-                        }`}
-                    >
-                        {product.stock <= 0 ? 'Stok Habis' : isAddConfirmed ? 'Berhasil Ditambahkan' : 'Tambah ke Keranjang'}
-                    </button>
-                    {product.stock > 0 && product.whatsappUrl && (
-                        <a
-                            href={product.whatsappUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex h-[2.4rem] w-[2.4rem] shrink-0 items-center justify-center rounded-xl bg-[#3a2117] text-white"
-                            aria-label="Pesan via WhatsApp"
+                <div className="mt-2.5">
+                    {quantity > 0 ? (
+                        <div className="flex min-h-[2.4rem] w-full items-center justify-between rounded-xl border border-[#e5d4bf] bg-[#fff7ea] p-1 text-[#3a2117]">
+                            <button
+                                type="button"
+                                onClick={onDecreaseCartItem}
+                                aria-label={`Kurangi ${product.name} dari keranjang`}
+                                className="inline-flex size-9 items-center justify-center rounded-lg transition hover:bg-[#f0dfc7] focus-visible:outline-2 focus-visible:outline-[#9b5c22]"
+                            >
+                                <Minus size={15} strokeWidth={2} />
+                            </button>
+                            <span className="text-center text-xs font-semibold" aria-live="polite">
+                                <strong className="block text-base leading-none">{quantity}</strong>
+                                <span className="mt-0.5 block text-[0.65rem] text-[#896b52]">di keranjang</span>
+                            </span>
+                            <button
+                                type="button"
+                                onClick={handleAddToCart}
+                                disabled={quantity >= product.stock}
+                                aria-label={`Tambah ${product.name} ke keranjang`}
+                                className="inline-flex size-9 items-center justify-center rounded-lg transition hover:bg-[#f0dfc7] focus-visible:outline-2 focus-visible:outline-[#9b5c22] disabled:cursor-not-allowed disabled:opacity-35"
+                            >
+                                <Plus size={15} strokeWidth={2} />
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={handleAddToCart}
+                            disabled={product.stock <= 0}
+                            className="inline-flex min-h-[2.4rem] w-full items-center justify-center gap-2 rounded-xl border border-[#eadfcf] bg-[#fff7ea] px-3 text-[0.8rem] font-semibold text-[#3a2117] transition duration-300 disabled:cursor-not-allowed disabled:opacity-45"
                         >
-                            <ShoppingCart size={15} strokeWidth={1.9} />
-                        </a>
+                            <ShoppingCart size={15} strokeWidth={1.9} aria-hidden="true" />
+                            {product.stock <= 0 ? 'Stok Habis' : 'Tambah ke Keranjang'}
+                        </button>
                     )}
                 </div>
             </div>

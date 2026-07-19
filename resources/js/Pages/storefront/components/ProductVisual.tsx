@@ -73,7 +73,7 @@ export function ProductVisual({ product }: ProductVisualProps) {
     if (product.imageUrl) {
         return (
             <div className="relative h-50 overflow-hidden rounded-[1.4rem] bg-[#f7ead4]">
-                <img src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
+                <img src={product.imageUrl} alt={product.name} className="h-full w-full object-contain p-2" loading="lazy" />
             </div>
         );
     }

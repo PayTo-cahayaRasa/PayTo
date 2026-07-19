@@ -125,13 +125,19 @@ export default function LandingPage({ business, catalog, featuredProducts = [], 
                                     <div className="mt-7 grid gap-5 lg:grid-cols-[16rem_1fr]">
                                         <CatalogSidebar categories={categories} selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
                                         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-                                            {filteredProducts.map((product) => (
-                                                <ProductCard
-                                                    key={product.id}
-                                                    product={product}
-                                                    onAddToCart={() => addToCart(product.id)}
-                                                />
-                                            ))}
+                                            {filteredProducts.map((product) => {
+                                                const quantity = cartItems.find((item) => item.product.id === product.id)?.quantity ?? 0;
+
+                                                return (
+                                                    <ProductCard
+                                                        key={product.id}
+                                                        product={product}
+                                                        quantity={quantity}
+                                                        onAddToCart={() => addToCart(product.id)}
+                                                        onDecreaseCartItem={() => decreaseCartItem(product.id)}
+                                                    />
+                                                );
+                                            })}
                                         </div>
                                     </div>
 

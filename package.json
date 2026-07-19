@@ -5,7 +5,7 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "test:frontend": "node --experimental-strip-types --test resources/js/Pages/storefront/hooks/publicCartState.test.ts",
+        "test:frontend": "node --experimental-strip-types --test resources/js/Pages/storefront/hooks/publicCartState.test.ts resources/js/Pages/admin/components/products/productImageCrop.test.ts",
         "typecheck": "tsc --noEmit"
     },
     "devDependencies": {
