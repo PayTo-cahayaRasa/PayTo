@@ -9,6 +9,7 @@ import type { Product } from '../../types';
 
 type ProductFormState = {
     name: string;
+    description: string;
     sku: string;
     uom: string;
     price: string;
@@ -21,6 +22,7 @@ type StockAction = 'ADD' | 'SUBTRACT' | 'SET';
 
 const defaultFormState: ProductFormState = {
     name: '',
+    description: '',
     sku: '',
     uom: 'pcs',
     price: '0',
@@ -187,6 +189,7 @@ export default function ProductsTab() {
         setEditingProduct(product);
         setFormState({
             name: product.name,
+            description: product.description ?? '',
             sku: product.sku ?? '',
             uom: product.uom ?? 'pcs',
             price: product.price.toString(),
@@ -255,7 +258,7 @@ export default function ProductsTab() {
         setStockSuccess(null);
     };
 
-    const handleChange = (field: keyof ProductFormState) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (field: keyof ProductFormState) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const value = field === 'is_active' ? (event.target as HTMLInputElement).checked : event.target.value;
         setFormState(state => ({
             ...state,
@@ -283,6 +286,7 @@ export default function ProductsTab() {
 
         const payload = new FormData();
         payload.append('name', formState.name.trim());
+        payload.append('description', formState.description.trim());
         payload.append('sku', formState.sku.trim());
         payload.append('uom', formState.uom.trim() || 'pcs');
         payload.append('price', String(Number(formState.price) || 0));
@@ -839,6 +843,22 @@ export default function ProductsTab() {
                                         onChange={handleChange('name')}
                                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
                                         placeholder="Contoh: Kopi Susu Gula Aren"
+                                    />
+                                </div>
+
+                                <div className="sm:col-span-2">
+                                    <div className="mb-2 flex items-center justify-between gap-3">
+                                        <label htmlFor="product-description" className="text-xs font-bold uppercase tracking-wider text-slate-500">Deskripsi Produk</label>
+                                        <span className="text-[10px] font-semibold text-slate-400">Opsional</span>
+                                    </div>
+                                    <textarea
+                                        id="product-description"
+                                        value={formState.description}
+                                        onChange={handleChange('description')}
+                                        rows={4}
+                                        maxLength={2000}
+                                        className="w-full resize-y rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700 outline-none transition-all focus:ring-2 focus:ring-indigo-200"
+                                        placeholder="Tulis deskripsi singkat produk"
                                     />
                                 </div>
 

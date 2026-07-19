@@ -57,7 +57,16 @@ export default function LandingPage({ business, catalog, featuredProducts = [], 
 
     function submitSearch(event: FormEvent): void {
         event.preventDefault();
-        router.get('/katalog', { q: searchQuery }, { preserveState: true });
+        router.get(
+            '/katalog',
+            { q: searchQuery.trim() || undefined },
+            {
+                only: ['products', 'search'],
+                preserveScroll: true,
+                preserveState: true,
+                replace: true,
+            },
+        );
     }
 
     return (
@@ -116,12 +125,10 @@ export default function LandingPage({ business, catalog, featuredProducts = [], 
                                     <div className="mt-7 grid gap-5 lg:grid-cols-[16rem_1fr]">
                                         <CatalogSidebar categories={categories} selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
                                         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-                                            {filteredProducts.map((product, index) => (
+                                            {filteredProducts.map((product) => (
                                                 <ProductCard
                                                     key={product.id}
                                                     product={product}
-                                                    index={index}
-                                                    detailHref={`/katalog/${product.slug}`}
                                                     onAddToCart={() => addToCart(product.id)}
                                                 />
                                             ))}
@@ -132,7 +139,15 @@ export default function LandingPage({ business, catalog, featuredProducts = [], 
                                         <MinimalPagination
                                             currentPage={products.current_page}
                                             totalPages={products.last_page}
-                                            onPageChange={(page) => router.get('/katalog', { q: searchQuery || undefined, page }, { preserveState: true })}
+                                            onPageChange={(page) => router.get(
+                                                '/katalog',
+                                                { q: searchQuery.trim() || undefined, page },
+                                                {
+                                                    only: ['products', 'search'],
+                                                    preserveScroll: true,
+                                                    preserveState: true,
+                                                },
+                                            )}
                                         />
                                     )}
 

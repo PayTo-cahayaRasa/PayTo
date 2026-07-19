@@ -56,16 +56,6 @@ class StorefrontController extends Controller
         ]);
     }
 
-    public function show(Product $product): Response
-    {
-        abort_unless($product->is_active && $this->settings->getCatalogSettings()['enabled'], 404);
-
-        return Inertia::render('storefront/KatalogDetailPage', [
-            'business' => $this->settings->getBusinessProfile(),
-            'product' => $this->mapProduct($product),
-        ]);
-    }
-
     private function publicProductQuery(): \Illuminate\Database\Eloquent\Builder
     {
         return Product::query()

@@ -36,8 +36,6 @@ export type CatalogSidebarProps = {
 
 export type ProductCardProps = {
     product: PublicCatalogProduct;
-    index: number;
-    detailHref: string;
     onAddToCart?: () => void;
 };
 

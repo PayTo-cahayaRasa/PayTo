@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use Inertia\Testing\AssertableInertia;
 use Tests\TestCase;
 
@@ -76,9 +77,9 @@ class KatalogPageTest extends TestCase
         );
     }
 
-    public function test_public_catalog_detail_page_returns_a_successful_response(): void
+    public function test_public_catalog_detail_page_is_not_exposed(): void
     {
-        $product = Product::factory()->create([
+        Product::factory()->create([
             'slug' => 'keripik-pisang',
             'is_active' => true,
             'is_public' => true,
@@ -86,18 +87,11 @@ class KatalogPageTest extends TestCase
 
         $response = $this->get('/katalog/keripik-pisang');
 
-        $response->assertOk();
-        $response->assertInertia(fn (AssertableInertia $page) => $page
-            ->component('storefront/KatalogDetailPage')
-            ->url('/katalog/keripik-pisang')
-            ->where('product.id', $product->id)
-        );
+        $response->assertNotFound();
     }
 
-    public function test_missing_public_catalog_detail_page_returns_not_found(): void
+    public function test_public_catalog_detail_route_is_removed(): void
     {
-        $response = $this->get('/katalog/produk-hilang');
-
-        $response->assertNotFound();
+        $this->assertFalse(Route::has('catalog.show'));
     }
 }
