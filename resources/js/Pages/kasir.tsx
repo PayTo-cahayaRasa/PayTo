@@ -235,7 +235,7 @@ export default function PosInterface() {
             const isPaymentConfirmed = ['confirmed', 'success', 'paid', 'settlement'].includes(responseStatus);
             const responseTotals = response?.data?.totals || {};
             const invoiceNo = response?.data?.invoice_no || response?.data?.invoiceNo || null;
-            const saleId = Number(response?.data?.sale_id);
+            const receiptUrl = response?.data?.receipt_url;
 
             setShowPaymentModal(false);
             setCart([]);
@@ -244,8 +244,8 @@ export default function PosInterface() {
             setCustomerName('');
             setCustomerPhone('');
 
-            if (Number.isSafeInteger(saleId) && saleId > 0) {
-                window.open(`/pos/sales/${saleId}/receipt`, '_blank', 'noopener,noreferrer');
+            if (typeof receiptUrl === 'string' && receiptUrl !== '') {
+                window.location.assign(receiptUrl);
             }
 
             if (isPaymentConfirmed) {

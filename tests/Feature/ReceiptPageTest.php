@@ -101,6 +101,20 @@ class ReceiptPageTest extends TestCase
         );
     }
 
+    public function test_cashier_can_download_own_receipt_pdf(): void
+    {
+        $cashier = $this->createCashier();
+        $sale = $this->createSaleWithItems($cashier);
+
+        $response = $this->actingAs($cashier)->get(route('pos.receipt.download', $sale));
+
+        $response->assertOk()
+            ->assertHeader('content-type', 'application/pdf')
+            ->assertHeader('content-disposition', "attachment; filename=struk-{$sale->id}.pdf");
+
+        $this->assertStringStartsWith('%PDF', $response->getContent());
+    }
+
     public function test_cashier_cannot_access_other_cashier_receipt(): void
     {
         $cashier1 = $this->createCashier('Kasir Satu', 'kasir1');
@@ -209,6 +223,6 @@ class ReceiptPageTest extends TestCase
 
         $receiptUrl = $response->json('receipt_url');
         $this->assertStringContainsString('/pos/sales/', $receiptUrl);
-        $this->assertStringContainsString('/receipt', $receiptUrl);
+        $this->assertStringContainsString('/receipt/download', $receiptUrl);
     }
 }
