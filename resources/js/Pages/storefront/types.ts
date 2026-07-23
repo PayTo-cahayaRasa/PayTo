@@ -12,6 +12,7 @@ export type BusinessProfile = {
     address: string;
     whatsapp_number: string;
     operating_hours: string;
+    shopee_url?: string;
     instagram_url?: string;
     tiktok_url?: string;
 };

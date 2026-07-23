@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Pos;
 use App\Http\Controllers\Controller;
 use App\Models\Sale;
 use App\Services\Settings\AppSettingsService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,22 +22,42 @@ class ReceiptController extends Controller
      */
     public function show(Request $request, Sale $sale): Response
     {
-        // IDOR protection: only allow cashier who owns the sale or supervisor
+        $this->authorizeReceipt($request, $sale);
+
+        return Inertia::render('receipt', $this->receiptData($sale));
+    }
+
+    public function download(Request $request, Sale $sale): HttpResponse
+    {
+        $this->authorizeReceipt($request, $sale);
+
+        return Pdf::loadView('receipt.pdf', $this->receiptData($sale))
+            ->setPaper([0, 0, 226.77, 841.89])
+            ->download("struk-{$sale->id}.pdf");
+    }
+
+    private function authorizeReceipt(Request $request, Sale $sale): void
+    {
         $user = $request->user();
+
         if ($user->role === 'CASHIER' && $sale->cashier_id !== $user->id) {
             abort(403, 'Unauthorized access to receipt.');
         }
+    }
 
-        // Load relationships
+    /**
+     * @return array<string, mixed>
+     */
+    private function receiptData(Sale $sale): array
+    {
         $sale->load(['items.product', 'payment', 'cashier']);
-
-        // Get receipt settings
         $receiptSettings = $this->settingsService->getReceiptSettings();
         $businessProfile = $this->settingsService->getBusinessProfile();
 
-        return Inertia::render('receipt', [
+        return [
             'sale' => [
                 'id' => $sale->id,
+                'invoice_no' => $sale->server_invoice_no,
                 'local_txn_uuid' => $sale->local_txn_uuid,
                 'subtotal' => $sale->subtotal,
                 'discount_amount' => $sale->discount_total,
@@ -56,7 +78,7 @@ class ReceiptController extends Controller
                     'change_amount' => $sale->change_total,
                 ],
                 'cashier' => [
-                    'name' => $sale->cashier->name,
+                    'name' => $sale->cashier?->name ?? '-',
                 ],
             ],
             'receipt_settings' => [
@@ -67,6 +89,6 @@ class ReceiptController extends Controller
                 'name' => $businessProfile['name'],
                 'address' => $businessProfile['address'],
             ],
-        ]);
+        ];
     }
 }

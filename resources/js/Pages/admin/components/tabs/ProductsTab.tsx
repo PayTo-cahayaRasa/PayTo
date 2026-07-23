@@ -13,6 +13,8 @@ type ProductFormState = {
     description: string;
     sku: string;
     uom: string;
+    category: string;
+    weight_grams: string;
     price: string;
     stock: string;
     discount: string;
@@ -26,6 +28,8 @@ const defaultFormState: ProductFormState = {
     description: '',
     sku: '',
     uom: 'pcs',
+    category: 'Lainnya',
+    weight_grams: '',
     price: '0',
     stock: '0',
     discount: '0',
@@ -202,6 +206,8 @@ export default function ProductsTab() {
             description: product.description ?? '',
             sku: product.sku ?? '',
             uom: product.uom ?? 'pcs',
+            category: product.category,
+            weight_grams: product.weight_grams?.toString() ?? '',
             price: product.price.toString(),
             stock: product.stock.toString(),
             discount: product.discount.toString(),
@@ -318,6 +324,8 @@ export default function ProductsTab() {
         payload.append('description', formState.description.trim());
         payload.append('sku', formState.sku.trim());
         payload.append('uom', formState.uom.trim() || 'pcs');
+        payload.append('category', formState.category);
+        payload.append('weight_grams', formState.weight_grams);
         payload.append('price', String(Number(formState.price) || 0));
         payload.append('stock', String(Number(formState.stock) || 0));
         payload.append('discount', String(Number(formState.discount) || 0));
@@ -921,6 +929,19 @@ export default function ProductsTab() {
                                 </div>
 
                                 <div>
+                                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">Kategori</label>
+                                    <select
+                                        value={formState.category}
+                                        onChange={handleChange('category')}
+                                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-indigo-200"
+                                    >
+                                        {['Makanan', 'Camilan', 'Minuman', 'Kerajinan', 'Lainnya'].map((category) => (
+                                            <option key={category} value={category}>{category}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Harga Jual (Rp)</label>
                                     <input
                                         type="number"
@@ -929,6 +950,19 @@ export default function ProductsTab() {
                                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
                                         placeholder="0"
                                     />
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">Berat Produk (gram)</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        value={formState.weight_grams}
+                                        onChange={handleChange('weight_grams')}
+                                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-bold outline-none transition-all focus:ring-2 focus:ring-indigo-200"
+                                        placeholder="Contoh: 250"
+                                    />
+                                    <p className="mt-2 text-xs text-slate-400">Wajib untuk pesanan kirim ke alamat.</p>
                                 </div>
 
                                 <div>

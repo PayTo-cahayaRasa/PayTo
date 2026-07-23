@@ -68,14 +68,14 @@ class PosCheckoutApiTest extends TestCase
     public function test_pos_catalog_returns_all_active_owner_products(): void
     {
         $cashier = User::factory()->create(['role' => 'CASHIER', 'is_active' => true]);
-        $publicProduct = Product::factory()->create(['name' => 'Produk Publik', 'is_active' => true, 'is_public' => true]);
+        $publicProduct = Product::factory()->create(['name' => 'Produk Publik', 'is_active' => true, 'is_public' => true, 'category' => 'Camilan', 'image_path' => 'products/produk-publik.jpg']);
         $privateProduct = Product::factory()->create(['name' => 'Produk Internal', 'is_active' => true, 'is_public' => false]);
         StockItem::query()->create(['product_id' => $publicProduct->id, 'on_hand' => 2]);
         StockItem::query()->create(['product_id' => $privateProduct->id, 'on_hand' => 2]);
 
         $this->actingAs($cashier)->getJson('/api/pos/products')
             ->assertOk()
-            ->assertJsonFragment(['name' => 'Produk Publik'])
+            ->assertJsonFragment(['name' => 'Produk Publik', 'category' => 'Camilan', 'imageUrl' => '/storage/products/produk-publik.jpg'])
             ->assertJsonFragment(['name' => 'Produk Internal']);
     }
 }

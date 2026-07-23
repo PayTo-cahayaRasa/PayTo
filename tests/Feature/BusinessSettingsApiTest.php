@@ -42,6 +42,7 @@ class BusinessSettingsApiTest extends TestCase
                 'address' => '2P5W+95R, Jl. Sukoanyar, Nongkosongo, Wringinsongo, Kec. Tumpang, Kabupaten Malang, Jawa Timur 65156',
                 'whatsapp_number' => '6281234567890',
                 'operating_hours' => 'Senin-Minggu 08.00-22.00',
+                'shopee_url' => 'https://shopee.co.id/cahayarasa',
                 'instagram_url' => 'https://www.instagram.com/cahayarasamalang/',
                 'tiktok_url' => 'https://www.tiktok.com/@cahayarasa_28',
             ],
@@ -64,6 +65,8 @@ class BusinessSettingsApiTest extends TestCase
         $this->assertDatabaseHas('app_settings', [
             'key' => 'business.profile',
         ]);
+
+        $response->assertJsonPath('data.business.shopee_url', 'https://shopee.co.id/cahayarasa');
 
         $this->assertDatabaseHas('app_settings', [
             'key' => 'catalog.settings',
@@ -109,6 +112,37 @@ class BusinessSettingsApiTest extends TestCase
         ])->assertOk()
             ->assertJsonPath('data.online_order.payment.bank_name', 'Bank Test')
             ->assertJsonPath('data.online_order.payment.qris_image_url', $qrisImageUrl);
+    }
+
+    public function test_supervisor_can_save_qris_settings_without_a_shipping_origin(): void
+    {
+        $supervisor = User::factory()->create(['role' => 'SUPERVISOR', 'is_active' => true]);
+
+        $this->actingAs($supervisor)->putJson('/api/admin/business-settings', [
+            'business' => [
+                'name' => 'Cahaya Rasa',
+                'address' => 'Malang',
+                'whatsapp_number' => '6281234567890',
+                'operating_hours' => '08.00-20.00',
+            ],
+            'catalog' => [
+                'enabled' => true,
+                'whatsapp_enabled' => true,
+                'whatsapp_message_template' => 'Halo {product_name}',
+            ],
+            'online_order' => [
+                'shipping' => ['origin' => '', 'packaging_weight_grams' => 0, 'couriers' => ['jne']],
+                'payment' => [
+                    'bank_name' => '',
+                    'bank_account_number' => '',
+                    'bank_account_name' => '',
+                    'qris_image_url' => '/storage/payment/qris/toko.png',
+                    'qris_image_path' => 'payment/qris/toko.png',
+                    'instructions' => 'Bayar sesuai nominal pesanan.',
+                ],
+            ],
+        ])->assertOk()
+            ->assertJsonPath('data.online_order.payment.qris_image_url', '/storage/payment/qris/toko.png');
     }
 
     /** @test */

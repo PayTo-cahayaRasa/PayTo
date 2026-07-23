@@ -28,6 +28,7 @@ export default function ProductCard({ product, onAdd, formatRupiah }: ProductCar
                 <span className="text-5xl group-hover:scale-110 transition-transform duration-500 drop-shadow-sm relative z-10">
                     {product.category === 'Minuman' ? '🥤' : product.category === 'Dessert' ? '🍰' : '🍔'}
                 </span>
+                {product.imageUrl ? <img src={product.imageUrl} alt={product.name} className="absolute inset-0 z-10 h-full w-full object-contain p-2" /> : null}
                 <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-20">
                     <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-lg text-indigo-600">
                         <Plus size={18} strokeWidth={3} />

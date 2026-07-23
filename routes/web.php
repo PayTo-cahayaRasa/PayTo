@@ -50,6 +50,9 @@ Route::get('/pesanan-online', fn () => inertia('online-orders/OnlineOrdersPage',
 Route::get('/pos/sales/{sale}/receipt', [ReceiptController::class, 'show'])
     ->middleware(['auth', 'role:CASHIER,SUPERVISOR'])
     ->name('pos.receipt');
+Route::get('/pos/sales/{sale}/receipt/download', [ReceiptController::class, 'download'])
+    ->middleware(['auth', 'role:CASHIER,SUPERVISOR'])
+    ->name('pos.receipt.download');
 
 // Protected Admin route - Supervisor only
 Route::get('/admin', function () {

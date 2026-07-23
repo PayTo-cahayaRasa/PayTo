@@ -31,6 +31,7 @@ class ProductStoreRequest extends FormRequest
             'discount' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'cost' => ['nullable', 'numeric', 'min:0'],
             'uom' => ['nullable', 'string', 'max:50'],
+            'category' => ['nullable', 'in:Makanan,Camilan,Minuman,Kerajinan,Lainnya'],
             'is_active' => ['nullable', 'boolean'],
             'is_public' => ['nullable', 'boolean'],
             'featured' => ['nullable', 'boolean'],

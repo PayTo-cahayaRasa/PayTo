@@ -15,13 +15,15 @@ import OnlineOrdersPage from './online-orders/OnlineOrdersPage';
 import UniversalModal from '../Components/UniversalModal';
 // import { CATEGORIES, QUICK_CASH_AMOUNTS } from './Pos/data';
 import type { CartItem, Product, SaleSource, TransactionHistory } from './Pos/types';
-import { Box, Coffee, LayoutGrid, Utensils } from 'lucide-react';
+import { Box, Coffee, LayoutGrid, Palette, Utensils } from 'lucide-react';
 
 export const CATEGORIES = [
-    { id: 'All', label: 'All Items', icon: LayoutGrid },
-    { id: 'Minuman', label: 'Drinks', icon: Coffee },
-    { id: 'Makanan', label: 'Foods', icon: Utensils },
-    { id: 'Dessert', label: 'Desserts', icon: Box },
+    { id: 'All', label: 'Semua', icon: LayoutGrid },
+    { id: 'Makanan', label: 'Makanan', icon: Utensils },
+    { id: 'Camilan', label: 'Camilan', icon: Box },
+    { id: 'Minuman', label: 'Minuman', icon: Coffee },
+    { id: 'Kerajinan', label: 'Kerajinan', icon: Palette },
+    { id: 'Lainnya', label: 'Lainnya', icon: Box },
 ];
 
 export const QUICK_CASH_AMOUNTS = [20000, 50000, 100000];
@@ -233,7 +235,7 @@ export default function PosInterface() {
             const isPaymentConfirmed = ['confirmed', 'success', 'paid', 'settlement'].includes(responseStatus);
             const responseTotals = response?.data?.totals || {};
             const invoiceNo = response?.data?.invoice_no || response?.data?.invoiceNo || null;
-            const saleId = Number(response?.data?.sale_id);
+            const receiptUrl = response?.data?.receipt_url;
 
             setShowPaymentModal(false);
             setCart([]);
@@ -242,8 +244,8 @@ export default function PosInterface() {
             setCustomerName('');
             setCustomerPhone('');
 
-            if (Number.isSafeInteger(saleId) && saleId > 0) {
-                window.open(`/pos/sales/${saleId}/receipt`, '_blank', 'noopener,noreferrer');
+            if (typeof receiptUrl === 'string' && receiptUrl !== '') {
+                window.location.assign(receiptUrl);
             }
 
             if (isPaymentConfirmed) {

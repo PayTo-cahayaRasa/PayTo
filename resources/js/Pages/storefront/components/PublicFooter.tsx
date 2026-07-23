@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Instagram, MapPin, MessageCircle, Music2, Phone } from 'lucide-react';
+import { Instagram, MapPin, MessageCircle, Music2, Phone, Store } from 'lucide-react';
 
 import { businessWhatsappUrl, storefrontShopHref } from '../constants';
 import type { PublicFooterProps } from '../types';
@@ -8,7 +8,11 @@ import { BrandMark } from './BrandMark';
 export function PublicFooter({ business }: PublicFooterProps) {
     const whatsappHref = businessWhatsappUrl(business);
     const whatsappDisplay = formatWhatsAppNumber(business.whatsapp_number);
-    const tiktokHref = business.tiktok_url ?? 'https://www.tiktok.com/@cahayarasa_28?_r=1&_t=ZS-989XRWXa7BR';
+    const marketplaces = [
+        { Icon: Store, href: business.shopee_url ?? '', label: 'Shopee' },
+        { Icon: Instagram, href: business.instagram_url ?? '', label: 'Instagram' },
+        { Icon: Music2, href: business.tiktok_url ?? '', label: 'TikTok' },
+    ].filter(({ href }) => Boolean(href));
 
     return (
         <footer id="kontak" className="scroll-mt-24 px-4 pb-8 pt-2 sm:px-5 lg:px-8">
@@ -21,8 +25,7 @@ export function PublicFooter({ business }: PublicFooterProps) {
                         </p>
                         <div className="mt-5 flex items-center gap-3">
                             {[
-                                { Icon: Instagram, href: business.instagram_url ?? '#footer', label: 'Instagram' },
-                                { Icon: Music2, href: tiktokHref, label: 'TikTok' },
+                                ...marketplaces,
                                 { Icon: MessageCircle, href: whatsappHref ?? '#footer', label: 'WhatsApp' },
                             ].filter(({ href }) => href !== '#footer').map(({ Icon, href, label }) => (
                                 <a
@@ -51,10 +54,12 @@ export function PublicFooter({ business }: PublicFooterProps) {
                     <div>
                         <h3 className="font-semibold text-[#3a2117]">Marketplace</h3>
                         <div className="mt-4 grid gap-3 text-sm text-[#6d5948]">
-                            <a href={tiktokHref} target="_blank" rel="noreferrer" className="flex items-center gap-3">
-                                <Music2 size={16} strokeWidth={1.8} className="text-[#3a2117]" />
-                                <span>TikTok Shop</span>
-                            </a>
+                            {marketplaces.map(({ Icon, href, label }) => (
+                                <a key={label} href={href} target="_blank" rel="noreferrer" className="flex items-center gap-3">
+                                    <Icon size={16} strokeWidth={1.8} className="text-[#3a2117]" />
+                                    <span>{label}</span>
+                                </a>
+                            ))}
                         </div>
                     </div>
 
