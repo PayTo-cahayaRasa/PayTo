@@ -10,6 +10,7 @@ import { HeaderIconButton } from './HeaderIconButton';
 
 export function PublicHeader({ business, cartItems, onIncreaseCartItem, onDecreaseCartItem, onClearCart }: PublicHeaderProps) {
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isCartBumping, setIsCartBumping] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const cartRef = useRef<HTMLDivElement | null>(null);
@@ -107,11 +108,24 @@ export function PublicHeader({ business, cartItems, onIncreaseCartItem, onDecrea
                     </Link>
 
                     <div className="lg:hidden">
-                        <HeaderIconButton ariaLabel="Buka menu">
-                            <Menu size={20} strokeWidth={1.8} />
+                        <HeaderIconButton
+                            ariaLabel={isMobileMenuOpen ? 'Tutup menu' : 'Buka menu'}
+                            isActive={isMobileMenuOpen}
+                            onClick={() => setIsMobileMenuOpen((current) => !current)}
+                        >
+                            {isMobileMenuOpen ? <X size={20} strokeWidth={1.8} /> : <Menu size={20} strokeWidth={1.8} />}
                         </HeaderIconButton>
                     </div>
                 </div>
+
+                {isMobileMenuOpen ? (
+                    <div className="absolute left-0 right-0 top-[calc(100%+0.65rem)] z-40 rounded-[1.5rem] border border-[#eadfcf] bg-[#fffdf9]/96 p-2 shadow-[0_24px_60px_-28px_rgba(58,33,23,0.42)] backdrop-blur-xl lg:hidden">
+                        <a href={storefrontShopHref} onClick={() => setIsMobileMenuOpen(false)} className="block rounded-xl px-4 py-3 text-sm font-semibold text-[#3a2117] hover:bg-[#f8ead6]">Produk</a>
+                        <a href="/lacak-pesanan" onClick={() => setIsMobileMenuOpen(false)} className="block rounded-xl px-4 py-3 text-sm font-semibold text-[#3a2117] hover:bg-[#f8ead6]">Lacak Pesanan</a>
+                        <a href="#kontak" onClick={() => setIsMobileMenuOpen(false)} className="block rounded-xl px-4 py-3 text-sm font-semibold text-[#3a2117] hover:bg-[#f8ead6]">Kontak</a>
+                        <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="block rounded-xl bg-[#3a2117] px-4 py-3 text-center text-sm font-bold text-white">Masuk</Link>
+                    </div>
+                ) : null}
 
                 {isCartOpen ? (
                     <div
