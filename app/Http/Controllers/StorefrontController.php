@@ -82,7 +82,7 @@ class StorefrontController extends Controller
             'price' => $price,
             'finalPrice' => $finalPrice,
             'discount' => $discount,
-            'category' => $product->uom === 'cup' ? 'Minuman' : 'Makanan',
+            'category' => $product->category,
             'description' => $product->description,
             'stock' => (float) ($product->stockItem?->on_hand ?? 0),
             'imageUrl' => $product->image_path ? Storage::disk('public')->url($product->image_path) : null,

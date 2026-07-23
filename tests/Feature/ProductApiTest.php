@@ -29,6 +29,7 @@ class ProductApiTest extends TestCase
             'discount' => 5,
             'cost' => 8000,
             'uom' => 'pcs',
+            'category' => 'Camilan',
             'is_active' => true,
             'stock' => 20,
             'weight_grams' => 250,
@@ -40,6 +41,7 @@ class ProductApiTest extends TestCase
             ->assertCreated()
             ->assertJsonPath('data.name', 'Teh Manis')
             ->assertJsonPath('data.description', null)
+            ->assertJsonPath('data.category', 'Camilan')
             ->assertJsonPath('data.stock', 20)
             ->assertJsonPath('data.weight_grams', 250)
             ->assertJsonPath('data.status', 'ACTIVE');
@@ -48,6 +50,7 @@ class ProductApiTest extends TestCase
             'name' => 'Teh Manis',
             'sku' => 'BV-010',
             'description' => null,
+            'category' => 'Camilan',
             'weight_grams' => 250,
         ]);
 
@@ -72,6 +75,7 @@ class ProductApiTest extends TestCase
             'discount' => 0,
             'cost' => 4000,
             'uom' => 'pcs',
+            'category' => 'Minuman',
             'is_active' => true,
             'weight_grams' => 200,
         ]);
@@ -86,6 +90,7 @@ class ProductApiTest extends TestCase
             ->assertJsonFragment([
                 'id' => $product->id,
                 'name' => 'Produk List',
+                'category' => 'Minuman',
                 'stock' => 7,
                 'weight_grams' => 200,
             ]);
@@ -94,6 +99,7 @@ class ProductApiTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.name', 'Produk List')
             ->assertJsonPath('data.description', 'Deskripsi produk untuk form edit.')
+            ->assertJsonPath('data.category', 'Minuman')
             ->assertJsonPath('data.weight_grams', 200)
             ->assertJsonPath('data.stock', 7);
     }
@@ -180,6 +186,7 @@ class ProductApiTest extends TestCase
             'description' => 'Deskripsi produk yang diperbarui.',
             'price' => 12000,
             'stock' => 12,
+            'category' => 'Kerajinan',
             'weight_grams' => 300,
         ];
 
@@ -187,6 +194,7 @@ class ProductApiTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.name', 'Produk Baru')
             ->assertJsonPath('data.description', 'Deskripsi produk yang diperbarui.')
+            ->assertJsonPath('data.category', 'Kerajinan')
             ->assertJsonPath('data.weight_grams', 300)
             ->assertJsonPath('data.stock', 12);
 
@@ -194,6 +202,7 @@ class ProductApiTest extends TestCase
             'id' => $product->id,
             'name' => 'Produk Baru',
             'description' => 'Deskripsi produk yang diperbarui.',
+            'category' => 'Kerajinan',
             'weight_grams' => 300,
         ]);
 

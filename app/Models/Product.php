@@ -21,6 +21,7 @@ class Product extends Model
         'discount',
         'cost',
         'uom',
+        'category',
         'is_active',
         'is_public',
         'featured',

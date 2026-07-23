@@ -34,6 +34,7 @@ class ProductUpdateRequest extends FormRequest
             'discount' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
             'cost' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'uom' => ['sometimes', 'nullable', 'string', 'max:50'],
+            'category' => ['sometimes', 'required', 'in:Makanan,Camilan,Minuman,Kerajinan,Lainnya'],
             'is_active' => ['sometimes', 'boolean'],
             'is_public' => ['sometimes', 'boolean'],
             'featured' => ['sometimes', 'boolean'],

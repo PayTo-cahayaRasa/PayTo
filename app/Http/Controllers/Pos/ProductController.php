@@ -8,6 +8,7 @@ use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class ProductController extends Controller
@@ -16,7 +17,7 @@ class ProductController extends Controller
     {
         $rows = Product::query()
             ->leftJoin('stock_items', 'products.id', '=', 'stock_items.product_id')
-            ->select('products.id', 'products.name', 'products.sku', 'products.price', 'products.discount', 'products.uom', DB::raw('COALESCE(stock_items.on_hand, 0) as stock'))
+            ->select('products.id', 'products.name', 'products.sku', 'products.price', 'products.discount', 'products.category', 'products.image_path', DB::raw('COALESCE(stock_items.on_hand, 0) as stock'))
             ->where('products.is_active', true)
             ->orderBy('products.name')
             ->get()
@@ -33,8 +34,8 @@ class ProductController extends Controller
                     'discount' => $discountPercent,
                     'price_after_discount' => $discountedPrice,
                     'stock' => (int) $r->stock,
-                    // Derive a simple category: cup => Minuman, else Makanan
-                    'category' => $r->uom === 'cup' ? 'Minuman' : 'Makanan',
+                    'category' => $r->category,
+                    'imageUrl' => $r->image_path ? Storage::disk('public')->url($r->image_path) : null,
                     'isFavorite' => false,
                     'imageColor' => null,
                 ];
