@@ -162,7 +162,18 @@ export default function SettingsTab() {
             setIsUploadingQris(true);
             setErrorMessage('');
             const response = await axios.post('/api/admin/business-settings/qris-image', payload);
-            setSettings(response.data.data);
+            const uploadedPayment = response.data.data.online_order.payment;
+            setSettings((current) => ({
+                ...current,
+                online_order: {
+                    ...current.online_order,
+                    payment: {
+                        ...current.online_order.payment,
+                        qris_image_url: uploadedPayment.qris_image_url,
+                        qris_image_path: uploadedPayment.qris_image_path,
+                    },
+                },
+            }));
         } catch (error: any) {
             setSaveStatus('error');
             setErrorMessage(error.response?.data?.message || 'Gagal mengunggah gambar QRIS.');
@@ -188,12 +199,9 @@ export default function SettingsTab() {
         <div className="animate-in slide-in-from-bottom-4 duration-500 space-y-6">
             {/* Status Messages */}
             {saveStatus === 'success' && (
-                <div className="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-start gap-3">
-                    <CheckCircle size={20} className="text-green-600 shrink-0 mt-0.5" />
-                    <div>
-                        <p className="font-bold text-sm text-green-900">Berhasil disimpan!</p>
-                        <p className="text-xs text-green-700 mt-1">Pengaturan toko berhasil diperbarui.</p>
-                    </div>
+                <div role="status" className="fixed right-4 top-4 z-50 flex items-start gap-3 rounded-2xl border border-green-200 bg-green-50 p-4 shadow-lg sm:right-6 sm:top-6">
+                    <CheckCircle size={20} className="mt-0.5 shrink-0 text-green-600" />
+                    <p className="text-sm font-bold text-green-900">Berhasil disimpan!</p>
                 </div>
             )}
 

@@ -36,7 +36,7 @@ class BusinessSettingsRequest extends FormRequest
             'catalog.enabled' => ['required', 'boolean'],
             'catalog.whatsapp_enabled' => ['required', 'boolean'],
             'catalog.whatsapp_message_template' => ['required', 'string', 'max:500'],
-            'online_order.shipping.origin' => ['required_with:online_order', 'string', 'max:50'],
+            'online_order.shipping.origin' => ['nullable', 'string', 'max:50'],
             'online_order.shipping.packaging_weight_grams' => ['required_with:online_order', 'integer', 'min:0', 'max:100000'],
             'online_order.shipping.couriers' => ['required_with:online_order', 'array', 'min:1', 'max:3'],
             'online_order.shipping.couriers.*' => ['required', 'string', 'max:20', 'distinct'],

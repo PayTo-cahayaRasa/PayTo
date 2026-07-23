@@ -111,6 +111,37 @@ class BusinessSettingsApiTest extends TestCase
             ->assertJsonPath('data.online_order.payment.qris_image_url', $qrisImageUrl);
     }
 
+    public function test_supervisor_can_save_qris_settings_without_a_shipping_origin(): void
+    {
+        $supervisor = User::factory()->create(['role' => 'SUPERVISOR', 'is_active' => true]);
+
+        $this->actingAs($supervisor)->putJson('/api/admin/business-settings', [
+            'business' => [
+                'name' => 'Cahaya Rasa',
+                'address' => 'Malang',
+                'whatsapp_number' => '6281234567890',
+                'operating_hours' => '08.00-20.00',
+            ],
+            'catalog' => [
+                'enabled' => true,
+                'whatsapp_enabled' => true,
+                'whatsapp_message_template' => 'Halo {product_name}',
+            ],
+            'online_order' => [
+                'shipping' => ['origin' => '', 'packaging_weight_grams' => 0, 'couriers' => ['jne']],
+                'payment' => [
+                    'bank_name' => '',
+                    'bank_account_number' => '',
+                    'bank_account_name' => '',
+                    'qris_image_url' => '/storage/payment/qris/toko.png',
+                    'qris_image_path' => 'payment/qris/toko.png',
+                    'instructions' => 'Bayar sesuai nominal pesanan.',
+                ],
+            ],
+        ])->assertOk()
+            ->assertJsonPath('data.online_order.payment.qris_image_url', '/storage/payment/qris/toko.png');
+    }
+
     /** @test */
     public function cashier_cannot_access_business_settings(): void
     {

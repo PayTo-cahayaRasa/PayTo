@@ -217,6 +217,7 @@ class OnlineOrderCheckoutTest extends TestCase
             ->assertInertia(fn ($page) => $page
                 ->component('storefront/CheckoutSuccessPage')
                 ->where('payment.bank_name', 'Bank Test')
+                ->where('payment.bank_account_number', '1234567890')
                 ->where('payment.instructions', 'Bayar sebelum pukul 20.00.')
                 ->where('order.order_number', $order->order_number)
                 ->where('payment_whatsapp_url', fn ($url) => str_contains($url, $order->order_number) && str_contains($url, 'Rp10.000'))
