@@ -31,6 +31,7 @@ class ProductApiTest extends TestCase
             'uom' => 'pcs',
             'is_active' => true,
             'stock' => 20,
+            'weight_grams' => 250,
         ];
 
         $response = $this->actingAs($supervisor)->postJson('/api/admin/products', $payload);
@@ -40,12 +41,14 @@ class ProductApiTest extends TestCase
             ->assertJsonPath('data.name', 'Teh Manis')
             ->assertJsonPath('data.description', null)
             ->assertJsonPath('data.stock', 20)
+            ->assertJsonPath('data.weight_grams', 250)
             ->assertJsonPath('data.status', 'ACTIVE');
 
         $this->assertDatabaseHas('products', [
             'name' => 'Teh Manis',
             'sku' => 'BV-010',
             'description' => null,
+            'weight_grams' => 250,
         ]);
 
         $this->assertDatabaseHas('stock_items', [
@@ -70,6 +73,7 @@ class ProductApiTest extends TestCase
             'cost' => 4000,
             'uom' => 'pcs',
             'is_active' => true,
+            'weight_grams' => 200,
         ]);
 
         StockItem::query()->create([
@@ -83,12 +87,14 @@ class ProductApiTest extends TestCase
                 'id' => $product->id,
                 'name' => 'Produk List',
                 'stock' => 7,
+                'weight_grams' => 200,
             ]);
 
         $this->actingAs($supervisor)->getJson("/api/admin/products/{$product->id}")
             ->assertOk()
             ->assertJsonPath('data.name', 'Produk List')
             ->assertJsonPath('data.description', 'Deskripsi produk untuk form edit.')
+            ->assertJsonPath('data.weight_grams', 200)
             ->assertJsonPath('data.stock', 7);
     }
 
@@ -174,18 +180,21 @@ class ProductApiTest extends TestCase
             'description' => 'Deskripsi produk yang diperbarui.',
             'price' => 12000,
             'stock' => 12,
+            'weight_grams' => 300,
         ];
 
         $this->actingAs($supervisor)->putJson("/api/admin/products/{$product->id}", $payload)
             ->assertOk()
             ->assertJsonPath('data.name', 'Produk Baru')
             ->assertJsonPath('data.description', 'Deskripsi produk yang diperbarui.')
+            ->assertJsonPath('data.weight_grams', 300)
             ->assertJsonPath('data.stock', 12);
 
         $this->assertDatabaseHas('products', [
             'id' => $product->id,
             'name' => 'Produk Baru',
             'description' => 'Deskripsi produk yang diperbarui.',
+            'weight_grams' => 300,
         ]);
 
         $this->assertDatabaseHas('stock_items', [

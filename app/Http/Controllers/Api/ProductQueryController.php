@@ -47,6 +47,7 @@ class ProductQueryController extends Controller
             'is_active',
             'is_public',
             'featured',
+            'weight_grams',
         ]));
 
         if ($request->hasFile('image')) {
@@ -131,6 +132,7 @@ class ProductQueryController extends Controller
             'is_active',
             'is_public',
             'featured',
+            'weight_grams',
         ]));
         $product->save();
 
@@ -300,6 +302,7 @@ class ProductQueryController extends Controller
             'price_after_discount' => round($priceAfterDiscount, 2),
             'cost' => $product->cost !== null ? (float) $product->cost : null,
             'uom' => $product->uom,
+            'weight_grams' => $product->weight_grams,
             'stock' => $product->stockItem?->on_hand !== null ? (float) $product->stockItem->on_hand : 0.0,
             'is_active' => (bool) $product->is_active,
             'status' => $product->is_active ? 'ACTIVE' : 'INACTIVE',

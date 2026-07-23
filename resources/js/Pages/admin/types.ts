@@ -50,6 +50,7 @@ export type Product = {
     price_after_discount: number;
     cost?: number | null;
     uom: string;
+    weight_grams: number | null;
     stock: number;
     is_active: boolean;
     status: 'ACTIVE' | 'INACTIVE';
