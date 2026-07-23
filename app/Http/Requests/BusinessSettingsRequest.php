@@ -29,6 +29,7 @@ class BusinessSettingsRequest extends FormRequest
             'business.whatsapp_number' => ['nullable', 'string', 'regex:/^[0-9]{8,15}$/'],
             'business.operating_hours' => ['required', 'string', 'max:255'],
             'business.tagline' => ['nullable', 'string', 'max:120'],
+            'business.shopee_url' => ['nullable', 'url', 'max:255'],
             'business.instagram_url' => ['nullable', 'url', 'max:255'],
             'business.tiktok_url' => ['nullable', 'url', 'max:255'],
 
@@ -60,6 +61,7 @@ class BusinessSettingsRequest extends FormRequest
             'business.whatsapp_number' => 'nomor WhatsApp',
             'business.operating_hours' => 'jam operasional',
             'business.tagline' => 'tagline toko',
+            'business.shopee_url' => 'tautan Shopee',
             'business.instagram_url' => 'tautan Instagram',
             'business.tiktok_url' => 'tautan TikTok',
             'catalog.enabled' => 'status katalog',
@@ -83,6 +85,7 @@ class BusinessSettingsRequest extends FormRequest
             'business.operating_hours.max' => 'Jam operasional maksimal 255 karakter.',
             'business.instagram_url.url' => 'Tautan Instagram harus berupa URL valid.',
             'business.tiktok_url.url' => 'Tautan TikTok harus berupa URL valid.',
+            'business.shopee_url.url' => 'Tautan Shopee harus berupa URL valid.',
             'catalog.enabled.required' => 'Status katalog wajib diisi.',
             'catalog.enabled.boolean' => 'Status katalog harus berupa true atau false.',
             'catalog.whatsapp_enabled.required' => 'Status WhatsApp katalog wajib diisi.',

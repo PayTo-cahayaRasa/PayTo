@@ -13,6 +13,7 @@ type BusinessSettings = {
         address: string;
         whatsapp_number: string;
         operating_hours: string;
+        shopee_url?: string;
         instagram_url?: string;
         tiktok_url?: string;
     };
@@ -50,6 +51,7 @@ export default function SettingsTab() {
             address: '',
             whatsapp_number: '',
             operating_hours: '',
+            shopee_url: '',
             instagram_url: '',
             tiktok_url: '',
         },
@@ -356,6 +358,31 @@ export default function SettingsTab() {
                                 <p className="text-xs text-red-600 mt-1">
                                     {getFieldError('business.operating_hours')}
                                 </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                                Link Shopee
+                            </label>
+                            <input
+                                type="url"
+                                value={settings.business.shopee_url || ''}
+                                onChange={(e) =>
+                                    setSettings({
+                                        ...settings,
+                                        business: { ...settings.business, shopee_url: e.target.value },
+                                    })
+                                }
+                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none ${
+                                    getFieldError('business.shopee_url')
+                                        ? 'border-red-300 bg-red-50/50'
+                                        : 'border-white/60'
+                                }`}
+                                placeholder="https://shopee.co.id/nama-toko"
+                            />
+                            {getFieldError('business.shopee_url') && (
+                                <p className="text-xs text-red-600 mt-1">{getFieldError('business.shopee_url')}</p>
                             )}
                         </div>
 

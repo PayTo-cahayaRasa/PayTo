@@ -42,6 +42,7 @@ class BusinessSettingsApiTest extends TestCase
                 'address' => '2P5W+95R, Jl. Sukoanyar, Nongkosongo, Wringinsongo, Kec. Tumpang, Kabupaten Malang, Jawa Timur 65156',
                 'whatsapp_number' => '6281234567890',
                 'operating_hours' => 'Senin-Minggu 08.00-22.00',
+                'shopee_url' => 'https://shopee.co.id/cahayarasa',
                 'instagram_url' => 'https://www.instagram.com/cahayarasamalang/',
                 'tiktok_url' => 'https://www.tiktok.com/@cahayarasa_28',
             ],
@@ -64,6 +65,8 @@ class BusinessSettingsApiTest extends TestCase
         $this->assertDatabaseHas('app_settings', [
             'key' => 'business.profile',
         ]);
+
+        $response->assertJsonPath('data.business.shopee_url', 'https://shopee.co.id/cahayarasa');
 
         $this->assertDatabaseHas('app_settings', [
             'key' => 'catalog.settings',
