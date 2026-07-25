@@ -118,33 +118,85 @@ function HeroDecorBackdrop() {
     );
 }
 
-function HeroBadgeArtwork() {
+type HeroProductPhotoProps = {
+    alt: string;
+    className: string;
+    imageClassName?: string;
+    isPriority?: boolean;
+    src: string;
+};
+
+function HeroProductPhoto({ alt, className, imageClassName = '', isPriority = false, src }: HeroProductPhotoProps) {
     return (
-        <div className="relative mx-auto h-66 w-66 sm:h-80 sm:w-[20rem] lg:h-104 lg:w-104">
-            <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,#fff5d6_0%,rgba(253,235,180,0.85)_40%,rgba(245,190,90,0.35)_70%,transparent_100%)] blur-sm" />
-            <div className="absolute inset-2 rounded-full border border-dashed border-[#e5a942]/60 sm:inset-3 lg:inset-4" />
-            <div className="absolute inset-[1.2rem] rounded-full border border-dotted border-[#d48c1b]/40 sm:inset-[1.6rem] lg:inset-8" />
-
-            <div className="absolute -left-2 top-16 sm:left-[0.2rem] sm:top-22 lg:left-2 lg:top-28">
-                <LeafBranch className="h-28 w-14 sm:h-36 sm:w-18 lg:h-48 lg:w-24" />
+        <div className={`absolute ${className}`}>
+            <div className={`hero-product-float h-full w-full ${imageClassName}`}>
+                <div className="h-full w-full overflow-hidden rounded-[1.8rem] border border-white/75 bg-[#fff8eb]/70 p-1.5 shadow-[0_24px_42px_-22px_rgba(94,53,22,0.5)] backdrop-blur-[2px] sm:p-2">
+                    <img
+                        src={src}
+                        alt={alt}
+                        width={1086}
+                        height={1448}
+                        loading={isPriority ? 'eager' : 'lazy'}
+                        fetchPriority={isPriority ? 'high' : 'auto'}
+                        className="h-full w-full rounded-[1.4rem] object-contain"
+                    />
+                </div>
             </div>
-            <div className="absolute -right-2 top-8 sm:right-[0.2rem] sm:top-12 lg:right-2 lg:top-16">
-                <LeafBranch className="h-32 w-16 sm:h-40 sm:w-20 lg:h-52 lg:w-26" mirrored />
-            </div>
+        </div>
+    );
+}
 
-            <ChipOrnament className="absolute -left-[0.8rem] top-6 h-8 w-8 -rotate-12 sm:left-2 sm:top-8 sm:h-10 sm:w-10 lg:left-4 lg:top-10 lg:h-12 lg:w-12" />
-            <ChipOrnament className="absolute -right-[0.6rem] bottom-12 h-7 w-7 rotate-45 sm:right-[0.8rem] sm:bottom-16 sm:h-9 sm:w-9 lg:right-6 lg:bottom-20 lg:h-11 lg:w-11" />
-            <ChipOrnament className="absolute left-8 bottom-4 h-6 w-6 rotate-12 sm:left-12 sm:bottom-6 sm:h-8 sm:w-8 lg:left-16 lg:bottom-8 lg:h-10 lg:w-10" />
-            <Sparkle className="absolute left-[1.8rem] top-[4.2rem] h-6 w-6 sm:left-[2.2rem] sm:top-[5.4rem] sm:h-7 sm:w-7 lg:left-[3.1rem] lg:top-[6.9rem] lg:h-9 lg:w-9" />
-            <Sparkle className="absolute right-12 top-[5.2rem] h-5 w-5 sm:right-[3.8rem] sm:top-[6.7rem] sm:h-6 sm:w-6 lg:right-[4.9rem] lg:top-[8.7rem] lg:h-7 lg:w-7" />
-            <Sparkle className="absolute left-[5.9rem] bottom-[2.3rem] h-4 w-4 sm:left-[7.4rem] sm:bottom-12 sm:h-5 sm:w-5 lg:left-[9.7rem] lg:bottom-[4.7rem] lg:h-6 lg:w-6" />
+function HeroProductShowcase() {
+    return (
+        <div className="relative mx-auto h-78 w-full max-w-92 sm:h-104 sm:max-w-130 lg:h-118 lg:max-w-142">
+            <div className="absolute left-[14%] top-[5%] h-[82%] w-[74%] rounded-[48%] bg-[radial-gradient(circle_at_48%_44%,rgba(255,246,211,0.98)_0%,rgba(250,211,112,0.62)_42%,rgba(235,154,47,0.15)_68%,transparent_74%)] blur-sm" />
+            <div className="absolute left-[18%] top-[11%] h-[70%] w-[64%] rotate-[-9deg] rounded-[48%] border border-dashed border-[#d89d35]/45" />
+            <div className="absolute left-[22%] top-[16%] h-[62%] w-[57%] rotate-12 rounded-[48%] border border-[#f0bd5c]/35" />
+            <svg aria-hidden="true" viewBox="0 0 500 390" className="absolute inset-0 h-full w-full opacity-55">
+                <path d="M48 244C128 80 338 39 455 169" stroke="#d89d35" strokeWidth="2" strokeDasharray="4 10" strokeLinecap="round" />
+                <path d="M82 302C213 379 398 324 447 211" stroke="#efb84f" strokeWidth="1.5" strokeLinecap="round" opacity="0.72" />
+            </svg>
 
-            <div className="absolute inset-[2.2rem] flex items-center justify-center rounded-full border-4 border-[#3a2117] bg-[radial-gradient(circle_at_35%_35%,#fff3b3_0%,#fcd84b_45%,#f4b81a_100%)] p-3 shadow-[0_28px_60px_-24px_rgba(58,33,23,0.48)] sm:inset-[2.8rem] sm:p-4 lg:inset-[3.6rem] lg:border-[6px] lg:p-6">
-                <div className="absolute inset-[0.4rem] rounded-full border-[1.5px] border-[#3a2117]/80 sm:inset-[0.6rem] lg:inset-3 lg:border-2" />
+            <HeroProductPhoto
+                src="/images/hero-products/keripik-singkong.jpg"
+                alt="Kemasan keripik singkong Cahaya Rasa"
+                className="left-0 top-8 z-[1] hidden h-42 w-31 -rotate-8 sm:block lg:left-1 lg:top-12 lg:h-49 lg:w-37"
+                imageClassName="hero-product-float-delayed"
+            />
+            <HeroProductPhoto
+                src="/images/hero-products/rempeyek.jpg"
+                alt="Kemasan rempeyek Cahaya Rasa"
+                className="bottom-4 left-[3%] z-[3] hidden h-38 w-28 rotate-5 sm:block lg:bottom-2 lg:left-[7%] lg:h-44 lg:w-33"
+                imageClassName="hero-product-float-slow"
+            />
+            <HeroProductPhoto
+                src="/images/hero-products/keripik-pisang.jpg"
+                alt="Kemasan keripik pisang Cahaya Rasa"
+                className="bottom-0 right-[3%] z-[4] hidden h-35 w-26 -rotate-5 lg:block"
+                imageClassName="hero-product-float-delayed"
+            />
+            <HeroProductPhoto
+                src="/images/hero-products/pisang-madu.jpg"
+                alt="Kemasan keripik pisang madu Cahaya Rasa"
+                className="right-0 top-5 z-[2] h-54 w-40 rotate-4 sm:right-[2%] sm:top-6 sm:h-70 sm:w-52 lg:right-0 lg:top-7 lg:h-80 lg:w-60"
+                isPriority
+            />
+
+            <LeafBranch className="absolute -left-1 bottom-7 z-[2] h-29 w-15 opacity-65 sm:left-[17%] sm:bottom-8 sm:h-38 sm:w-19 lg:left-[20%] lg:h-44 lg:w-22" />
+            <Sparkle className="absolute left-[10%] top-[13%] z-[5] h-6 w-6 sm:left-[26%] sm:top-[9%] sm:h-8 sm:w-8" />
+            <Sparkle className="absolute bottom-[8%] right-[28%] z-[5] h-5 w-5 sm:h-7 sm:w-7" />
+            <ChipOrnament className="absolute right-[8%] top-[4%] z-[5] h-8 w-8 rotate-18 sm:right-[11%] sm:h-10 sm:w-10" />
+            <ChipOrnament className="absolute bottom-[4%] left-[31%] z-[5] h-7 w-7 -rotate-25 sm:h-9 sm:w-9" />
+
+            <div className="absolute left-[43%] top-[53%] z-[6] flex h-43 w-43 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-4 border-[#3a2117] bg-[radial-gradient(circle_at_35%_35%,#fff3b3_0%,#fcd84b_45%,#f4b81a_100%)] p-3 shadow-[0_28px_60px_-24px_rgba(58,33,23,0.58)] sm:left-[48%] sm:top-[51%] sm:h-54 sm:w-54 sm:border-[5px] sm:p-4 lg:h-61 lg:w-61 lg:border-[6px] lg:p-5">
+                <div className="absolute inset-2 rounded-full border-[1.5px] border-[#3a2117]/80 sm:inset-2.5 lg:inset-3 lg:border-2" />
                 <img
                     src="/images/logo-removed.png"
-                    alt="Cahaya Rasa Logo"
-                    className="relative z-10 h-full w-full object-contain drop-shadow-[0_8px_16px_rgba(58,33,23,0.25)] transition-transform duration-300 hover:scale-105"
+                    alt="Logo Cahaya Rasa"
+                    width={500}
+                    height={500}
+                    loading="eager"
+                    className="relative h-full w-full object-contain drop-shadow-[0_8px_16px_rgba(58,33,23,0.25)]"
                 />
             </div>
         </div>
@@ -208,7 +260,7 @@ export function HeroSection({ business }: HeroSectionProps) {
                     </div>
 
                     <div className="relative flex items-center justify-center pt-2 lg:justify-end">
-                        <HeroBadgeArtwork />
+                        <HeroProductShowcase />
                     </div>
                 </div>
             </div>
