@@ -28,10 +28,12 @@ class ProductFactory extends Factory
             'discount' => 0,
             'cost' => fake()->randomFloat(2, 1000, 100000),
             'uom' => 'pcs',
+            'category' => 'Lainnya',
             'is_active' => true,
             'is_public' => false,
             'featured' => false,
             'image_path' => null,
+            'weight_grams' => 250,
         ];
     }
 }

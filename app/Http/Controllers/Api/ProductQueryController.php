@@ -9,8 +9,11 @@ use App\Models\Product;
 use App\Models\ProductHistory;
 use App\Models\StockItem;
 use App\Models\StockMovement;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 
 class ProductQueryController extends Controller
 {
@@ -41,10 +44,16 @@ class ProductQueryController extends Controller
             'discount',
             'cost',
             'uom',
+            'category',
             'is_active',
             'is_public',
             'featured',
+            'weight_grams',
         ]));
+
+        if ($request->hasFile('image')) {
+            $this->replaceProductImage($product, $request->file('image'));
+        }
 
         // Create initial stock
         StockItem::query()->firstOrCreate(
@@ -121,11 +130,17 @@ class ProductQueryController extends Controller
             'discount',
             'cost',
             'uom',
+            'category',
             'is_active',
             'is_public',
             'featured',
+            'weight_grams',
         ]));
         $product->save();
+
+        if ($request->hasFile('image')) {
+            $this->replaceProductImage($product, $request->file('image'));
+        }
 
         // Handle stock changes with validation
         $stockChanged = false;
@@ -210,7 +225,13 @@ class ProductQueryController extends Controller
             note: "Produk {$productName} dihapus"
         );
 
-        StockItem::query()->where('product_id', $product->id)->delete();
+        $product->update([
+            'is_active' => false,
+            'is_public' => false,
+        ]);
+        if ($product->image_path) {
+            Storage::disk('public')->delete($product->image_path);
+        }
         $product->delete();
 
         return response()->json([
@@ -269,10 +290,13 @@ class ProductQueryController extends Controller
         $price = (float) $product->price;
         $discount = (float) ($product->discount ?? 0);
         $priceAfterDiscount = max(0, $price - ($price * $discount / 100));
+        /** @var FilesystemAdapter $publicDisk */
+        $publicDisk = Storage::disk('public');
 
         return [
             'id' => $product->id,
             'name' => $product->name,
+            'description' => $product->description,
             'sku' => $product->sku,
             'barcode' => $product->barcode,
             'price' => $price,
@@ -280,10 +304,23 @@ class ProductQueryController extends Controller
             'price_after_discount' => round($priceAfterDiscount, 2),
             'cost' => $product->cost !== null ? (float) $product->cost : null,
             'uom' => $product->uom,
+            'category' => $product->category,
+            'weight_grams' => $product->weight_grams,
             'stock' => $product->stockItem?->on_hand !== null ? (float) $product->stockItem->on_hand : 0.0,
             'is_active' => (bool) $product->is_active,
             'status' => $product->is_active ? 'ACTIVE' : 'INACTIVE',
+            'image_url' => $product->image_path ? $publicDisk->url($product->image_path) : null,
         ];
+    }
+
+    private function replaceProductImage(Product $product, UploadedFile $image): void
+    {
+        $oldImagePath = $product->image_path;
+        $product->update(['image_path' => $image->store('products', 'public')]);
+
+        if ($oldImagePath) {
+            Storage::disk('public')->delete($oldImagePath);
+        }
     }
 
     /**

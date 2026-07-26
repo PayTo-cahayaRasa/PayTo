@@ -42,6 +42,7 @@ export type StaffMember = {
 export type Product = {
     id: number;
     name: string;
+    description: string | null;
     sku: string | null;
     barcode?: string | null;
     price: number;
@@ -49,10 +50,12 @@ export type Product = {
     price_after_discount: number;
     cost?: number | null;
     uom: string;
+    category: 'Makanan' | 'Camilan' | 'Minuman' | 'Kerajinan' | 'Lainnya';
+    weight_grams: number | null;
     stock: number;
     is_active: boolean;
     status: 'ACTIVE' | 'INACTIVE';
-    image?: string;
+    image_url?: string | null;
 };
 
 export type Notification = {

@@ -27,12 +27,14 @@ class PosApiController extends Controller
         $perPage = (int) $request->query('per_page', 10);
         $startDate = $request->query('start_date');
         $endDate = $request->query('end_date');
+        $source = $request->query('source');
         $userId = $request->user()->id;
 
         $result = $this->historyQuery->fetchPaginated($page, $perPage, [
             'userId' => $userId,
             'startDate' => $startDate ? (string) $startDate : null,
             'endDate' => $endDate ? (string) $endDate : null,
+            'source' => in_array($source, ['WALK_IN', 'WHATSAPP'], true) ? (string) $source : null,
         ]);
 
         return response()->json($result);

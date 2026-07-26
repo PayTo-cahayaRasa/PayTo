@@ -147,6 +147,20 @@ class AuthenticationAuthorizationTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_authenticated_supervisor_is_not_rate_limited_on_admin_api(): void
+    {
+        $supervisor = User::factory()->create([
+            'role' => 'SUPERVISOR',
+            'is_active' => true,
+        ]);
+
+        for ($attempt = 0; $attempt < 61; $attempt++) {
+            $this->actingAs($supervisor)
+                ->getJson('/api/admin/profile')
+                ->assertOk();
+        }
+    }
+
     /**
      * Test supervisor dapat mengakses halaman POS.
      */

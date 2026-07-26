@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\OnlineOrder;
 use App\Models\Product;
 use App\Services\Settings\AppSettingsService;
 
@@ -20,16 +21,13 @@ class WhatsAppLinkBuilder
     public function buildProductLink(Product $product, int $qty = 1): ?string
     {
         $catalogSettings = $this->settings->getCatalogSettings();
-        $businessProfile = $this->settings->getBusinessProfile();
-
         // Check if WhatsApp is enabled
         if (! $catalogSettings['whatsapp_enabled']) {
             return null;
         }
 
-        // Check if WhatsApp number is valid
-        $whatsappNumber = $businessProfile['whatsapp_number'] ?? '';
-        if (empty($whatsappNumber) || strlen($whatsappNumber) < 8) {
+        $whatsappNumber = $this->whatsappNumber();
+        if ($whatsappNumber === null) {
             return null;
         }
 
@@ -59,11 +57,58 @@ class WhatsAppLinkBuilder
         return "https://wa.me/{$whatsappNumber}?text={$encodedMessage}";
     }
 
+    public function buildShippingUpdateLink(OnlineOrder $order): ?string
+    {
+        $whatsappNumber = $this->whatsappNumber();
+        if ($whatsappNumber === null) {
+            return null;
+        }
+
+        if (! $order->tracking_number) {
+            return null;
+        }
+
+        $trackingUrl = route('orders.track', ['orderNumber' => $order->order_number, 'token' => $order->tracking_token]);
+        $message = implode("\n", [
+            "Halo {$order->customer_name}, pesanan {$order->order_number} sudah dikirim.",
+            "Kurir: {$order->shipping_courier_name} {$order->shipping_service}",
+            "Nomor resi: {$order->tracking_number}",
+            "Lacak pesanan: {$trackingUrl}",
+        ]);
+
+        return "https://wa.me/{$whatsappNumber}?text=".urlencode($message);
+    }
+
+    public function buildPaymentConfirmationLink(OnlineOrder $order): ?string
+    {
+        $profile = $this->settings->getBusinessProfile();
+        $whatsappNumber = $this->whatsappNumber();
+        if ($whatsappNumber === null) {
+            return null;
+        }
+
+        $total = $this->formatRupiah((float) $order->grand_total);
+        $message = "Halo {$profile['name']}, saya sudah membayar pesanan {$order->order_number} sebesar {$total}. Bukti pembayaran saya lampirkan di sini.";
+
+        return "https://wa.me/{$whatsappNumber}?text=".urlencode($message);
+    }
+
     /**
      * Format price to Indonesian Rupiah format
      */
     private function formatRupiah(float $amount): string
     {
         return 'Rp'.number_format($amount, 0, ',', '.');
+    }
+
+    private function whatsappNumber(): ?string
+    {
+        $whatsappNumber = preg_replace('/\D+/', '', (string) ($this->settings->getBusinessProfile()['whatsapp_number'] ?? ''));
+
+        if ($whatsappNumber === null || ! preg_match('/^[0-9]{8,15}$/', $whatsappNumber)) {
+            return null;
+        }
+
+        return $whatsappNumber;
     }
 }

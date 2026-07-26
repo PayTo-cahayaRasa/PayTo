@@ -6,6 +6,7 @@ enum SaleSource: string
 {
     case WalkIn = 'WALK_IN';
     case WhatsApp = 'WHATSAPP';
+    case Web = 'WEB';
 
     /**
      * Get human-readable label
@@ -15,6 +16,7 @@ enum SaleSource: string
         return match ($this) {
             self::WalkIn => 'Walk-in',
             self::WhatsApp => 'WhatsApp',
+            self::Web => 'Web',
         };
     }
 
@@ -26,6 +28,7 @@ enum SaleSource: string
         return match ($this) {
             self::WalkIn => 'gray',
             self::WhatsApp => 'green',
+            self::Web => 'blue',
         };
     }
 }

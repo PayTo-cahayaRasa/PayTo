@@ -3,6 +3,7 @@ export * from './hooks/usePublicCart';
 export * from './types';
 export * from './components/BlackCtaSection';
 export * from './components/CatalogSidebar';
+export * from './components/FeaturedChipsSection';
 export * from './components/HeroSection';
 export * from './components/MinimalPagination';
 export * from './components/ProductCard';

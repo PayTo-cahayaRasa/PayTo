@@ -22,7 +22,7 @@ class PosCheckoutController extends Controller
             return response()->json([
                 'sale_id' => $result['sale_id'],
                 'invoice_no' => $result['invoice_no'],
-                'receipt_url' => route('pos.receipt', ['sale' => $result['sale_id']]),
+                'receipt_url' => route('pos.receipt.download', ['sale' => $result['sale_id']]),
                 'payment' => [
                     'status' => 'CONFIRMED',
                 ],

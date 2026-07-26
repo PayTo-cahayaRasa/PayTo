@@ -6,11 +6,15 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { Edit, Minus, Package, Plus, Save, Settings, Trash2, UploadCloud, X } from 'lucide-react';
 import type { Product } from '../../types';
+import ProductImageCropper from '../products/ProductImageCropper';
 
 type ProductFormState = {
     name: string;
+    description: string;
     sku: string;
     uom: string;
+    category: string;
+    weight_grams: string;
     price: string;
     stock: string;
     discount: string;
@@ -21,8 +25,11 @@ type StockAction = 'ADD' | 'SUBTRACT' | 'SET';
 
 const defaultFormState: ProductFormState = {
     name: '',
+    description: '',
     sku: '',
     uom: 'pcs',
+    category: 'Lainnya',
+    weight_grams: '',
     price: '0',
     stock: '0',
     discount: '0',
@@ -39,7 +46,13 @@ export default function ProductsTab() {
     const [showProductModal, setShowProductModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [formState, setFormState] = useState<ProductFormState>(defaultFormState);
+    const [productImageFile, setProductImageFile] = useState<File | null>(null);
+    const [productImagePreview, setProductImagePreview] = useState<string | null>(null);
+    const [productImageToCrop, setProductImageToCrop] = useState<File | null>(null);
+    const [productImageError, setProductImageError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [showStockModal, setShowStockModal] = useState(false);
     const [stockAction, setStockAction] = useState<StockAction>('ADD');
     const [selectedStockProductId, setSelectedStockProductId] = useState<number | ''>('');
@@ -51,6 +64,7 @@ export default function ProductsTab() {
     const [stockSuccess, setStockSuccess] = useState<string | null>(null);
     const [stockSubmitting, setStockSubmitting] = useState(false);
     const stockProductDropdownRef = useRef<HTMLDivElement | null>(null);
+    const productImageInputRef = useRef<HTMLInputElement | null>(null);
 
     const currencyFormatter = useMemo(() => new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -129,6 +143,12 @@ export default function ProductsTab() {
         };
     }, []);
 
+    useEffect(() => () => {
+        if (productImagePreview?.startsWith('blob:')) {
+            URL.revokeObjectURL(productImagePreview);
+        }
+    }, [productImagePreview]);
+
     useEffect(() => {
         const timeoutId = window.setTimeout(() => {
             setDebouncedStockProductKeyword(stockProductKeyword);
@@ -173,6 +193,9 @@ export default function ProductsTab() {
     const handleOpenCreate = () => {
         setEditingProduct(null);
         setFormState(defaultFormState);
+        setProductImageFile(null);
+        setProductImagePreview(null);
+        setProductImageError(null);
         setShowProductModal(true);
     };
 
@@ -180,13 +203,19 @@ export default function ProductsTab() {
         setEditingProduct(product);
         setFormState({
             name: product.name,
+            description: product.description ?? '',
             sku: product.sku ?? '',
             uom: product.uom ?? 'pcs',
+            category: product.category,
+            weight_grams: product.weight_grams?.toString() ?? '',
             price: product.price.toString(),
             stock: product.stock.toString(),
             discount: product.discount.toString(),
             is_active: product.is_active,
         });
+        setProductImageFile(null);
+        setProductImagePreview(product.image_url ?? null);
+        setProductImageError(null);
         setShowProductModal(true);
     };
 
@@ -246,12 +275,40 @@ export default function ProductsTab() {
         setStockSuccess(null);
     };
 
-    const handleChange = (field: keyof ProductFormState) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (field: keyof ProductFormState) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const value = field === 'is_active' ? (event.target as HTMLInputElement).checked : event.target.value;
         setFormState(state => ({
             ...state,
             [field]: value,
         }));
+    };
+
+    const handleProductImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const image = event.target.files?.[0];
+        event.target.value = '';
+        if (!image) {
+            return;
+        }
+
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(image.type)) {
+            setProductImageError('Foto produk harus berformat JPG, PNG, atau WEBP.');
+            return;
+        }
+
+        if (image.size > 10 * 1024 * 1024) {
+            setProductImageError('Ukuran foto sebelum crop maksimal 10 MB.');
+            return;
+        }
+
+        setProductImageError(null);
+        setProductImageToCrop(image);
+    };
+
+    const handleApplyProductImage = (image: File) => {
+        setProductImageFile(image);
+        setProductImagePreview(URL.createObjectURL(image));
+        setProductImageError(null);
+        setProductImageToCrop(null);
     };
 
     const handleSave = async () => {
@@ -262,19 +319,25 @@ export default function ProductsTab() {
         setIsSubmitting(true);
         setErrorMessage(null);
 
-        const payload = {
-            name: formState.name.trim(),
-            sku: formState.sku.trim() || null,
-            uom: formState.uom.trim() || 'pcs',
-            price: Number(formState.price) || 0,
-            stock: Number(formState.stock) || 0,
-            discount: Number(formState.discount) || 0,
-            is_active: formState.is_active,
-        };
+        const payload = new FormData();
+        payload.append('name', formState.name.trim());
+        payload.append('description', formState.description.trim());
+        payload.append('sku', formState.sku.trim());
+        payload.append('uom', formState.uom.trim() || 'pcs');
+        payload.append('category', formState.category);
+        payload.append('weight_grams', formState.weight_grams);
+        payload.append('price', String(Number(formState.price) || 0));
+        payload.append('stock', String(Number(formState.stock) || 0));
+        payload.append('discount', String(Number(formState.discount) || 0));
+        payload.append('is_active', formState.is_active ? '1' : '0');
+        if (productImageFile) {
+            payload.append('image', productImageFile);
+        }
 
         try {
             if (editingProduct) {
-                const response = await axios.put(`/api/admin/products/${editingProduct.id}`, payload);
+                payload.append('_method', 'PUT');
+                const response = await axios.post(`/api/admin/products/${editingProduct.id}`, payload);
                 const updated = response.data?.data;
                 setProducts(items => items.map(item => (item.id === updated.id ? updated : item)));
             } else {
@@ -284,6 +347,8 @@ export default function ProductsTab() {
             }
 
             setShowProductModal(false);
+            setProductImageFile(null);
+            setProductImagePreview(null);
         } catch (error) {
             setErrorMessage('Gagal menyimpan data produk.');
         } finally {
@@ -291,17 +356,22 @@ export default function ProductsTab() {
         }
     };
 
-    const handleDelete = async (product: Product) => {
-        const confirmed = window.confirm(`Hapus produk ${product.name}?`);
-        if (!confirmed) {
+    const handleDelete = async () => {
+        if (!productToDelete || isDeleting) {
             return;
         }
 
+        setIsDeleting(true);
+        setErrorMessage(null);
         try {
-            await axios.delete(`/api/admin/products/${product.id}`);
-            setProducts(items => items.filter(item => item.id !== product.id));
+            await axios.delete(`/api/admin/products/${productToDelete.id}`);
+            setProducts(items => items.filter(item => item.id !== productToDelete.id));
+            setProductToDelete(null);
         } catch (error) {
-            setErrorMessage('Gagal menghapus produk.');
+            const message = axios.isAxiosError(error) ? error.response?.data?.message : null;
+            setErrorMessage(message || 'Gagal menghapus produk.');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -431,8 +501,12 @@ export default function ProductsTab() {
                                     <tr key={product.id} className="hover:bg-white/40 transition-colors group">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-300">
-                                                    <span className="text-[10px]">IMG</span>
+                                                <div className="w-12 h-12 overflow-hidden rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-300">
+                                                    {product.image_url ? (
+                                                        <img src={product.image_url} alt="" className="h-full w-full object-contain p-1" />
+                                                    ) : (
+                                                        <span className="text-[10px]">IMG</span>
+                                                    )}
                                                 </div>
                                                 <div className="min-w-0">
                                                     <div className="font-bold text-slate-800 wrap-break-word">{product.name}</div>
@@ -490,7 +564,7 @@ export default function ProductsTab() {
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    onClick={() => handleDelete(product)}
+                                                    onClick={() => setProductToDelete(product)}
                                                     className="inline-flex items-center justify-center p-2.5 bg-white border border-slate-200 rounded-lg text-rose-500 hover:bg-rose-50 hover:border-rose-200 active:scale-95 transition-all"
                                                     aria-label={`Hapus produk ${product.name}`}
                                                     title="Hapus produk"
@@ -512,6 +586,51 @@ export default function ProductsTab() {
                     </table>
                 </div>
             </div>
+
+            {productToDelete && (
+                <div
+                    className="fixed inset-0 z-60 flex items-center justify-center bg-slate-950/35 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="delete-product-title"
+                    onKeyDown={(event) => {
+                        if (event.key === 'Escape' && !isDeleting) {
+                            setProductToDelete(null);
+                        }
+                    }}
+                >
+                    <div className="w-full max-w-md overflow-hidden rounded-4xl border border-white/70 bg-white shadow-2xl">
+                        <div className="p-7 sm:p-8">
+                            <div className="flex size-14 items-center justify-center rounded-2xl border border-rose-100 bg-rose-50 text-rose-600">
+                                <Trash2 size={24} />
+                            </div>
+                            <h3 id="delete-product-title" className="mt-5 text-xl font-bold text-slate-900">Hapus produk?</h3>
+                            <p className="mt-2 text-sm leading-6 text-slate-500">
+                                <strong className="text-slate-700">{productToDelete.name}</strong> akan dihapus dari katalog dan POS. Riwayat transaksi tetap tersimpan.
+                            </p>
+                        </div>
+                        <div className="flex flex-col-reverse gap-2 border-t border-slate-100 bg-slate-50 p-5 sm:flex-row sm:justify-end">
+                            <button
+                                type="button"
+                                autoFocus
+                                disabled={isDeleting}
+                                onClick={() => setProductToDelete(null)}
+                                className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100 disabled:opacity-50"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                disabled={isDeleting}
+                                onClick={handleDelete}
+                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-rose-200 transition-colors hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                <Trash2 size={17} /> {isDeleting ? 'Menghapus...' : 'Hapus Produk'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {showStockModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm animate-in fade-in duration-200">
@@ -731,11 +850,33 @@ export default function ProductsTab() {
 
                         <div className="p-8 overflow-y-auto custom-scrollbar-light space-y-6">
                             <div className="flex justify-center">
-                                <div className="w-32 h-32 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 flex flex-col items-center justify-center text-slate-400 cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-500 transition-all group">
-                                    <UploadCloud size={32} className="mb-2 group-hover:scale-110 transition-transform" />
-                                    <span className="text-xs font-bold">Upload Foto</span>
-                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => productImageInputRef.current?.click()}
+                                    aria-label={productImagePreview ? 'Ganti dan crop foto produk' : 'Upload dan crop foto produk'}
+                                    className="relative flex size-48 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 text-slate-400 transition-colors hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-500"
+                                >
+                                    {productImagePreview ? (
+                                        <img src={productImagePreview} alt="Preview produk" className="h-full w-full object-contain p-2" />
+                                    ) : (
+                                        <>
+                                            <UploadCloud size={32} className="mb-2" />
+                                            <span className="text-xs font-bold">Upload Foto</span>
+                                        </>
+                                    )}
+                                </button>
+                                <input
+                                    ref={productImageInputRef}
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    className="hidden"
+                                    onChange={handleProductImageChange}
+                                />
                             </div>
+                            <p className="-mt-4 text-center text-xs text-slate-400">JPG, PNG, atau WEBP • Rasio vertikal/horizontal terdeteksi otomatis</p>
+                            {productImageError ? (
+                                <p className="-mt-3 text-center text-xs font-semibold text-rose-600">{productImageError}</p>
+                            ) : null}
 
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                 <div className="sm:col-span-2">
@@ -746,6 +887,22 @@ export default function ProductsTab() {
                                         onChange={handleChange('name')}
                                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
                                         placeholder="Contoh: Kopi Susu Gula Aren"
+                                    />
+                                </div>
+
+                                <div className="sm:col-span-2">
+                                    <div className="mb-2 flex items-center justify-between gap-3">
+                                        <label htmlFor="product-description" className="text-xs font-bold uppercase tracking-wider text-slate-500">Deskripsi Produk</label>
+                                        <span className="text-[10px] font-semibold text-slate-400">Opsional</span>
+                                    </div>
+                                    <textarea
+                                        id="product-description"
+                                        value={formState.description}
+                                        onChange={handleChange('description')}
+                                        rows={4}
+                                        maxLength={2000}
+                                        className="w-full resize-y rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700 outline-none transition-all focus:ring-2 focus:ring-indigo-200"
+                                        placeholder="Tulis deskripsi singkat produk"
                                     />
                                 </div>
 
@@ -772,6 +929,19 @@ export default function ProductsTab() {
                                 </div>
 
                                 <div>
+                                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">Kategori</label>
+                                    <select
+                                        value={formState.category}
+                                        onChange={handleChange('category')}
+                                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-indigo-200"
+                                    >
+                                        {['Makanan', 'Camilan', 'Minuman', 'Kerajinan', 'Lainnya'].map((category) => (
+                                            <option key={category} value={category}>{category}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Harga Jual (Rp)</label>
                                     <input
                                         type="number"
@@ -780,6 +950,19 @@ export default function ProductsTab() {
                                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
                                         placeholder="0"
                                     />
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">Berat Produk (gram)</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        value={formState.weight_grams}
+                                        onChange={handleChange('weight_grams')}
+                                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-bold outline-none transition-all focus:ring-2 focus:ring-indigo-200"
+                                        placeholder="Contoh: 250"
+                                    />
+                                    <p className="mt-2 text-xs text-slate-400">Wajib untuk pesanan kirim ke alamat.</p>
                                 </div>
 
                                 <div>
@@ -853,6 +1036,14 @@ export default function ProductsTab() {
                     </div>
                 </div>
             )}
+
+            {productImageToCrop ? (
+                <ProductImageCropper
+                    file={productImageToCrop}
+                    onApply={handleApplyProductImage}
+                    onCancel={() => setProductImageToCrop(null)}
+                />
+            ) : null}
         </div>
     );
 }

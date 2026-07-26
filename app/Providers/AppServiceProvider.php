@@ -62,6 +62,10 @@ class AppServiceProvider extends ServiceProvider
 
         // Admin API rate limiting - prevents abuse of admin endpoints
         RateLimiter::for('admin-api', function (Request $request) {
+            if ($request->user()?->role === 'SUPERVISOR') {
+                return Limit::none();
+            }
+
             return Limit::perMinute(60)->by(
                 'admin:'.($request->user()?->getAuthIdentifier() ?: $request->ip())
             );

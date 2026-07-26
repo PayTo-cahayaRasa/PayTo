@@ -3,7 +3,10 @@
 namespace App\Services\Settings;
 
 use App\Models\AppSetting;
+use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class AppSettingsService
 {
@@ -15,11 +18,17 @@ class AppSettingsService
 
     private const KEY_POS_TARGET = 'pos.cashier_target';
 
+    private const KEY_ONLINE_ORDER_SETTINGS = 'online_order.settings';
+
     private const DEFAULT_BUSINESS_PROFILE = [
-        'name' => 'Nama Toko',
-        'address' => 'Alamat Toko',
-        'whatsapp_number' => '',
+        'name' => 'Cahaya Rasa',
+        'tagline' => 'Oleh-Oleh Malang',
+        'address' => '2P5W+95R, Jl. Sukoanyar, Nongkosongo, Wringinsongo, Kec. Tumpang, Kabupaten Malang, Jawa Timur 65156',
+        'whatsapp_number' => '6282337079892',
         'operating_hours' => 'Senin-Sabtu 08.00-20.00 WIB',
+        'shopee_url' => '',
+        'instagram_url' => 'https://www.instagram.com/cahayarasamalang/',
+        'tiktok_url' => 'https://www.tiktok.com/@cahayarasa_28?_r=1&_t=ZS-989XRWXa7BR',
     ];
 
     private const DEFAULT_CATALOG_SETTINGS = [
@@ -34,6 +43,11 @@ class AppSettingsService
     ];
 
     private const DEFAULT_POS_TARGET = 1000000;
+
+    private const DEFAULT_ONLINE_ORDER_SETTINGS = [
+        'shipping' => ['origin' => '', 'packaging_weight_grams' => 0, 'couriers' => ['jne', 'jnt', 'sicepat']],
+        'payment' => ['bank_name' => '', 'bank_account_number' => '', 'bank_account_name' => '', 'qris_image_url' => '', 'qris_image_path' => '', 'instructions' => 'Lakukan pembayaran sesuai total pesanan, lalu kirim bukti pembayaran melalui WhatsApp.'],
+    ];
 
     /**
      * Get business profile settings with defaults merged
@@ -76,6 +90,18 @@ class AppSettingsService
         return [
             'business' => $this->getBusinessProfile(),
             'catalog' => $this->getCatalogSettings(),
+            'online_order' => $this->getOnlineOrderSettings(),
+        ];
+    }
+
+    public function getOnlineOrderSettings(): array
+    {
+        $stored = AppSetting::query()->where('key', self::KEY_ONLINE_ORDER_SETTINGS)->value('value');
+        $stored = is_array($stored) ? $stored : [];
+
+        return [
+            'shipping' => array_merge(self::DEFAULT_ONLINE_ORDER_SETTINGS['shipping'], $stored['shipping'] ?? []),
+            'payment' => array_merge(self::DEFAULT_ONLINE_ORDER_SETTINGS['payment'], $stored['payment'] ?? []),
         ];
     }
 
@@ -97,9 +123,13 @@ class AppSettingsService
     /**
      * Update business profile and catalog settings atomically
      */
-    public function updateBusinessSettings(array $businessProfile, array $catalogSettings): void
+    public function updateBusinessSettings(array $businessProfile, array $catalogSettings, array $onlineOrderSettings): void
     {
-        DB::transaction(function () use ($businessProfile, $catalogSettings) {
+        $existingOnlineOrderSettings = $this->getOnlineOrderSettings();
+        $onlineOrderSettings['payment']['qris_image_path'] = $onlineOrderSettings['payment']['qris_image_path']
+            ?? $existingOnlineOrderSettings['payment']['qris_image_path'];
+
+        DB::transaction(function () use ($businessProfile, $catalogSettings, $onlineOrderSettings) {
             AppSetting::query()->updateOrCreate(
                 ['key' => self::KEY_BUSINESS_PROFILE],
                 ['value' => $businessProfile]
@@ -109,7 +139,35 @@ class AppSettingsService
                 ['key' => self::KEY_CATALOG_SETTINGS],
                 ['value' => $catalogSettings]
             );
+
+            AppSetting::query()->updateOrCreate(
+                ['key' => self::KEY_ONLINE_ORDER_SETTINGS],
+                ['value' => $onlineOrderSettings]
+            );
         });
+    }
+
+    public function updateQrisImage(UploadedFile $image): array
+    {
+        $onlineOrderSettings = $this->getOnlineOrderSettings();
+        $oldImagePath = $onlineOrderSettings['payment']['qris_image_path'] ?? null;
+        $imagePath = $image->store('payment/qris', 'public');
+        /** @var FilesystemAdapter $publicDisk */
+        $publicDisk = Storage::disk('public');
+
+        $onlineOrderSettings['payment']['qris_image_path'] = $imagePath;
+        $onlineOrderSettings['payment']['qris_image_url'] = $publicDisk->url($imagePath);
+
+        AppSetting::query()->updateOrCreate(
+            ['key' => self::KEY_ONLINE_ORDER_SETTINGS],
+            ['value' => $onlineOrderSettings]
+        );
+
+        if ($oldImagePath) {
+            $publicDisk->delete($oldImagePath);
+        }
+
+        return $this->getAllBusinessSettings();
     }
 
     /**

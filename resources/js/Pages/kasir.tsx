@@ -11,16 +11,19 @@ import FavoritesView from './Pos/components/views/FavoritesView';
 import HistoryView from './Pos/components/views/HistoryView';
 import ProfileView from './Pos/components/views/ProfileView';
 import SettingsView from './Pos/components/views/SettingsView';
+import OnlineOrdersPage from './online-orders/OnlineOrdersPage';
 import UniversalModal from '../Components/UniversalModal';
 // import { CATEGORIES, QUICK_CASH_AMOUNTS } from './Pos/data';
-import type { CartItem, Product, TransactionHistory } from './Pos/types';
-import { Box, Coffee, LayoutGrid, Utensils } from 'lucide-react';
+import type { CartItem, Product, SaleSource, TransactionHistory } from './Pos/types';
+import { Box, Coffee, LayoutGrid, Palette, Utensils } from 'lucide-react';
 
 export const CATEGORIES = [
-    { id: 'All', label: 'All Items', icon: LayoutGrid },
-    { id: 'Minuman', label: 'Drinks', icon: Coffee },
-    { id: 'Makanan', label: 'Foods', icon: Utensils },
-    { id: 'Dessert', label: 'Desserts', icon: Box },
+    { id: 'All', label: 'Semua', icon: LayoutGrid },
+    { id: 'Makanan', label: 'Makanan', icon: Utensils },
+    { id: 'Camilan', label: 'Camilan', icon: Box },
+    { id: 'Minuman', label: 'Minuman', icon: Coffee },
+    { id: 'Kerajinan', label: 'Kerajinan', icon: Palette },
+    { id: 'Lainnya', label: 'Lainnya', icon: Box },
 ];
 
 export const QUICK_CASH_AMOUNTS = [20000, 50000, 100000];
@@ -29,7 +32,7 @@ export default function PosInterface() {
     // authentication and role will be validated by the backend header/profile controller
 
     // State Management
-    const [activeView, setActiveView] = useState<'menu' | 'history' | 'favorites' | 'profile' | 'settings'>('menu');
+    const [activeView, setActiveView] = useState<'menu' | 'history' | 'favorites' | 'online-orders' | 'profile' | 'settings'>('menu');
     const [cart, setCart] = useState<CartItem[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
@@ -63,6 +66,10 @@ export default function PosInterface() {
     // Payment State
     const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'EWALLET'>('CASH');
     const [cashReceived, setCashReceived] = useState<string>("");
+    const [saleSource, setSaleSource] = useState<SaleSource>('WALK_IN');
+    const [customerName, setCustomerName] = useState('');
+    const [customerPhone, setCustomerPhone] = useState('');
+    const [paymentValidationError, setPaymentValidationError] = useState<string | null>(null);
 
     // Refs
     const searchInputRef = useRef<HTMLInputElement>(null);
@@ -118,14 +125,14 @@ export default function PosInterface() {
     const [historyFilters, setHistoryFilters] = useState({
         startDate: '',
         endDate: '',
+        source: '',
     });
 
     // --- Computed ---
     const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
     const totalDiscount = cart.reduce((acc, item) => acc + item.discount, 0);
     const grandTotal = subtotal - totalDiscount;
-    const taxTotal = (subtotal - totalDiscount) * 0.11;
-    const totalDue = grandTotal + taxTotal;
+    const totalDue = grandTotal;
     const totalItems = cart.reduce((acc, item) => acc + item.qty, 0);
 
     const hasRefundSelection = refundTarget
@@ -196,11 +203,19 @@ export default function PosInterface() {
             return;
         }
 
+        if (saleSource === 'WHATSAPP' && (!customerName.trim() || !customerPhone.trim())) {
+            setPaymentValidationError('Nama dan nomor pelanggan wajib diisi untuk pesanan WhatsApp.');
+            return;
+        }
+
         if (paymentMethod === 'CASH' && (!cashReceived || Number(cashReceived) < totalDue)) {
             return;
         }
 
         const checkoutPayload = {
+            source: saleSource,
+            customer_name: saleSource === 'WHATSAPP' ? customerName.trim() : undefined,
+            customer_phone: saleSource === 'WHATSAPP' ? customerPhone.trim() : undefined,
             payment_method: paymentMethod,
             cash_received: paymentMethod === 'CASH' ? Number(cashReceived) : undefined,
             items: cart.map((item) => ({
@@ -211,6 +226,7 @@ export default function PosInterface() {
         };
 
         setCheckoutError(null);
+        setPaymentValidationError(null);
 
         try {
             const response = await axios.post('/api/pos/checkout', checkoutPayload);
@@ -219,10 +235,18 @@ export default function PosInterface() {
             const isPaymentConfirmed = ['confirmed', 'success', 'paid', 'settlement'].includes(responseStatus);
             const responseTotals = response?.data?.totals || {};
             const invoiceNo = response?.data?.invoice_no || response?.data?.invoiceNo || null;
+            const receiptUrl = response?.data?.receipt_url;
 
             setShowPaymentModal(false);
             setCart([]);
             setCashReceived("");
+            setSaleSource('WALK_IN');
+            setCustomerName('');
+            setCustomerPhone('');
+
+            if (typeof receiptUrl === 'string' && receiptUrl !== '') {
+                window.location.assign(receiptUrl);
+            }
 
             if (isPaymentConfirmed) {
                 setLastPaymentSummary({
@@ -256,6 +280,7 @@ export default function PosInterface() {
                     per_page: historyMeta.perPage,
                     start_date: historyFilters.startDate || undefined,
                     end_date: historyFilters.endDate || undefined,
+                    source: historyFilters.source || undefined,
                 },
             });
             setHistoryData(res.data.data || []);
@@ -355,8 +380,6 @@ export default function PosInterface() {
             return;
         }
 
-        localStorage.removeItem('pos_logged_in');
-        localStorage.removeItem('pos_role');
         window.location.assign('/login');
     };
 
@@ -406,6 +429,7 @@ export default function PosInterface() {
                             per_page: historyMeta.perPage,
                             start_date: historyFilters.startDate || undefined,
                             end_date: historyFilters.endDate || undefined,
+                            source: historyFilters.source || undefined,
                         },
                     });
                     if (!mounted) return;
@@ -446,7 +470,7 @@ export default function PosInterface() {
         return () => {
             mounted = false;
         };
-    }, [activeView, historyPage, historyFilters.startDate, historyFilters.endDate]);
+    }, [activeView, historyPage, historyFilters.startDate, historyFilters.endDate, historyFilters.source]);
 
     // Use server-provided products (fallback to client-fetched)
     const PRODUCTS = productsData || [];
@@ -529,6 +553,7 @@ export default function PosInterface() {
                         formatRupiah={formatRupiah}
                         startDate={historyFilters.startDate}
                         endDate={historyFilters.endDate}
+                        source={historyFilters.source}
                         onStartDateChange={(value) => {
                             setHistoryPage(1);
                             setHistoryFilters(prev => ({ ...prev, startDate: value }));
@@ -537,20 +562,28 @@ export default function PosInterface() {
                             setHistoryPage(1);
                             setHistoryFilters(prev => ({ ...prev, endDate: value }));
                         }}
+                        onSourceChange={(value) => {
+                            setHistoryPage(1);
+                            setHistoryFilters(prev => ({ ...prev, source: value }));
+                        }}
                         onResetFilters={() => {
                             setHistoryPage(1);
-                            setHistoryFilters({ startDate: '', endDate: '' });
+                            setHistoryFilters({ startDate: '', endDate: '', source: '' });
                         }}
                         page={historyMeta.currentPage}
                         lastPage={historyMeta.lastPage}
                         onPageChange={(page) => setHistoryPage(page)}
-                        onRequestRefund={openRefundModal}
+
                     />
                 )}
 
                 {/* --- VIEW: FAVORITES --- */}
                 {activeView === 'favorites' && (
                     <FavoritesView favorites={favoriteProducts} onAddToCart={addToCart} formatRupiah={formatRupiah} />
+                )}
+
+                {activeView === 'online-orders' && (
+                    <OnlineOrdersPage role="CASHIER" embedded />
                 )}
 
                 {/* --- VIEW: PROFILE --- */}
@@ -566,16 +599,21 @@ export default function PosInterface() {
             </div>
 
             {/* 3. CART PANEL (Unchanged Style) */}
-            {activeView !== 'profile' && activeView !== 'settings' && (
+            {activeView !== 'profile' && activeView !== 'settings' && activeView !== 'online-orders' && (
                 <CartPanel
                     cart={cart}
                     subtotal={subtotal}
                     totalDiscount={totalDiscount}
                     grandTotal={grandTotal}
-                    onClearCart={() => setCart([])}
+                    onClearCart={() => {
+                        setCart([]);
+                        setSaleSource('WALK_IN');
+                        setCustomerName('');
+                        setCustomerPhone('');
+                    }}
                     onUpdateQty={updateQty}
                     onRemoveFromCart={removeFromCart}
-                    onOpenApprovalModal={() => setShowApprovalModal(true)}
+
                     onCheckout={() => setShowPaymentModal(true)}
                     formatRupiah={formatRupiah}
                 />
@@ -588,11 +626,19 @@ export default function PosInterface() {
                 onPaymentMethodChange={setPaymentMethod}
                 cashReceived={cashReceived}
                 onCashReceivedChange={setCashReceived}
+                source={saleSource}
+                onSourceChange={(source) => {
+                    setSaleSource(source);
+                    setPaymentValidationError(null);
+                }}
+                customerName={customerName}
+                onCustomerNameChange={setCustomerName}
+                customerPhone={customerPhone}
+                onCustomerPhoneChange={setCustomerPhone}
+                validationError={paymentValidationError || checkoutError}
                 onClose={() => setShowPaymentModal(false)}
                 onCheckout={handleCheckout}
                 quickCashAmounts={QUICK_CASH_AMOUNTS}
-                grandTotal={grandTotal}
-                taxTotal={taxTotal}
                 discountTotal={totalDiscount}
                 totalDue={totalDue}
                 subtotal={subtotal}

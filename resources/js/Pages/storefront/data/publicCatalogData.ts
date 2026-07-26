@@ -1,13 +1,18 @@
 export type PublicCatalogProduct = {
     id: number;
+    slug?: string;
     name: string;
     price: number;
-    category: string;
+    finalPrice?: number;
+    discount?: number;
+    category?: string;
     stock: number;
     sku: string;
     description: string;
-    details: string[];
+    details?: string[];
     imageColor?: string;
+    imageUrl?: string | null;
+    whatsappUrl?: string | null;
 };
 
 export type PublicCatalogFilterId = 'new-arrival' | 'best-seller' | 'on-discount' | null;
@@ -134,10 +139,6 @@ export const PUBLIC_PRODUCTS: PublicCatalogProduct[] = [
 
 export function getPublicCatalogProduct(productId: number): PublicCatalogProduct | undefined {
     return PUBLIC_PRODUCTS.find((product) => product.id === productId);
-}
-
-export function getProductWhatsappUrl(productName: string): string {
-    return `https://wa.me/6281284719284?text=${encodeURIComponent(`Halo PayTo, saya ingin memesan produk ${productName}.`)}`;
 }
 
 export function formatRupiah(amount: number): string {

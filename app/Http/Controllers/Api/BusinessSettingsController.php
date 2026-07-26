@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BusinessSettingsRequest;
+use App\Http\Requests\QrisImageUploadRequest;
 use App\Services\Settings\AppSettingsService;
 use Illuminate\Http\JsonResponse;
 
@@ -34,12 +35,21 @@ class BusinessSettingsController extends Controller
 
         $this->settingsService->updateBusinessSettings(
             businessProfile: $validated['business'],
-            catalogSettings: $validated['catalog']
+            catalogSettings: $validated['catalog'],
+            onlineOrderSettings: $validated['online_order'] ?? $this->settingsService->getOnlineOrderSettings()
         );
 
         return response()->json([
             'message' => 'Pengaturan toko berhasil disimpan.',
             'data' => $this->settingsService->getAllBusinessSettings(),
+        ]);
+    }
+
+    public function uploadQrisImage(QrisImageUploadRequest $request): JsonResponse
+    {
+        return response()->json([
+            'message' => 'Gambar QRIS berhasil diunggah.',
+            'data' => $this->settingsService->updateQrisImage($request->file('qris_image')),
         ]);
     }
 }

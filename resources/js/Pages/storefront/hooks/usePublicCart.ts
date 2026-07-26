@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { PUBLIC_PRODUCTS } from '../data/publicCatalogData';
 import { publicCartStorageKey } from '../constants';
-import type { PublicCartEntry, PublicCartLineItem } from '../types';
+import type { PublicCartEntry } from '../types';
+import type { PublicCatalogProduct } from '../data/publicCatalogData';
+import { addPublicCartEntry, parsePublicCart, resolvePublicCart } from './publicCartState';
 
-export function usePublicCart() {
+export function usePublicCart(products: PublicCatalogProduct[] = PUBLIC_PRODUCTS) {
     const [cartEntries, setCartEntries] = useState<PublicCartEntry[]>([]);
     const [hasLoaded, setHasLoaded] = useState(false);
 
@@ -15,13 +17,7 @@ export function usePublicCart() {
 
         const savedCart = window.localStorage.getItem(publicCartStorageKey);
 
-        if (savedCart) {
-            try {
-                setCartEntries(JSON.parse(savedCart) as PublicCartEntry[]);
-            } catch {
-                setCartEntries([]);
-            }
-        }
+        setCartEntries(parsePublicCart(savedCart));
 
         setHasLoaded(true);
     }, []);
@@ -35,33 +31,13 @@ export function usePublicCart() {
     }, [cartEntries, hasLoaded]);
 
     const cartItems = useMemo(() => {
-        return cartEntries
-            .map((entry) => {
-                const product = PUBLIC_PRODUCTS.find((catalogProduct) => catalogProduct.id === entry.productId);
-
-                if (!product) {
-                    return null;
-                }
-
-                return {
-                    product,
-                    quantity: entry.quantity,
-                };
-            })
-            .filter((entry): entry is PublicCartLineItem => entry !== null);
-    }, [cartEntries]);
+        return resolvePublicCart(cartEntries, products);
+    }, [cartEntries, products]);
 
     function addToCart(productId: number): void {
         setCartEntries((currentEntries) => {
-            const current = currentEntries.find((entry) => entry.productId === productId);
-
-            if (current) {
-                return currentEntries.map((entry) =>
-                    entry.productId === productId ? { ...entry, quantity: entry.quantity + 1 } : entry,
-                );
-            }
-
-            return [...currentEntries, { productId, quantity: 1 }];
+            const product = products.find((catalogProduct) => catalogProduct.id === productId);
+            return product ? addPublicCartEntry(currentEntries, product) : currentEntries;
         });
     }
 

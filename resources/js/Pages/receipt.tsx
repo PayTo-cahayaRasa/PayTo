@@ -11,6 +11,7 @@ interface ReceiptItem {
 
 interface ReceiptSale {
     id: number;
+    invoice_no: string | null;
     local_txn_uuid: string;
     subtotal: number;
     discount_amount: number;
@@ -47,7 +48,7 @@ interface ReceiptPageProps {
 
 export default function ReceiptPage({ sale, receipt_settings, business }: ReceiptPageProps) {
     const handlePrint = () => {
-        window.print();
+        window.location.assign(`/pos/sales/${sale.id}/receipt/download`);
     };
 
     const formatCurrency = (amount: number): string => {
@@ -63,13 +64,13 @@ export default function ReceiptPage({ sale, receipt_settings, business }: Receip
             <Head title={`Struk #${sale.id}`} />
             
             <div className="receipt-container">
-                {/* Print button - hidden saat print */}
+                {/* PDF download button */}
                 <div className="no-print print-button-container">
                     <button 
                         onClick={handlePrint}
                         className="print-button"
                     >
-                        🖨️ Cetak Struk
+                        Unduh PDF
                     </button>
                 </div>
 
@@ -89,7 +90,7 @@ export default function ReceiptPage({ sale, receipt_settings, business }: Receip
 
                     {/* Transaction info */}
                     <div className="receipt-info">
-                        <div>No. Transaksi: {sale.id}</div>
+                        <div>No. Transaksi: {sale.invoice_no ?? sale.id}</div>
                         <div>Tanggal: {sale.created_at}</div>
                         <div>Kasir: {sale.cashier.name}</div>
                     </div>

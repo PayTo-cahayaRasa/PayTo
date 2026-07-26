@@ -29,11 +29,15 @@ class SecurityHeaders
         // Referrer Policy
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-        // Content Security Policy - Configure based on your needs
-        // For SPA with Inertia, you may need to adjust this
-        $viteOrigin = config('app.env') === 'local' ? ' http://127.0.0.1:5173' : '';
-        $csp = "default-src 'self'; script-src 'self'{$viteOrigin} 'unsafe-inline' 'unsafe-eval'; style-src 'self'{$viteOrigin} 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;";
+        $isProduction = config('app.env') === 'production';
+        $viteOrigin = $isProduction ? '' : ' http://127.0.0.1:5173';
+        $scriptRelaxations = $isProduction ? '' : " 'unsafe-inline' 'unsafe-eval'";
+        $csp = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self'{$viteOrigin}{$scriptRelaxations}; style-src 'self'{$viteOrigin} 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self'{$viteOrigin};";
         $response->headers->set('Content-Security-Policy', $csp);
+
+        if ($isProduction && $request->isSecure()) {
+            $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+        }
 
         // Permissions Policy (disable unnecessary browser features)
         $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');

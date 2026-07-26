@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class BusinessSettingsApiTest extends TestCase
@@ -35,10 +37,14 @@ class BusinessSettingsApiTest extends TestCase
 
         $payload = [
             'business' => [
-                'name' => 'Toko Maju Jaya',
-                'address' => 'Jl. Merdeka No. 123, Jakarta',
+                'name' => 'Cahaya Rasa',
+                'tagline' => 'Oleh-Oleh Malang',
+                'address' => '2P5W+95R, Jl. Sukoanyar, Nongkosongo, Wringinsongo, Kec. Tumpang, Kabupaten Malang, Jawa Timur 65156',
                 'whatsapp_number' => '6281234567890',
                 'operating_hours' => 'Senin-Minggu 08.00-22.00',
+                'shopee_url' => 'https://shopee.co.id/cahayarasa',
+                'instagram_url' => 'https://www.instagram.com/cahayarasamalang/',
+                'tiktok_url' => 'https://www.tiktok.com/@cahayarasa_28',
             ],
             'catalog' => [
                 'enabled' => true,
@@ -60,9 +66,83 @@ class BusinessSettingsApiTest extends TestCase
             'key' => 'business.profile',
         ]);
 
+        $response->assertJsonPath('data.business.shopee_url', 'https://shopee.co.id/cahayarasa');
+
         $this->assertDatabaseHas('app_settings', [
             'key' => 'catalog.settings',
         ]);
+    }
+
+    public function test_supervisor_can_save_bank_details_and_upload_qris_image(): void
+    {
+        $storage = Storage::fake('public');
+        $supervisor = User::factory()->create(['role' => 'SUPERVISOR', 'is_active' => true]);
+
+        $upload = $this->actingAs($supervisor)->post('/api/admin/business-settings/qris-image', [
+            'qris_image' => UploadedFile::fake()->image('qris.png'),
+        ])->assertOk();
+
+        $qrisImageUrl = $upload->json('data.online_order.payment.qris_image_url');
+        $qrisImagePath = $upload->json('data.online_order.payment.qris_image_path');
+        $storage->assertExists($qrisImagePath);
+
+        $this->actingAs($supervisor)->putJson('/api/admin/business-settings', [
+            'business' => [
+                'name' => 'Cahaya Rasa',
+                'address' => 'Malang',
+                'whatsapp_number' => '6281234567890',
+                'operating_hours' => '08.00-20.00',
+            ],
+            'catalog' => [
+                'enabled' => true,
+                'whatsapp_enabled' => true,
+                'whatsapp_message_template' => 'Halo {product_name}',
+            ],
+            'online_order' => [
+                'shipping' => ['origin' => '123', 'packaging_weight_grams' => 100, 'couriers' => ['jne']],
+                'payment' => [
+                    'bank_name' => 'Bank Test',
+                    'bank_account_number' => '1234567890',
+                    'bank_account_name' => 'Cahaya Rasa',
+                    'qris_image_url' => $qrisImageUrl,
+                    'qris_image_path' => $qrisImagePath,
+                    'instructions' => 'Bayar sesuai nominal pesanan.',
+                ],
+            ],
+        ])->assertOk()
+            ->assertJsonPath('data.online_order.payment.bank_name', 'Bank Test')
+            ->assertJsonPath('data.online_order.payment.qris_image_url', $qrisImageUrl);
+    }
+
+    public function test_supervisor_can_save_qris_settings_without_a_shipping_origin(): void
+    {
+        $supervisor = User::factory()->create(['role' => 'SUPERVISOR', 'is_active' => true]);
+
+        $this->actingAs($supervisor)->putJson('/api/admin/business-settings', [
+            'business' => [
+                'name' => 'Cahaya Rasa',
+                'address' => 'Malang',
+                'whatsapp_number' => '6281234567890',
+                'operating_hours' => '08.00-20.00',
+            ],
+            'catalog' => [
+                'enabled' => true,
+                'whatsapp_enabled' => true,
+                'whatsapp_message_template' => 'Halo {product_name}',
+            ],
+            'online_order' => [
+                'shipping' => ['origin' => '', 'packaging_weight_grams' => 0, 'couriers' => ['jne']],
+                'payment' => [
+                    'bank_name' => '',
+                    'bank_account_number' => '',
+                    'bank_account_name' => '',
+                    'qris_image_url' => '/storage/payment/qris/toko.png',
+                    'qris_image_path' => 'payment/qris/toko.png',
+                    'instructions' => 'Bayar sesuai nominal pesanan.',
+                ],
+            ],
+        ])->assertOk()
+            ->assertJsonPath('data.online_order.payment.qris_image_url', '/storage/payment/qris/toko.png');
     }
 
     /** @test */
@@ -191,8 +271,11 @@ class BusinessSettingsApiTest extends TestCase
         $response->assertJson([
             'data' => [
                 'business' => [
-                    'name' => 'Nama Toko',
-                    'address' => 'Alamat Toko',
+                    'name' => 'Cahaya Rasa',
+                    'tagline' => 'Oleh-Oleh Malang',
+                    'address' => '2P5W+95R, Jl. Sukoanyar, Nongkosongo, Wringinsongo, Kec. Tumpang, Kabupaten Malang, Jawa Timur 65156',
+                    'instagram_url' => 'https://www.instagram.com/cahayarasamalang/',
+                    'tiktok_url' => 'https://www.tiktok.com/@cahayarasa_28',
                 ],
                 'catalog' => [
                     'enabled' => true,
