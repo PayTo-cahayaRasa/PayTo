@@ -6,6 +6,9 @@ use App\Models\AppSetting;
 use App\Models\Product;
 use App\Models\StockItem;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 class StorefrontSeeder extends Seeder
 {
@@ -64,56 +67,87 @@ class StorefrontSeeder extends Seeder
     {
         return [
             [
-                'name' => 'Keripik Pisang Original',
-                'slug' => 'keripik-pisang-original',
+                'name' => 'Kripik Pisang',
+                'slug' => 'kripik-pisang',
                 'sku' => 'CR-001',
-                'barcode' => '899700000001',
                 'price' => 18000,
-                'description' => 'Keripik pisang renyah dengan rasa original gurih manis khas Cahaya Rasa.',
+                'description' => 'Kripik pisang renyah untuk camilan dan oleh-oleh.',
                 'discount' => 0,
                 'cost' => 10000,
                 'uom' => 'pcs',
+                'category' => 'Camilan',
                 'is_active' => true,
                 'is_public' => true,
                 'featured' => true,
-                'image_path' => null,
+                'image_path' => $this->seedProductImage('pisang.webp'),
                 'weight_grams' => 250,
                 'stock' => 50,
             ],
             [
-                'name' => 'Keripik Pisang Coklat',
-                'slug' => 'keripik-pisang-coklat',
+                'name' => 'Kripik Pisang Madu',
+                'slug' => 'kripik-pisang-madu',
                 'sku' => 'CR-002',
-                'barcode' => '899700000002',
                 'price' => 22000,
-                'description' => 'Keripik pisang berbalut rasa coklat untuk camilan keluarga dan oleh-oleh.',
-                'discount' => 10,
+                'description' => 'Kripik pisang manis dengan rasa madu.',
+                'discount' => 0,
                 'cost' => 12000,
                 'uom' => 'pcs',
+                'category' => 'Camilan',
                 'is_active' => true,
                 'is_public' => true,
                 'featured' => true,
-                'image_path' => null,
+                'image_path' => $this->seedProductImage('pisangMadu.webp'),
                 'weight_grams' => 250,
                 'stock' => 35,
             ],
             [
-                'name' => 'Stik Talas Balado',
-                'slug' => 'stik-talas-balado',
+                'name' => 'Kripik Singkong',
+                'slug' => 'kripik-singkong',
                 'sku' => 'CR-003',
-                'barcode' => '899700000003',
                 'price' => 16000,
-                'description' => 'Stik talas renyah dengan bumbu balado pedas ringan.',
+                'description' => 'Kripik singkong renyah dengan rasa gurih.',
                 'discount' => 0,
                 'cost' => 9000,
                 'uom' => 'pcs',
+                'category' => 'Camilan',
                 'is_active' => true,
                 'is_public' => true,
                 'featured' => true,
-                'image_path' => null,
+                'image_path' => $this->seedProductImage('singkong.webp'),
+                'weight_grams' => 200,
+                'stock' => 40,
+            ],
+            [
+                'name' => 'Rempeyek',
+                'slug' => 'rempeyek',
+                'sku' => 'CR-004',
+                'price' => 18000,
+                'description' => 'Rempeyek gurih dan renyah untuk camilan serta oleh-oleh.',
+                'discount' => 0,
+                'cost' => 10000,
+                'uom' => 'pcs',
+                'category' => 'Camilan',
+                'is_active' => true,
+                'is_public' => true,
+                'featured' => true,
+                'image_path' => $this->seedProductImage('rempeyek.webp'),
                 'weight_grams' => 200,
                 'stock' => 40,
             ],
         ];
+    }
+
+    private function seedProductImage(string $filename): string
+    {
+        $sourcePath = public_path("products/{$filename}");
+        $imagePath = "products/{$filename}";
+
+        if (! File::exists($sourcePath)) {
+            throw new RuntimeException("Asset foto produk tidak ditemukan: {$sourcePath}");
+        }
+
+        Storage::disk('public')->put($imagePath, File::get($sourcePath));
+
+        return $imagePath;
     }
 }

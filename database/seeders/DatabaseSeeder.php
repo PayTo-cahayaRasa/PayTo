@@ -32,7 +32,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
-            ProductReportSeeder::class,
             StorefrontSeeder::class,
         ]);
     }

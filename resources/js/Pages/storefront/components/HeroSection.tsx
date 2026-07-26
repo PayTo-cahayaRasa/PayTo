@@ -1,4 +1,5 @@
 import { ChevronRight, Heart, Leaf, Medal, ShoppingCart } from 'lucide-react';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { storefrontShopHref } from '../constants';
@@ -127,10 +128,17 @@ type HeroProductPhotoProps = {
 };
 
 function HeroProductPhoto({ alt, className, imageClassName = '', isPriority = false, src }: HeroProductPhotoProps) {
+    const [isLoaded, setIsLoaded] = useState(false);
+
     return (
         <div className={`absolute ${className}`}>
             <div className={`hero-product-float h-full w-full ${imageClassName}`}>
-                <div className="h-full w-full overflow-hidden rounded-[1.8rem] border border-white/75 bg-[#fff8eb]/70 p-1.5 shadow-[0_24px_42px_-22px_rgba(94,53,22,0.5)] backdrop-blur-[2px] sm:p-2">
+                <div className="relative h-full w-full overflow-hidden rounded-[1.8rem] border border-white/75 bg-[#fff8eb]/70 p-1.5 shadow-[0_24px_42px_-22px_rgba(94,53,22,0.5)] backdrop-blur-[2px] sm:p-2">
+                    {!isLoaded && (
+                        <div aria-hidden="true" className="absolute inset-1.5 z-10 grid animate-pulse place-items-center rounded-[1.4rem] bg-[#ecd6ae] sm:inset-2">
+                            <span className="h-2 w-2/3 rounded-full bg-white/65" />
+                        </div>
+                    )}
                     <img
                         src={src}
                         alt={alt}
@@ -138,7 +146,9 @@ function HeroProductPhoto({ alt, className, imageClassName = '', isPriority = fa
                         height={1448}
                         loading={isPriority ? 'eager' : 'lazy'}
                         fetchPriority={isPriority ? 'high' : 'auto'}
-                        className="h-full w-full rounded-[1.4rem] object-contain"
+                        onLoad={() => setIsLoaded(true)}
+                        onError={() => setIsLoaded(true)}
+                        className={`relative h-full w-full rounded-[1.4rem] object-contain transition-opacity duration-200 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
                     />
                 </div>
             </div>
@@ -158,25 +168,25 @@ function HeroProductShowcase() {
             </svg>
 
             <HeroProductPhoto
-                src="/images/hero-products/keripik-singkong.jpg"
+                src="/products/singkong.webp"
                 alt="Kemasan keripik singkong Cahaya Rasa"
                 className="left-0 top-8 z-[1] hidden h-42 w-31 -rotate-8 sm:block lg:left-1 lg:top-12 lg:h-49 lg:w-37"
                 imageClassName="hero-product-float-delayed"
             />
             <HeroProductPhoto
-                src="/images/hero-products/rempeyek.jpg"
+                src="/products/rempeyek.webp"
                 alt="Kemasan rempeyek Cahaya Rasa"
                 className="bottom-4 left-[3%] z-[3] hidden h-38 w-28 rotate-5 sm:block lg:bottom-2 lg:left-[7%] lg:h-44 lg:w-33"
                 imageClassName="hero-product-float-slow"
             />
             <HeroProductPhoto
-                src="/images/hero-products/keripik-pisang.jpg"
+                src="/products/pisang.webp"
                 alt="Kemasan keripik pisang Cahaya Rasa"
                 className="bottom-0 right-[3%] z-[4] hidden h-35 w-26 -rotate-5 lg:block"
                 imageClassName="hero-product-float-delayed"
             />
             <HeroProductPhoto
-                src="/images/hero-products/pisang-madu.jpg"
+                src="/products/pisangMadu.webp"
                 alt="Kemasan keripik pisang madu Cahaya Rasa"
                 className="right-0 top-5 z-[2] h-54 w-40 rotate-4 sm:right-[2%] sm:top-6 sm:h-70 sm:w-52 lg:right-0 lg:top-7 lg:h-80 lg:w-60"
                 isPriority

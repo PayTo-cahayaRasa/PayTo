@@ -57,7 +57,7 @@ export default function LandingPage({ business, catalog, featuredProducts = [], 
         : visibleProducts.filter((product) => product.category === selectedCategory);
 
     function selectChipsCategory(): void {
-        const chipsCategory = categories.find((category) => category.id.toLocaleLowerCase('id-ID').includes('keripik'));
+        const chipsCategory = categories.find((category) => category.id === 'Camilan');
 
         if (chipsCategory) {
             setSelectedCategory(chipsCategory.id);

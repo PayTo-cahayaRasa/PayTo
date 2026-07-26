@@ -1,4 +1,5 @@
 import { ArrowRight, Check } from 'lucide-react';
+import { useState } from 'react';
 
 type FeaturedChipsSectionProps = {
     onExplore: () => void;
@@ -9,6 +10,30 @@ const highlights = [
     'Dibuat dari bahan pilihan',
     'Cocok untuk camilan dan oleh-oleh',
 ];
+
+function FeaturedImage({ alt, className, src }: { alt: string; className: string; src: string }) {
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    return (
+        <>
+            {!isLoaded && (
+                <span aria-hidden="true" className="absolute inset-0 z-10 grid animate-pulse place-items-center bg-[#dfbd81]">
+                    <span className="h-2 w-2/3 rounded-full bg-white/65" />
+                </span>
+            )}
+            <img
+                src={src}
+                alt={alt}
+                width={1086}
+                height={1448}
+                loading="lazy"
+                onLoad={() => setIsLoaded(true)}
+                onError={() => setIsLoaded(true)}
+                className={`relative transition-opacity duration-200 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className}`}
+            />
+        </>
+    );
+}
 
 export function FeaturedChipsSection({ onExplore }: FeaturedChipsSectionProps) {
     return (
@@ -24,35 +49,26 @@ export function FeaturedChipsSection({ onExplore }: FeaturedChipsSectionProps) {
                     <div className="relative order-1 min-h-94 sm:min-h-112 md:min-h-126">
                         <div className="absolute inset-4 rounded-[45%] bg-[radial-gradient(circle,rgba(255,221,140,0.8)_0%,rgba(236,164,48,0.24)_54%,transparent_72%)] blur-xl" />
                         <div className="absolute bottom-8 left-3 right-12 top-6 rotate-[-2deg] overflow-hidden rounded-[2rem] border border-white/70 bg-[#e9c793] shadow-[0_30px_58px_-34px_rgba(75,39,18,0.62)] sm:bottom-10 sm:left-5 sm:right-18 sm:top-8">
-                            <img
-                                src="/images/hero-products/keripik-pisang.jpg"
+                            <FeaturedImage
+                                src="/products/pisang.webp"
                                 alt="Keripik pisang Cahaya Rasa tersaji bersama kemasannya"
-                                width={1086}
-                                height={1448}
-                                loading="lazy"
                                 className="h-full w-full object-cover object-[50%_22%]"
                             />
                             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.16),transparent_38%,rgba(92,48,19,0.1))]" />
                         </div>
 
                         <div className="absolute bottom-0 left-0 h-30 w-40 -rotate-6 overflow-hidden rounded-[45%_55%_48%_52%/54%_46%_54%_46%] border-4 border-[#fff8ea] bg-[#e5b85f] shadow-[0_22px_38px_-21px_rgba(75,39,18,0.68)] sm:h-38 sm:w-52">
-                            <img
-                                src="/images/hero-products/keripik-singkong.jpg"
+                            <FeaturedImage
+                                src="/products/singkong.webp"
                                 alt="Mangkuk berisi keripik singkong Cahaya Rasa"
-                                width={1086}
-                                height={1448}
-                                loading="lazy"
                                 className="h-full w-full scale-[1.65] object-cover object-[4%_73%]"
                             />
                         </div>
 
                         <div className="absolute right-0 top-3 h-44 w-32 rotate-5 overflow-hidden rounded-[1.45rem] border-4 border-[#fff8ea] bg-[#fff4db] p-1.5 shadow-[0_25px_46px_-25px_rgba(75,39,18,0.62)] sm:top-14 sm:h-64 sm:w-47">
-                            <img
-                                src="/images/hero-products/pisang-madu.jpg"
+                            <FeaturedImage
+                                src="/products/pisangMadu.webp"
                                 alt="Kemasan keripik pisang madu Cahaya Rasa"
-                                width={1086}
-                                height={1448}
-                                loading="lazy"
                                 className="h-full w-full rounded-[1rem] object-contain"
                             />
                         </div>
