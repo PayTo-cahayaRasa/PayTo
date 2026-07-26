@@ -1,4 +1,5 @@
 import type { PublicCatalogProduct } from '../data/publicCatalogData';
+import { useState } from 'react';
 
 type ProductPileProps = {
     type: 'chips' | 'sticks' | 'dark' | 'drink';
@@ -61,6 +62,7 @@ type ProductVisualProps = {
 };
 
 export function ProductVisual({ product }: ProductVisualProps) {
+    const [isLoaded, setIsLoaded] = useState(false);
     const visualType =
         product.category === 'Minuman'
             ? 'drink'
@@ -73,7 +75,19 @@ export function ProductVisual({ product }: ProductVisualProps) {
     if (product.imageUrl) {
         return (
             <div className="relative h-50 overflow-hidden rounded-[1.4rem] bg-[#f7ead4]">
-                <img src={product.imageUrl} alt={product.name} className="h-full w-full object-contain p-2" loading="lazy" />
+                {!isLoaded && (
+                    <div aria-hidden="true" className="absolute inset-2 z-10 grid animate-pulse place-items-center rounded-[1rem] bg-[#ecd6ae]">
+                        <span className="h-2 w-2/3 rounded-full bg-white/65" />
+                    </div>
+                )}
+                <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    loading="lazy"
+                    onLoad={() => setIsLoaded(true)}
+                    onError={() => setIsLoaded(true)}
+                    className={`relative h-full w-full object-contain p-2 transition-opacity duration-200 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+                />
             </div>
         );
     }

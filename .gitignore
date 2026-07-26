@@ -16,6 +16,7 @@
 /public/build
 /public/hot
 /public/storage
+/bootstrap/ssr
 public/.flyenv
 /storage/*.key
 /storage/pail

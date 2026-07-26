@@ -17,7 +17,7 @@ type CheckoutPageProps = { business: BusinessProfile; couriers: string[]; produc
 const fieldClass = 'mt-2 min-h-12 w-full rounded-xl border border-[#dfcfbb] bg-white px-4 text-[0.95rem] text-[#3a2117] outline-none transition-colors placeholder:text-[#a58e79] focus:border-[#9b5c22] focus:ring-4 focus:ring-[#ef921e]/15 motion-reduce:transition-none';
 
 export default function CheckoutPage({ business, couriers, products }: CheckoutPageProps) {
-    const [entries] = useState<PublicCartEntry[]>(() => parsePublicCart(window.localStorage.getItem(publicCartStorageKey)));
+    const [entries, setEntries] = useState<PublicCartEntry[]>([]);
     const cartItems = useMemo(() => resolvePublicCart(entries, products), [entries, products]);
     const { cartItems: headerCartItems, addToCart, decreaseCartItem, clearCart } = usePublicCart(products);
     const [customerName, setCustomerName] = useState('');
@@ -35,11 +35,16 @@ export default function CheckoutPage({ business, couriers, products }: CheckoutP
     const [errors, setErrors] = useState<CheckoutErrors>({});
     const [submitting, setSubmitting] = useState(false);
     const [shippingLoading, setShippingLoading] = useState(false);
-    const [idempotencyKey, setIdempotencyKey] = useState(() => window.crypto.randomUUID());
+    const [idempotencyKey, setIdempotencyKey] = useState('');
     const subtotal = useMemo(() => cartItems.reduce((sum, item) => sum + (item.product.finalPrice ?? item.product.price) * item.quantity, 0), [cartItems]);
     const grandTotal = subtotal + (quote?.cost ?? 0);
     const hasUnavailableItems = cartItems.some((item) => item.product.stock <= 0 || item.quantity > item.product.stock);
     const errorMessages = Object.values(errors).flat();
+
+    useEffect(() => {
+        setEntries(parsePublicCart(window.localStorage.getItem(publicCartStorageKey)));
+        setIdempotencyKey(window.crypto.randomUUID());
+    }, []);
 
     useEffect(() => {
         if (fulfillmentMethod !== 'DELIVERY' || destinationQuery.trim().length < 3 || destination?.label === destinationQuery) {

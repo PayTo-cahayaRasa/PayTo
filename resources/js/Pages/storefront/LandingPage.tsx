@@ -8,6 +8,7 @@ import type { BusinessProfile } from './types';
 import {
     BlackCtaSection,
     CatalogSidebar,
+    FeaturedChipsSection,
     HeroSection,
     MinimalPagination,
     ProductCard,
@@ -55,6 +56,14 @@ export default function LandingPage({ business, catalog, featuredProducts = [], 
         ? visibleProducts
         : visibleProducts.filter((product) => product.category === selectedCategory);
 
+    function selectChipsCategory(): void {
+        const chipsCategory = categories.find((category) => category.id === 'Camilan');
+
+        if (chipsCategory) {
+            setSelectedCategory(chipsCategory.id);
+        }
+    }
+
     function submitSearch(event: FormEvent): void {
         event.preventDefault();
         router.get(
@@ -87,6 +96,7 @@ export default function LandingPage({ business, catalog, featuredProducts = [], 
 
                 <main id="main-content">
                     <HeroSection business={business} />
+                    <FeaturedChipsSection onExplore={selectChipsCategory} />
 
                     <section id={storefrontShopSectionId} className="relative z-20 -mt-36 px-4 pb-3 sm:-mt-44 sm:px-5 lg:-mt-54 lg:px-8">
                         <div className="mx-auto max-w-462 rounded-t-[2.25rem] border border-b-0 border-[#f1e6d7] bg-[#fffdf9]/98 px-4 py-6 shadow-[0_-18px_46px_-38px_rgba(58,33,23,0.32)] backdrop-blur-sm sm:px-7 sm:py-9 lg:px-9">

@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
 html {
@@ -34,6 +33,38 @@ html {
 
     to {
         transform: rotate(360deg) translateX(20px) rotate(-360deg);
+    }
+}
+
+@keyframes hero-product-float {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0);
+    }
+
+    50% {
+        transform: translate3d(0, -8px, 0);
+    }
+}
+
+.hero-product-float {
+    animation: hero-product-float 6.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+    will-change: transform;
+}
+
+.hero-product-float-delayed {
+    animation-delay: -2.2s;
+}
+
+.hero-product-float-slow {
+    animation-duration: 7.8s;
+    animation-delay: -4.1s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-product-float {
+        animation: none;
+        will-change: auto;
     }
 }
 
