@@ -5,15 +5,24 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use LogicException;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        foreach ([
-            ['name' => 'Test User', 'username' => 'testuser', 'password' => 'password', 'pin' => '123456', 'role' => 'CASHIER'],
-            ['name' => 'Supervisor User', 'username' => 'supervisor', 'password' => 'password', 'pin' => '654321', 'role' => 'SUPERVISOR'],
-        ] as $account) {
+        $accounts = [
+            ['name' => 'Kasir Cahaya Rasa', 'username' => 'kasir-cahayarasa', 'password' => config('seeders.cahayarasa.cashier_password'), 'pin' => config('seeders.cahayarasa.cashier_pin'), 'role' => 'CASHIER'],
+            ['name' => 'Supervisor Cahaya Rasa', 'username' => 'supervisor-cahayarasa', 'password' => config('seeders.cahayarasa.supervisor_password'), 'pin' => config('seeders.cahayarasa.supervisor_pin'), 'role' => 'SUPERVISOR'],
+        ];
+
+        foreach ($accounts as $account) {
+            if (! is_string($account['password']) || $account['password'] === '' || ! is_string($account['pin']) || $account['pin'] === '') {
+                throw new LogicException('Set all Cahaya Rasa seeder credentials before running the seeder.');
+            }
+        }
+
+        foreach ($accounts as $account) {
             $user = User::query()->firstOrNew(['username' => $account['username']]);
 
             $user->forceFill([
