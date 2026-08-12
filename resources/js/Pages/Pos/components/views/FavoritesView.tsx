@@ -20,7 +20,7 @@ export default function FavoritesView({ favorites, onAddToCart, formatRupiah }: 
                     ))}
                 </div>
             ) : (
-                <div className="h-full flex flex-col items-center justify-center text-slate-400">
+                <div className="h-full flex flex-col items-center justify-center text-cocoa-400">
                     <Star size={48} className="mb-4 opacity-20" />
                     <p>Belum ada item favorit.</p>
                 </div>

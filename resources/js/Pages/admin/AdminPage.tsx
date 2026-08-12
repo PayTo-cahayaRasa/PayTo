@@ -123,7 +123,7 @@ export default function AdminPage() {
     };
 
     return (
-        <div className="relative flex min-h-screen w-full overflow-x-hidden overflow-y-hidden bg-[radial-gradient(circle_at_top_left,_rgba(248,236,217,0.84),_transparent_26%),radial-gradient(circle_at_bottom_left,_rgba(219,233,223,0.7),_transparent_30%),linear-gradient(180deg,#f7f0e6_0%,#f2e9dd_100%)] font-sans text-[#2f241c] selection:bg-[#375c3f] selection:text-white">
+        <div className="relative flex min-h-screen w-full overflow-x-hidden overflow-y-hidden bg-[radial-gradient(circle_at_top_left,_rgba(248,236,217,0.84),_transparent_26%),radial-gradient(circle_at_bottom_left,_rgba(219,233,223,0.7),_transparent_30%),linear-gradient(180deg,#f7f0e6_0%,#f2e9dd_100%)] font-sans text-[var(--color-cocoa-900)] selection:bg-[var(--color-leaf-600)] selection:text-white">
             <div className="pointer-events-none absolute inset-0 opacity-35 [background-image:radial-gradient(rgba(120,89,62,0.09)_0.8px,transparent_0.8px)] [background-size:18px_18px]"></div>
             <div className="pointer-events-none absolute right-0 top-0 h-56 w-56 rounded-full bg-[#ede0cb] blur-3xl"></div>
             <div className="pointer-events-none absolute bottom-8 left-8 h-48 w-48 rounded-full bg-[#dce8dd] blur-3xl"></div>
@@ -143,7 +143,7 @@ export default function AdminPage() {
                     type="button"
                     aria-label="Tutup sidebar"
                     onClick={() => setIsSidebarOpen(false)}
-                    className="fixed inset-0 z-20 bg-[#2f241c]/28 backdrop-blur-[2px] lg:hidden"
+                    className="fixed inset-0 z-20 bg-[var(--color-cocoa-900)]/28 backdrop-blur-[2px] lg:hidden"
                 />
             )}
 

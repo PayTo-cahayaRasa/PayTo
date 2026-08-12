@@ -15,15 +15,15 @@ type StatCardProps = {
 
 export default function StatCard({ title, value, subtext, trend, trendVal }: StatCardProps) {
     return (
-        <div className="rounded-[2rem] border border-[#eadfcf] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(249,243,234,0.92))] p-6 shadow-[0_24px_44px_-36px_rgba(58,33,23,0.28)] transition-all hover:-translate-y-px">
+        <div className="rounded-[2rem] border border-[var(--color-cream-200)] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(249,243,234,0.92))] p-6 shadow-[0_24px_44px_-36px_rgba(58,33,23,0.28)] transition-all hover:-translate-y-px">
             <div className="mb-4 flex items-start justify-between">
                 <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8e6847]">{title}</p>
-                    <h3 className="mt-1 text-3xl font-semibold tracking-[-0.05em] text-[#2f241c]">{value}</h3>
+                    <h3 className="mt-1 text-3xl font-semibold tracking-[-0.05em] text-[var(--color-cocoa-900)]">{value}</h3>
                 </div>
                 {trend ? (
                     <div
-                        className={`rounded-xl p-2 ${trend === 'up' ? 'bg-[#edf5ee] text-[#375c3f]' : 'bg-[#fff0ea] text-[#b76046]'}`}
+                        className={`rounded-xl p-2 ${trend === 'up' ? 'bg-[#edf5ee] text-[var(--color-leaf-600)]' : 'bg-[#fff0ea] text-[var(--color-danger-500)]'}`}
                     >
                         {trend === 'up' ? <ArrowUpRight size={20} /> : <ArrowDownRight size={20} />}
                     </div>
@@ -31,7 +31,7 @@ export default function StatCard({ title, value, subtext, trend, trendVal }: Sta
             </div>
             <div className="flex items-center gap-2 text-xs">
                 {trend && trendVal ? (
-                    <span className={`font-semibold ${trend === 'up' ? 'text-[#375c3f]' : 'text-[#b76046]'}`}>
+                    <span className={`font-semibold ${trend === 'up' ? 'text-[var(--color-leaf-600)]' : 'text-[var(--color-danger-500)]'}`}>
                         {trend === 'up' ? '+' : ''}{trendVal}
                     </span>
                 ) : null}

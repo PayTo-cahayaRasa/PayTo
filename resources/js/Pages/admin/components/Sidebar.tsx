@@ -16,13 +16,13 @@ type SidebarProps = {
 
 export default function Sidebar({ activeTab, onChangeTab, onLogout }: SidebarProps) {
     return (
-        <aside className="z-20 my-3 ml-3 flex h-[calc(100vh-1.5rem)] w-[calc(100vw-1.5rem)] max-w-72 flex-col rounded-[2rem] border border-[#eadfcf] bg-[linear-gradient(180deg,rgba(255,250,243,0.97),rgba(247,240,229,0.95))] p-4 shadow-[0_32px_62px_-38px_rgba(58,33,23,0.3)] sm:m-4 sm:h-[calc(100vh-2rem)] sm:w-[calc(100vw-2rem)] sm:rounded-[2.5rem] sm:p-6 lg:w-72 lg:max-w-72">
+        <aside className="z-20 my-3 ml-3 flex h-[calc(100vh-1.5rem)] w-[calc(100vw-1.5rem)] max-w-72 flex-col rounded-[2rem] border border-[var(--color-cream-200)] bg-[linear-gradient(180deg,rgba(255,250,243,0.97),rgba(247,240,229,0.95))] p-4 shadow-[0_32px_62px_-38px_rgba(58,33,23,0.3)] sm:m-4 sm:h-[calc(100vh-2rem)] sm:w-[calc(100vw-2rem)] sm:rounded-[2.5rem] sm:p-6 lg:w-72 lg:max-w-72">
             <div className="flex items-center gap-3 px-1 sm:px-2 mb-8 sm:mb-10">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#3d281b] text-white shadow-[0_18px_34px_-24px_rgba(61,40,27,0.78)]">
                     <LayoutDashboard size={20} />
                 </div>
                 <div>
-                    <h1 className="text-base font-semibold leading-tight tracking-[-0.03em] text-[#2f241c] sm:text-lg">
+                    <h1 className="text-base font-semibold leading-tight tracking-[-0.03em] text-[var(--color-cocoa-900)] sm:text-lg">
                         Supervisor Panel
                     </h1>
                     <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-[#8e6847]">Cahaya Rasa control</p>

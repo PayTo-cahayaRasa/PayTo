@@ -17,10 +17,10 @@ export function ProductCard({ product, quantity = 0, onAddToCart, onDecreaseCart
                 type="button"
                 aria-label={`Tampilkan informasi ${product.name}`}
                 aria-describedby={`product-description-${product.id}`}
-                className="group relative block w-full px-2.5 pt-2.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9b5c22]"
+                className="group relative block w-full px-2.5 pt-2.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-caramel-600)]"
             >
                 <ProductVisual product={product} />
-                <span className="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white/92 px-2.5 py-1.5 text-[0.7rem] font-semibold text-[#3a2117] shadow-sm backdrop-blur-sm">
+                <span className="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white/92 px-2.5 py-1.5 text-[0.7rem] font-semibold text-[var(--color-cocoa-800)] shadow-sm backdrop-blur-sm">
                     <Info size={13} aria-hidden="true" />
                     Info
                 </span>
@@ -35,7 +35,7 @@ export function ProductCard({ product, quantity = 0, onAddToCart, onDecreaseCart
                 </span>
             </button>
             <div className="px-3 pb-3 pt-3">
-                <h3 className="font-display text-[1.15rem] font-semibold leading-[1.08] tracking-[-0.04em] text-[#3a2117] sm:text-[1.3rem]">
+                <h3 className="font-display text-[1.15rem] font-semibold leading-[1.08] tracking-[-0.04em] text-[var(--color-cocoa-800)] sm:text-[1.3rem]">
                     {product.name}
                 </h3>
                 <div className={`mt-1.5 flex items-center gap-1.5 text-[0.8rem] font-semibold ${product.stock > 0 ? 'text-[#7a654f]' : 'text-red-700'}`}>
@@ -43,19 +43,19 @@ export function ProductCard({ product, quantity = 0, onAddToCart, onDecreaseCart
                     <span>{product.stock > 0 ? `${product.stock} tersedia` : 'Stok habis'}</span>
                 </div>
                 <div className="mt-2 flex min-h-[3.1rem] flex-col justify-start">
-                    <p className="text-[1.15rem] font-semibold tracking-[-0.04em] text-[#3a2117] sm:text-[1.3rem]">{formatRupiah(product.finalPrice ?? product.price)}</p>
+                    <p className="text-[1.15rem] font-semibold tracking-[-0.04em] text-[var(--color-cocoa-800)] sm:text-[1.3rem]">{formatRupiah(product.finalPrice ?? product.price)}</p>
                     {(product.discount ?? 0) > 0 && (
                         <p className="text-xs font-semibold text-[#9b7860] line-through">{formatRupiah(product.price)}</p>
                     )}
                 </div>
                 <div className="mt-2.5">
                     {quantity > 0 ? (
-                        <div className="flex min-h-[2.4rem] w-full items-center justify-between rounded-xl border border-[#e5d4bf] bg-[#fff7ea] p-1 text-[#3a2117]">
+                        <div className="flex min-h-[2.4rem] w-full items-center justify-between rounded-xl border border-[#e5d4bf] bg-[#fff7ea] p-1 text-[var(--color-cocoa-800)]">
                             <button
                                 type="button"
                                 onClick={onDecreaseCartItem}
                                 aria-label={`Kurangi ${product.name} dari keranjang`}
-                                className="inline-flex size-9 items-center justify-center rounded-lg transition hover:bg-[#f0dfc7] focus-visible:outline-2 focus-visible:outline-[#9b5c22]"
+                                className="inline-flex size-9 items-center justify-center rounded-lg transition hover:bg-[#f0dfc7] focus-visible:outline-2 focus-visible:outline-[var(--color-caramel-600)]"
                             >
                                 <Minus size={15} strokeWidth={2} />
                             </button>
@@ -68,7 +68,7 @@ export function ProductCard({ product, quantity = 0, onAddToCart, onDecreaseCart
                                 onClick={handleAddToCart}
                                 disabled={quantity >= product.stock}
                                 aria-label={`Tambah ${product.name} ke keranjang`}
-                                className="inline-flex size-9 items-center justify-center rounded-lg transition hover:bg-[#f0dfc7] focus-visible:outline-2 focus-visible:outline-[#9b5c22] disabled:cursor-not-allowed disabled:opacity-35"
+                                className="inline-flex size-9 items-center justify-center rounded-lg transition hover:bg-[#f0dfc7] focus-visible:outline-2 focus-visible:outline-[var(--color-caramel-600)] disabled:cursor-not-allowed disabled:opacity-35"
                             >
                                 <Plus size={15} strokeWidth={2} />
                             </button>
@@ -78,7 +78,7 @@ export function ProductCard({ product, quantity = 0, onAddToCart, onDecreaseCart
                             type="button"
                             onClick={handleAddToCart}
                             disabled={product.stock <= 0}
-                            className="inline-flex min-h-[2.4rem] w-full items-center justify-center gap-2 rounded-xl border border-[#eadfcf] bg-[#fff7ea] px-3 text-[0.8rem] font-semibold text-[#3a2117] transition duration-300 disabled:cursor-not-allowed disabled:opacity-45"
+                            className="inline-flex min-h-[2.4rem] w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-cream-200)] bg-[#fff7ea] px-3 text-[0.8rem] font-semibold text-[var(--color-cocoa-800)] transition duration-300 disabled:cursor-not-allowed disabled:opacity-45"
                         >
                             <ShoppingCart size={15} strokeWidth={1.9} aria-hidden="true" />
                             {product.stock <= 0 ? 'Stok Habis' : 'Tambah ke Keranjang'}

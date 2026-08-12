@@ -192,7 +192,7 @@ export default function SettingsTab() {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                <Loader2 className="w-8 h-8 animate-spin text-snack-600" />
             </div>
         );
     }
@@ -208,11 +208,11 @@ export default function SettingsTab() {
             )}
 
             {saveStatus === 'error' && errorMessage && (
-                <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
-                    <AlertCircle size={20} className="text-red-600 shrink-0 mt-0.5" />
+                <div className="bg-danger-50 border border-danger-200 rounded-2xl p-4 flex items-start gap-3">
+                    <AlertCircle size={20} className="text-danger-600 shrink-0 mt-0.5" />
                     <div>
-                        <p className="font-bold text-sm text-red-900">Gagal menyimpan</p>
-                        <p className="text-xs text-red-700 mt-1">{errorMessage}</p>
+                        <p className="font-bold text-sm text-danger-900">Gagal menyimpan</p>
+                        <p className="text-xs text-danger-700 mt-1">{errorMessage}</p>
                     </div>
                 </div>
             )}
@@ -220,14 +220,14 @@ export default function SettingsTab() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Profil Toko */}
                 <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-4xl p-6 shadow-sm">
-                    <h3 className="font-bold text-lg text-slate-800 mb-6 flex items-center gap-2">
-                        <Settings size={20} className="text-slate-400" /> Profil Toko
+                    <h3 className="font-bold text-lg text-cocoa-800 mb-6 flex items-center gap-2">
+                        <Settings size={20} className="text-cocoa-400" /> Profil Toko
                     </h3>
 
                     <div className="space-y-4">
                         {/* Nama Toko */}
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                            <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">
                                 Nama Toko *
                             </label>
                             <input
@@ -239,20 +239,20 @@ export default function SettingsTab() {
                                         business: { ...settings.business, name: e.target.value },
                                     })
                                 }
-                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none ${
+                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-snack-200 outline-none ${
                                     getFieldError('business.name')
-                                        ? 'border-red-300 bg-red-50/50'
+                                        ? 'border-danger-300 bg-danger-50/50'
                                         : 'border-white/60'
                                 }`}
                                 placeholder="Contoh: Toko Maju Jaya"
                             />
                             {getFieldError('business.name') && (
-                                <p className="text-xs text-red-600 mt-1">{getFieldError('business.name')}</p>
+                                <p className="text-xs text-danger-600 mt-1">{getFieldError('business.name')}</p>
                             )}
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                            <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">
                                 Tagline
                             </label>
                             <input
@@ -264,21 +264,21 @@ export default function SettingsTab() {
                                         business: { ...settings.business, tagline: e.target.value },
                                     })
                                 }
-                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none ${
+                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-snack-200 outline-none ${
                                     getFieldError('business.tagline')
-                                        ? 'border-red-300 bg-red-50/50'
+                                        ? 'border-danger-300 bg-danger-50/50'
                                         : 'border-white/60'
                                 }`}
                                 placeholder="Contoh: Oleh-Oleh Malang"
                             />
                             {getFieldError('business.tagline') && (
-                                <p className="text-xs text-red-600 mt-1">{getFieldError('business.tagline')}</p>
+                                <p className="text-xs text-danger-600 mt-1">{getFieldError('business.tagline')}</p>
                             )}
                         </div>
 
                         {/* Alamat */}
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                            <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">
                                 Alamat Toko *
                             </label>
                             <textarea
@@ -290,21 +290,21 @@ export default function SettingsTab() {
                                     })
                                 }
                                 rows={3}
-                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none resize-none ${
+                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-snack-200 outline-none resize-none ${
                                     getFieldError('business.address')
-                                        ? 'border-red-300 bg-red-50/50'
+                                        ? 'border-danger-300 bg-danger-50/50'
                                         : 'border-white/60'
                                 }`}
                                 placeholder="Contoh: Jl. Merdeka No. 123, Jakarta"
                             />
                             {getFieldError('business.address') && (
-                                <p className="text-xs text-red-600 mt-1">{getFieldError('business.address')}</p>
+                                <p className="text-xs text-danger-600 mt-1">{getFieldError('business.address')}</p>
                             )}
                         </div>
 
                         {/* Nomor WhatsApp */}
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                            <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">
                                 Nomor WhatsApp
                             </label>
                             <input
@@ -316,18 +316,18 @@ export default function SettingsTab() {
                                         business: { ...settings.business, whatsapp_number: e.target.value.replace(/\D/g, '') },
                                     })
                                 }
-                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none ${
+                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-snack-200 outline-none ${
                                     getFieldError('business.whatsapp_number')
-                                        ? 'border-red-300 bg-red-50/50'
+                                        ? 'border-danger-300 bg-danger-50/50'
                                         : 'border-white/60'
                                 }`}
                                 placeholder="Contoh: 6281234567890"
                             />
-                            <p className="text-[10px] text-slate-400 mt-2">
+                            <p className="text-[10px] text-cocoa-400 mt-2">
                                 Format: 8-15 digit angka, tanpa +, spasi, atau tanda hubung
                             </p>
                             {getFieldError('business.whatsapp_number') && (
-                                <p className="text-xs text-red-600 mt-1">
+                                <p className="text-xs text-danger-600 mt-1">
                                     {getFieldError('business.whatsapp_number')}
                                 </p>
                             )}
@@ -335,7 +335,7 @@ export default function SettingsTab() {
 
                         {/* Jam Operasional */}
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                            <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">
                                 Jam Operasional *
                             </label>
                             <input
@@ -347,22 +347,22 @@ export default function SettingsTab() {
                                         business: { ...settings.business, operating_hours: e.target.value },
                                     })
                                 }
-                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none ${
+                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-snack-200 outline-none ${
                                     getFieldError('business.operating_hours')
-                                        ? 'border-red-300 bg-red-50/50'
+                                        ? 'border-danger-300 bg-danger-50/50'
                                         : 'border-white/60'
                                 }`}
                                 placeholder="Contoh: Senin-Sabtu 08.00-20.00 WIB"
                             />
                             {getFieldError('business.operating_hours') && (
-                                <p className="text-xs text-red-600 mt-1">
+                                <p className="text-xs text-danger-600 mt-1">
                                     {getFieldError('business.operating_hours')}
                                 </p>
                             )}
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                            <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">
                                 Link Shopee
                             </label>
                             <input
@@ -374,20 +374,20 @@ export default function SettingsTab() {
                                         business: { ...settings.business, shopee_url: e.target.value },
                                     })
                                 }
-                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none ${
+                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-snack-200 outline-none ${
                                     getFieldError('business.shopee_url')
-                                        ? 'border-red-300 bg-red-50/50'
+                                        ? 'border-danger-300 bg-danger-50/50'
                                         : 'border-white/60'
                                 }`}
                                 placeholder="https://shopee.co.id/nama-toko"
                             />
                             {getFieldError('business.shopee_url') && (
-                                <p className="text-xs text-red-600 mt-1">{getFieldError('business.shopee_url')}</p>
+                                <p className="text-xs text-danger-600 mt-1">{getFieldError('business.shopee_url')}</p>
                             )}
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                            <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">
                                 Link Instagram
                             </label>
                             <input
@@ -399,20 +399,20 @@ export default function SettingsTab() {
                                         business: { ...settings.business, instagram_url: e.target.value },
                                     })
                                 }
-                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none ${
+                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-snack-200 outline-none ${
                                     getFieldError('business.instagram_url')
-                                        ? 'border-red-300 bg-red-50/50'
+                                        ? 'border-danger-300 bg-danger-50/50'
                                         : 'border-white/60'
                                 }`}
                                 placeholder="https://www.instagram.com/cahayarasamalang/"
                             />
                             {getFieldError('business.instagram_url') && (
-                                <p className="text-xs text-red-600 mt-1">{getFieldError('business.instagram_url')}</p>
+                                <p className="text-xs text-danger-600 mt-1">{getFieldError('business.instagram_url')}</p>
                             )}
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                            <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">
                                 Link TikTok
                             </label>
                             <input
@@ -424,15 +424,15 @@ export default function SettingsTab() {
                                         business: { ...settings.business, tiktok_url: e.target.value },
                                     })
                                 }
-                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none ${
+                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-snack-200 outline-none ${
                                     getFieldError('business.tiktok_url')
-                                        ? 'border-red-300 bg-red-50/50'
+                                        ? 'border-danger-300 bg-danger-50/50'
                                         : 'border-white/60'
                                 }`}
                                 placeholder="https://www.tiktok.com/@cahayarasa_28"
                             />
                             {getFieldError('business.tiktok_url') && (
-                                <p className="text-xs text-red-600 mt-1">{getFieldError('business.tiktok_url')}</p>
+                                <p className="text-xs text-danger-600 mt-1">{getFieldError('business.tiktok_url')}</p>
                             )}
                         </div>
                     </div>
@@ -440,16 +440,16 @@ export default function SettingsTab() {
 
                 {/* Pengaturan Katalog */}
                 <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-4xl p-6 shadow-sm">
-                    <h3 className="font-bold text-lg text-slate-800 mb-6 flex items-center gap-2">
-                        <Globe size={20} className="text-slate-400" /> Katalog & WhatsApp
+                    <h3 className="font-bold text-lg text-cocoa-800 mb-6 flex items-center gap-2">
+                        <Globe size={20} className="text-cocoa-400" /> Katalog & WhatsApp
                     </h3>
 
                     <div className="space-y-4">
                         {/* Aktifkan Katalog */}
                         <div className="flex items-center justify-between p-4 bg-white/50 rounded-2xl border border-white/50">
                             <div>
-                                <div className="font-bold text-sm text-slate-700">Aktifkan Katalog</div>
-                                <div className="text-xs text-slate-500">Tampilkan katalog produk</div>
+                                <div className="font-bold text-sm text-cocoa-700">Aktifkan Katalog</div>
+                                <div className="text-xs text-cocoa-500">Tampilkan katalog produk</div>
                             </div>
                             <input
                                 type="checkbox"
@@ -460,15 +460,15 @@ export default function SettingsTab() {
                                         catalog: { ...settings.catalog, enabled: e.target.checked },
                                     })
                                 }
-                                className="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-200"
+                                className="w-5 h-5 text-snack-600 rounded focus:ring-2 focus:ring-snack-200"
                             />
                         </div>
 
                         {/* WhatsApp Enabled */}
                         <div className="flex items-center justify-between p-4 bg-white/50 rounded-2xl border border-white/50">
                             <div>
-                                <div className="font-bold text-sm text-slate-700">WhatsApp di Katalog</div>
-                                <div className="text-xs text-slate-500">Tampilkan tombol WhatsApp</div>
+                                <div className="font-bold text-sm text-cocoa-700">WhatsApp di Katalog</div>
+                                <div className="text-xs text-cocoa-500">Tampilkan tombol WhatsApp</div>
                             </div>
                             <input
                                 type="checkbox"
@@ -479,13 +479,13 @@ export default function SettingsTab() {
                                         catalog: { ...settings.catalog, whatsapp_enabled: e.target.checked },
                                     })
                                 }
-                                className="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-200"
+                                className="w-5 h-5 text-snack-600 rounded focus:ring-2 focus:ring-snack-200"
                             />
                         </div>
 
                         {/* Template WhatsApp */}
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                            <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">
                                 Template Pesan WhatsApp *
                             </label>
                             <textarea
@@ -497,18 +497,18 @@ export default function SettingsTab() {
                                     })
                                 }
                                 rows={4}
-                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none resize-none ${
+                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-snack-200 outline-none resize-none ${
                                     getFieldError('catalog.whatsapp_message_template')
-                                        ? 'border-red-300 bg-red-50/50'
+                                        ? 'border-danger-300 bg-danger-50/50'
                                         : 'border-white/60'
                                 }`}
                                 placeholder="Halo, saya tertarik dengan {product_name} seharga {price}. Qty: {qty}."
                             />
-                            <p className="text-[10px] text-slate-400 mt-2">
+                            <p className="text-[10px] text-cocoa-400 mt-2">
                                 Placeholder: {'{product_name}'}, {'{price}'}, {'{qty}'}
                             </p>
                             {getFieldError('catalog.whatsapp_message_template') && (
-                                <p className="text-xs text-red-600 mt-1">
+                                <p className="text-xs text-danger-600 mt-1">
                                     {getFieldError('catalog.whatsapp_message_template')}
                                 </p>
                             )}
@@ -517,14 +517,14 @@ export default function SettingsTab() {
                 </div>
 
                 <div className="md:col-span-2 bg-white/40 backdrop-blur-xl border border-white/60 rounded-4xl p-6 shadow-sm">
-                    <h3 className="font-bold text-lg text-slate-800 mb-2 flex items-center gap-2">
-                        <Landmark size={20} className="text-slate-400" /> Pembayaran Pesanan Online
+                    <h3 className="font-bold text-lg text-cocoa-800 mb-2 flex items-center gap-2">
+                        <Landmark size={20} className="text-cocoa-400" /> Pembayaran Pesanan Online
                     </h3>
-                    <p className="mb-6 text-sm text-slate-500">Informasi ini akan ditampilkan saat pelanggan memilih transfer bank atau QRIS.</p>
+                    <p className="mb-6 text-sm text-cocoa-500">Informasi ini akan ditampilkan saat pelanggan memilih transfer bank atau QRIS.</p>
 
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Bank</label>
+                            <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">Nama Bank</label>
                             <input
                                 type="text"
                                 value={settings.online_order.payment.bank_name}
@@ -536,11 +536,11 @@ export default function SettingsTab() {
                                     },
                                 })}
                                 placeholder="Contoh: BCA"
-                                className="w-full p-4 bg-white/60 border border-white/60 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none"
+                                className="w-full p-4 bg-white/60 border border-white/60 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-snack-200 outline-none"
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nomor Rekening</label>
+                            <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">Nomor Rekening</label>
                             <input
                                 type="text"
                                 value={settings.online_order.payment.bank_account_number}
@@ -552,11 +552,11 @@ export default function SettingsTab() {
                                     },
                                 })}
                                 placeholder="Contoh: 1234567890"
-                                className="w-full p-4 bg-white/60 border border-white/60 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none"
+                                className="w-full p-4 bg-white/60 border border-white/60 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-snack-200 outline-none"
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Atas Nama</label>
+                            <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">Atas Nama</label>
                             <input
                                 type="text"
                                 value={settings.online_order.payment.bank_account_name}
@@ -568,14 +568,14 @@ export default function SettingsTab() {
                                     },
                                 })}
                                 placeholder="Contoh: Cahaya Rasa"
-                                className="w-full p-4 bg-white/60 border border-white/60 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none"
+                                className="w-full p-4 bg-white/60 border border-white/60 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-snack-200 outline-none"
                             />
                         </div>
                     </div>
 
                     <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,1fr)_220px]">
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Instruksi Pembayaran</label>
+                            <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">Instruksi Pembayaran</label>
                             <textarea
                                 rows={5}
                                 value={settings.online_order.payment.instructions}
@@ -586,12 +586,12 @@ export default function SettingsTab() {
                                         payment: { ...settings.online_order.payment, instructions: event.target.value },
                                     },
                                 })}
-                                className="w-full resize-none p-4 bg-white/60 border border-white/60 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none"
+                                className="w-full resize-none p-4 bg-white/60 border border-white/60 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-snack-200 outline-none"
                             />
                         </div>
                         <div>
-                            <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">QRIS</span>
-                            <label className="flex h-[180px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 bg-white/60 text-slate-400 transition-colors hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-500">
+                            <span className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">QRIS</span>
+                            <label className="flex h-[180px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-cocoa-300 bg-white/60 text-cocoa-400 transition-colors hover:border-snack-400 hover:bg-snack-50 hover:text-snack-500">
                                 {settings.online_order.payment.qris_image_url ? (
                                     <img src={settings.online_order.payment.qris_image_url} alt="QRIS toko" className="h-full w-full object-contain p-3" />
                                 ) : (
@@ -608,7 +608,7 @@ export default function SettingsTab() {
                                     onChange={handleQrisImageChange}
                                 />
                             </label>
-                            <p className="mt-2 flex items-center gap-1 text-[11px] text-slate-400">
+                            <p className="mt-2 flex items-center gap-1 text-[11px] text-cocoa-400">
                                 {isUploadingQris ? <Loader2 size={12} className="animate-spin" /> : <UploadCloud size={12} />}
                                 {isUploadingQris ? 'Mengunggah QRIS...' : 'JPG, PNG, atau WEBP, maks. 4 MB.'}
                             </p>
@@ -622,7 +622,7 @@ export default function SettingsTab() {
                 <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="flex w-full items-center justify-center gap-2 px-8 py-4 bg-slate-800 text-white rounded-2xl font-bold shadow-xl shadow-slate-300 hover:bg-slate-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto"
+                    className="flex w-full items-center justify-center gap-2 px-8 py-4 bg-cocoa-800 text-white rounded-2xl font-bold shadow-xl shadow-cocoa-300 hover:bg-cocoa-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto"
                 >
                     {saving ? (
                         <>

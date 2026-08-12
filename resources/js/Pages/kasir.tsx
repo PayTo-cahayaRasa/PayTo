@@ -489,12 +489,12 @@ export default function PosInterface() {
 
     return (
         // Main Background
-        <div className="min-h-screen lg:h-screen w-full bg-[#f3f4f6] relative flex flex-col lg:flex-row font-sans overflow-x-hidden lg:overflow-hidden text-slate-800 selection:bg-indigo-500 selection:text-white">
+        <div className="min-h-screen lg:h-screen w-full bg-cream-50 relative flex flex-col lg:flex-row font-sans overflow-x-hidden lg:overflow-hidden text-cocoa-800 selection:bg-snack-500 selection:text-white">
 
             {/* Background Ambience */}
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-200 rounded-full blur-[120px] opacity-40 animate-pulse-slow pointer-events-none"></div>
-            <div className="absolute bottom-[-10%] left-[20%] w-[30%] h-[30%] bg-blue-200 rounded-full blur-[100px] opacity-40 pointer-events-none"></div>
-            <div className="absolute top-[20%] right-[40%] w-[25%] h-[25%] bg-indigo-200 rounded-full blur-[100px] opacity-30 pointer-events-none"></div>
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-caramel-200 rounded-full blur-[120px] opacity-40 animate-pulse-slow pointer-events-none"></div>
+            <div className="absolute bottom-[-10%] left-[20%] w-[30%] h-[30%] bg-cream-200 rounded-full blur-[100px] opacity-40 pointer-events-none"></div>
+            <div className="absolute top-[20%] right-[40%] w-[25%] h-[25%] bg-snack-200 rounded-full blur-[100px] opacity-30 pointer-events-none"></div>
 
             {/* 1. SIDEBAR (Navigation) */}
             <div
@@ -515,7 +515,7 @@ export default function PosInterface() {
                     type="button"
                     aria-label="Tutup sidebar"
                     onClick={() => setIsSidebarOpen(false)}
-                    className="fixed inset-0 z-30 bg-slate-900/40 lg:hidden"
+                    className="fixed inset-0 z-30 bg-cocoa-900/40 lg:hidden"
                 />
             )}
 
@@ -674,25 +674,25 @@ export default function PosInterface() {
                     {lastPaymentSummary?.invoiceNo && (
                         <div className="flex justify-between">
                             <span>Invoice</span>
-                            <span className="font-mono font-bold text-slate-700">{lastPaymentSummary.invoiceNo}</span>
+                            <span className="font-mono font-bold text-cocoa-700">{lastPaymentSummary.invoiceNo}</span>
                         </div>
                     )}
                     <div className="flex justify-between">
                         <span>Metode</span>
-                        <span className="font-bold text-slate-700">{lastPaymentSummary?.method === 'CASH' ? 'Tunai' : 'QRIS'}</span>
+                        <span className="font-bold text-cocoa-700">{lastPaymentSummary?.method === 'CASH' ? 'Tunai' : 'QRIS'}</span>
                     </div>
                     <div className="flex justify-between">
                         <span>Total</span>
-                        <span className="font-mono font-bold text-slate-700">{formatRupiah(lastPaymentSummary?.total ?? 0)}</span>
+                        <span className="font-mono font-bold text-cocoa-700">{formatRupiah(lastPaymentSummary?.total ?? 0)}</span>
                     </div>
                     <div className="flex justify-between">
                         <span>Dibayar</span>
-                        <span className="font-mono font-bold text-slate-700">{formatRupiah(lastPaymentSummary?.paidTotal ?? 0)}</span>
+                        <span className="font-mono font-bold text-cocoa-700">{formatRupiah(lastPaymentSummary?.paidTotal ?? 0)}</span>
                     </div>
                     {lastPaymentSummary?.method === 'CASH' && (
                         <div className="flex justify-between">
                             <span>Kembalian</span>
-                            <span className="font-mono font-bold text-emerald-600">
+                            <span className="font-mono font-bold text-leaf-600">
                                 {lastPaymentSummary?.change >= 0 ? formatRupiah(lastPaymentSummary.change).replace(",00", "") : '-'}
                             </span>
                         </div>
@@ -723,17 +723,17 @@ export default function PosInterface() {
             >
                 <div className="space-y-4">
                     {refundError && (
-                        <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600">
+                        <div className="rounded-xl border border-danger-200 bg-danger-50 px-3 py-2 text-xs font-semibold text-danger-600">
                             {refundError}
                         </div>
                     )}
                     <div className="space-y-3">
                         {refundTarget?.itemsDetail.map((item) => (
-                            <div key={item.id} className="flex flex-col gap-2 rounded-xl border border-slate-200/70 bg-white/80 p-3">
+                            <div key={item.id} className="flex flex-col gap-2 rounded-xl border border-cocoa-200/70 bg-white/80 p-3">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm font-semibold text-slate-800">{item.name}</p>
-                                        <p className="text-xs text-slate-500">
+                                        <p className="text-sm font-semibold text-cocoa-800">{item.name}</p>
+                                        <p className="text-xs text-cocoa-500">
                                             Sisa {item.refundableQty} × {formatRupiah(item.refundUnitPrice).replace(',00', '')}
                                         </p>
                                     </div>
@@ -755,13 +755,13 @@ export default function PosInterface() {
                                             const clamped = Math.max(0, Math.min(numeric, item.refundableQty));
                                             setRefundQuantities(prev => ({ ...prev, [item.id]: clamped ? clamped.toString() : '' }));
                                         }}
-                                        className="w-28 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700"
+                                        className="w-28 rounded-xl border border-cocoa-200 bg-white px-3 py-2 text-xs font-semibold text-cocoa-700"
                                         placeholder="0"
                                         disabled={item.refundableQty <= 0}
                                     />
                                 </div>
                                 {item.refundedQty > 0 && (
-                                    <p className="text-[10px] text-amber-600">
+                                    <p className="text-[10px] text-snack-600">
                                         Sudah direfund: {item.refundedQty}
                                     </p>
                                 )}
@@ -770,11 +770,11 @@ export default function PosInterface() {
                     </div>
                     <div className="space-y-2">
                         <div>
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Alasan Refund</label>
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-cocoa-400">Alasan Refund</label>
                             <textarea
                                 value={refundReason}
                                 onChange={(event) => setRefundReason(event.target.value)}
-                                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
+                                className="mt-1 w-full rounded-xl border border-cocoa-200 bg-white px-3 py-2 text-xs font-medium text-cocoa-700"
                                 rows={3}
                                 placeholder="Tuliskan alasan refund (min. 10 karakter)"
                             />
@@ -793,7 +793,7 @@ export default function PosInterface() {
             >
                 <div className="flex items-center justify-between">
                     <span>Total refund</span>
-                    <span className="font-mono font-bold text-emerald-600">
+                    <span className="font-mono font-bold text-leaf-600">
                         {formatRupiah(refundSuccess?.total ?? 0).replace(',00', '')}
                     </span>
                 </div>

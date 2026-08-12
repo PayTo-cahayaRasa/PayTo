@@ -28,7 +28,7 @@ export function MinimalPagination({ currentPage, totalPages, onPageChange }: Min
                             key={page}
                             onClick={() => onPageChange(page)}
                             className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${
-                                page === currentPage ? 'bg-[#3a2117] text-white' : 'text-[#8d6b4e]'
+                                page === currentPage ? 'bg-[var(--color-cocoa-800)] text-white' : 'text-[#8d6b4e]'
                             }`}
                         >
                             {page}
