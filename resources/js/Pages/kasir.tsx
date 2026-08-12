@@ -109,7 +109,7 @@ export default function PosInterface() {
         };
     }, []);
 
-    const { products: serverProducts = [], history: serverHistory = [], profile: serverProfile = {} } = usePage().props as any;
+    const { products: serverProducts = [], history: serverHistory = [], profile: serverProfile = {}, payment = {} } = usePage().props as any;
 
     const [productsData, setProductsData] = useState<any[]>(Array.isArray(serverProducts) ? serverProducts : []);
     const [historyData, setHistoryData] = useState<any[]>(Array.isArray(serverHistory) ? serverHistory : []);
@@ -643,6 +643,7 @@ export default function PosInterface() {
                 totalDue={totalDue}
                 subtotal={subtotal}
                 change={change}
+                qrisImageUrl={payment.qris_image_url}
                 formatRupiah={formatRupiah}
             />
 
