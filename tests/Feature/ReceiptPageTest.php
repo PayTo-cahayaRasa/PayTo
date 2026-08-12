@@ -115,16 +115,28 @@ class ReceiptPageTest extends TestCase
         $this->assertStringStartsWith('%PDF', $response->getContent());
     }
 
-    public function test_cashier_cannot_access_other_cashier_receipt(): void
+    public function test_cashier_can_download_another_cashiers_receipt_pdf(): void
+    {
+        $cashier = $this->createCashier();
+        $saleOwner = $this->createCashier('Kasir Sebelumnya', 'kasir-sebelumnya');
+        $sale = $this->createSaleWithItems($saleOwner);
+
+        $response = $this->actingAs($cashier)->get(route('pos.receipt.download', $sale));
+
+        $response->assertOk()
+            ->assertHeader('content-type', 'application/pdf')
+            ->assertHeader('content-disposition', "attachment; filename=struk-{$sale->id}.pdf");
+    }
+
+    public function test_cashier_can_access_other_cashier_receipt(): void
     {
         $cashier1 = $this->createCashier('Kasir Satu', 'kasir1');
         $cashier2 = $this->createCashier('Kasir Dua', 'kasir2');
         $sale = $this->createSaleWithItems($cashier1);
 
-        // cashier2 tries to access cashier1's receipt
         $response = $this->actingAs($cashier2)->get(route('pos.receipt', $sale));
 
-        $response->assertForbidden();
+        $response->assertOk();
     }
 
     public function test_supervisor_can_access_any_receipt_page(): void
