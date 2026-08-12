@@ -47,6 +47,22 @@ html {
     }
 }
 
+@keyframes notification-progress {
+    from {
+        transform: scaleX(1);
+    }
+
+    to {
+        transform: scaleX(0);
+    }
+}
+
+.notification-progress {
+    animation-name: notification-progress;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}
+
 .hero-product-float {
     animation: hero-product-float 6.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
     will-change: transform;

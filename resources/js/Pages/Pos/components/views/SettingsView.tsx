@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Printer } from 'lucide-react';
+import { logDevelopmentError, useNotification } from '../../../../Components/notifications/NotificationProvider';
 
 export default function SettingsView() {
+    const notification = useNotification();
     const [printerName, setPrinterName] = useState('');
     const [printerStatus, setPrinterStatus] = useState<'connected' | 'not_connected'>('not_connected');
     const [isTesting, setIsTesting] = useState(false);
@@ -19,6 +21,7 @@ export default function SettingsView() {
                 setPrinterName(data.printer?.name ?? '');
                 setPrinterStatus(data.printer?.status ?? 'not_connected');
             } catch (e) {
+                logDevelopmentError('load printer settings', e);
                 // silent
             }
         }
@@ -38,7 +41,10 @@ export default function SettingsView() {
                 name: printerName.trim(),
             });
             setPrinterStatus(res.data?.data?.status ?? 'connected');
+            notification.success('Printer berhasil dihubungkan.');
         } catch (e) {
+            logDevelopmentError('save printer settings', e);
+            notification.error('Gagal menghubungkan printer. Coba lagi.');
             // silent
         } finally {
             setIsSaving(false);
@@ -49,7 +55,10 @@ export default function SettingsView() {
         setIsTesting(true);
         try {
             await axios.post('/api/pos/settings/printer/test');
+            notification.success('Perintah test print berhasil dikirim.');
         } catch (e) {
+            logDevelopmentError('test printer', e);
+            notification.error('Gagal mengirim test print. Coba lagi.');
             // silent
         } finally {
             setIsTesting(false);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Services\Settings\AppSettingsService;
 use App\Services\WhatsAppLinkBuilder;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -73,6 +74,8 @@ class StorefrontController extends Controller
         $price = (float) $product->price;
         $discount = (float) ($product->discount ?? 0);
         $finalPrice = max(0, $price - (($price * $discount) / 100));
+        /** @var FilesystemAdapter $publicDisk */
+        $publicDisk = Storage::disk('public');
 
         return [
             'id' => $product->id,
@@ -85,7 +88,7 @@ class StorefrontController extends Controller
             'category' => $product->category,
             'description' => $product->description,
             'stock' => (float) ($product->stockItem?->on_hand ?? 0),
-            'imageUrl' => $product->image_path ? Storage::disk('public')->url($product->image_path) : null,
+            'imageUrl' => $product->image_path ? $publicDisk->url($product->image_path) : null,
             'whatsappUrl' => $this->whatsAppLinks->buildProductLink($product),
         ];
     }
