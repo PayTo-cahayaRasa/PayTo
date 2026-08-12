@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Product;
-use Database\Seeders\ProductReportSeeder;
+use Database\Seeders\StorefrontSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -33,13 +33,13 @@ class ProductSlugTest extends TestCase
         $this->assertSame('kopi-susu-2', $secondProduct->slug);
     }
 
-    public function test_product_report_seeder_includes_required_slugs(): void
+    public function test_storefront_seeder_includes_required_slugs(): void
     {
-        $this->seed(ProductReportSeeder::class);
+        $this->seed(StorefrontSeeder::class);
 
         $this->assertDatabaseHas('products', [
-            'sku' => 'COF-ESP-001',
-            'slug' => 'single-origin-espresso',
+            'sku' => 'CR-001',
+            'slug' => 'kripik-pisang',
         ]);
     }
 }

@@ -57,11 +57,13 @@ export default function DashboardTab() {
                 if (!isActive) {
                     return;
                 }
+
                 setDashboard(response.data?.data ?? null);
             } catch (error) {
                 if (!isActive) {
                     return;
                 }
+
                 setErrorMessage('Gagal memuat data dashboard.');
             } finally {
                 if (isActive) {
@@ -70,7 +72,7 @@ export default function DashboardTab() {
             }
         };
 
-        fetchDashboard();
+        void fetchDashboard();
 
         return () => {
             isActive = false;
@@ -89,12 +91,12 @@ export default function DashboardTab() {
     return (
         <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
             {errorMessage ? (
-                <div className="bg-rose-50 text-rose-600 border border-rose-200 rounded-2xl px-4 py-3 text-sm font-semibold">
+                <div className="rounded-2xl border border-[#efc9bf] bg-[#fff3ee] px-4 py-3 text-sm font-semibold text-[#a44b39]">
                     {errorMessage}
                 </div>
             ) : null}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                 <StatCard
                     title="Total Penjualan Hari Ini"
                     value={currencyFormatter.format(dashboard?.today_sales_total ?? 0)}
@@ -113,113 +115,129 @@ export default function DashboardTab() {
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem] p-6 shadow-sm min-h-[300px] lg:col-span-2">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="font-bold text-slate-800">Trend Penjualan (7 Hari)</h3>
-                        <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg">Real-time</span>
+                <section className="min-h-[300px] rounded-[2rem] border border-[#eadfcf] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(249,243,234,0.92))] p-6 shadow-[0_24px_44px_-36px_rgba(58,33,23,0.28)] lg:col-span-2">
+                    <div className="mb-6 flex items-center justify-between">
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8e6847]">Ringkasan mingguan</p>
+                            <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#2f241c]">Trend Penjualan (7 Hari)</h3>
+                        </div>
+                        <span className="rounded-full bg-[#edf5ee] px-3 py-1 text-xs font-semibold text-[#375c3f]">Real-time</span>
                     </div>
-                    <div className="flex items-end justify-between h-48 gap-4 px-4">
+
+                    <div className="flex h-48 items-end justify-between gap-4 px-4">
                         {isLoading ? (
                             Array.from({ length: 7 }).map((_, index) => (
-                                <div key={index} className="w-full bg-indigo-100/70 rounded-t-xl animate-pulse">
+                                <div key={index} className="w-full rounded-t-xl bg-[#efe5d8] animate-pulse">
                                     <div className="h-10"></div>
                                 </div>
                             ))
                         ) : weeklyTrend.length ? (
-                            weeklyTrend.map((point, index) => {
+                            weeklyTrend.map((point) => {
                                 const height = maxTrend > 0 ? Math.round((point.total / maxTrend) * 100) : 0;
+
                                 return (
-                                    <div key={point.date} className="w-full bg-indigo-100 rounded-t-xl relative group">
+                                    <div key={point.date} className="group relative w-full rounded-t-xl bg-[#f1e6d7]">
                                         <div
                                             style={{ height: `${height}%` }}
-                                            className="absolute bottom-0 w-full bg-indigo-500 rounded-t-xl transition-all group-hover:bg-indigo-600"
+                                            className="absolute bottom-0 w-full rounded-t-xl bg-[#375c3f] transition-all group-hover:bg-[#2f4d35]"
                                         ></div>
-                                        <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-slate-500 opacity-0 group-hover:opacity-100 transition">
+                                        <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-[#8d6b4e] opacity-0 transition group-hover:opacity-100">
                                             {currencyFormatter.format(point.total)}
                                         </span>
                                     </div>
                                 );
                             })
                         ) : (
-                            <div className="text-sm text-slate-400">Belum ada data penjualan.</div>
+                            <div className="rounded-[1.5rem] border border-dashed border-[#dfcfbb] bg-[#fffdf9] px-4 py-5 text-sm text-[#806049]">
+                                Belum ada data penjualan minggu ini.
+                            </div>
                         )}
                     </div>
-                    <div className="flex justify-between mt-4 text-xs text-slate-400 font-medium px-2">
+
+                    <div className="mt-4 flex justify-between px-2 text-xs font-medium text-[#9b7a5c]">
                         {weeklyTrend.length
-                            ? weeklyTrend.map(point => {
+                            ? weeklyTrend.map((point) => {
                                 const dayIndex = new Date(point.date).getDay();
                                 return <span key={point.date}>{dayLabels[dayIndex]}</span>;
                             })
-                            : dayLabels.map(label => <span key={label}>{label}</span>)}
+                            : dayLabels.map((label) => <span key={label}>{label}</span>)}
                     </div>
-                </div>
+                </section>
 
-                <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem] p-6 shadow-sm lg:col-span-1">
-                    <h3 className="font-bold text-slate-800 mb-4">Aktivitas Terkini</h3>
+                <section className="rounded-[2rem] border border-[#eadfcf] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(249,243,234,0.92))] p-6 shadow-[0_24px_44px_-36px_rgba(58,33,23,0.28)] lg:col-span-1">
+                    <h3 className="mb-4 text-xl font-semibold tracking-[-0.03em] text-[#2f241c]">Aktivitas Terkini</h3>
                     <div className="space-y-4">
                         {isLoading ? (
                             Array.from({ length: 3 }).map((_, index) => (
-                                <div key={index} className="flex gap-3 items-start animate-pulse">
-                                    <div className="w-8 h-8 rounded-full bg-slate-200 shrink-0 mt-0.5"></div>
+                                <div key={index} className="flex items-start gap-3 animate-pulse">
+                                    <div className="mt-0.5 h-8 w-8 shrink-0 rounded-full bg-[#efe5d8]"></div>
                                     <div className="flex-1 space-y-2">
-                                        <div className="h-3 bg-slate-200 rounded w-3/4"></div>
-                                        <div className="h-2 bg-slate-200 rounded w-2/3"></div>
+                                        <div className="h-3 w-3/4 rounded bg-[#efe5d8]"></div>
+                                        <div className="h-2 w-2/3 rounded bg-[#efe5d8]"></div>
                                     </div>
                                 </div>
                             ))
-                        ) : (dashboard?.recent_activities?.length ? (
-                            dashboard.recent_activities.map(activity => (
-                                <div key={activity.id} className="flex gap-3 items-start">
-                                    <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                        ) : dashboard?.recent_activities?.length ? (
+                            dashboard.recent_activities.map((activity) => (
+                                <div key={activity.id} className="flex items-start gap-3">
+                                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#edf5ee] text-[#375c3f]">
                                         <CheckCircle size={14} />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-bold text-slate-700">{activity.title}</p>
-                                        <p className="text-xs text-slate-500">
-                                            {currencyFormatter.format(activity.amount)} • {activity.method} • {activity.cashier}
+                                        <p className="text-sm font-semibold text-[#2f241c]">{activity.title}</p>
+                                        <p className="text-xs text-[#806049]">
+                                            {currencyFormatter.format(activity.amount)} | {activity.method} | {activity.cashier}
                                         </p>
-                                        <p className="text-[10px] text-slate-400 mt-0.5">{activity.time}</p>
+                                        <p className="mt-0.5 text-[10px] text-[#a3886c]">{activity.time}</p>
                                     </div>
                                 </div>
                             ))
                         ) : (
-                            <p className="text-sm text-slate-400">Belum ada aktivitas terbaru.</p>
-                        ))}
+                            <div className="rounded-[1.6rem] border border-dashed border-[#dfcfbb] bg-[#fffdf9] px-4 py-5 text-sm text-[#806049]">
+                                Belum ada aktivitas terbaru. Riwayat transaksi dan approval akan muncul di sini setelah operasional berjalan.
+                            </div>
+                        )}
                     </div>
-                </div>
+                </section>
             </div>
 
-            <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem] p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-slate-800">Stok Hampir Habis</h3>
-                    <span className="text-xs text-slate-500">Top {dashboard?.low_stock?.items?.length ?? 0}</span>
+            <section className="rounded-[2rem] border border-[#eadfcf] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(249,243,234,0.92))] p-6 shadow-[0_24px_44px_-36px_rgba(58,33,23,0.28)]">
+                <div className="mb-4 flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8e6847]">Kontrol stok</p>
+                        <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#2f241c]">Stok Hampir Habis</h3>
+                    </div>
+                    <span className="text-xs text-[#8d6b4e]">Top {dashboard?.low_stock?.items?.length ?? 0}</span>
                 </div>
+
                 <div className="space-y-3">
                     {isLoading ? (
                         Array.from({ length: 3 }).map((_, index) => (
                             <div key={index} className="flex items-center justify-between gap-4 animate-pulse">
-                                <div className="h-3 bg-slate-200 rounded w-1/2"></div>
-                                <div className="h-3 bg-slate-200 rounded w-1/4"></div>
+                                <div className="h-3 w-1/2 rounded bg-[#efe5d8]"></div>
+                                <div className="h-3 w-1/4 rounded bg-[#efe5d8]"></div>
                             </div>
                         ))
-                    ) : (dashboard?.low_stock?.items?.length ? (
-                        dashboard.low_stock.items.map(item => (
-                            <div key={item.id} className="flex items-center justify-between gap-4">
+                    ) : dashboard?.low_stock?.items?.length ? (
+                        dashboard.low_stock.items.map((item) => (
+                            <div key={item.id} className="flex items-center justify-between gap-4 rounded-2xl border border-[#f0e4d5] bg-white/75 px-4 py-3">
                                 <div>
-                                    <p className="text-sm font-semibold text-slate-700">{item.name}</p>
-                                    <p className="text-xs text-slate-400">{item.sku ?? 'Tanpa SKU'}</p>
+                                    <p className="text-sm font-semibold text-[#2f241c]">{item.name}</p>
+                                    <p className="text-xs text-[#8d6b4e]">{item.sku ?? 'Tanpa SKU'}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-bold text-rose-600">{item.stock ?? 0}</p>
-                                    <p className="text-[10px] text-slate-400">stok tersedia</p>
+                                    <p className="text-sm font-semibold text-[#b76046]">{item.stock ?? 0}</p>
+                                    <p className="text-[10px] text-[#a3886c]">stok tersedia</p>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <p className="text-sm text-slate-400">Semua stok aman saat ini.</p>
-                    ))}
+                        <div className="rounded-[1.6rem] border border-dashed border-[#d8cdbd] bg-[#fffdf9] px-4 py-5 text-sm text-[#806049]">
+                            Semua stok aman saat ini. Daftar prioritas restock akan muncul otomatis saat barang mendekati batas aman.
+                        </div>
+                    )}
                 </div>
-            </div>
+            </section>
         </div>
     );
 }

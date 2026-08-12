@@ -16,6 +16,8 @@
 /public/build
 /public/hot
 /public/storage
+/bootstrap/ssr
+public/.flyenv
 /storage/*.key
 /storage/pail
 /vendor
@@ -26,3 +28,17 @@ Thumbs.db
 opencode.json
 
 task.md
+SECURITY_REVIEW.md
+BUG_REPORT.md
+
+/docs/
+/docs/ai/
+
+# Agent/skill configs (personal workspace - do not commit)
+/.agents/
+/.github/tugas.md
+/.github/skills/
+/.github/copilot-instructions.md
+
+# Temp files
+tmp-*.png

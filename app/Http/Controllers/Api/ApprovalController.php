@@ -28,11 +28,39 @@ class ApprovalController extends Controller
     public function index(Request $request): JsonResponse
     {
         $status = $request->query('status');
+        $user = $request->user();
 
         $approvals = Approval::query()
             ->with(['requester', 'approver', 'sale'])
             ->when($status, fn ($query) => $query->where('status', strtoupper((string) $status)))
+            ->when(
+                $user->role !== 'SUPERVISOR',
+                fn ($query) => $query->where('requested_by', $user->id)
+            )
             ->orderByDesc('created_at')
+            ->get();
+
+        return response()->json([
+            'data' => $approvals->map(fn (Approval $approval) => $this->formatApproval($approval))->values()->all(),
+        ]);
+    }
+
+    /**
+     * Get pending approvals (supervisor only)
+     */
+    public function pending(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Only supervisors can view all pending approvals
+        if ($user->role !== 'SUPERVISOR') {
+            return response()->json(['message' => 'Akses ditolak.'], 403);
+        }
+
+        $approvals = Approval::query()
+            ->with(['requester', 'sale'])
+            ->where('status', 'PENDING')
+            ->orderBy('created_at')
             ->get();
 
         return response()->json([
@@ -42,26 +70,32 @@ class ApprovalController extends Controller
 
     public function approve(ApprovalApproveRequest $request, Approval $approval): JsonResponse
     {
-        if ($approval->status !== 'PENDING') {
-            return response()->json(['message' => 'Approval sudah diproses.'], 422);
-        }
-
         $approver = $this->resolveApprover($request);
         if (! $approver) {
             return response()->json(['message' => 'Supervisor tidak ditemukan.'], 422);
         }
 
-        if ($approval->action === 'REFUND') {
-            $result = $this->processRefundApproval($approval, $approver);
-            if ($result['status'] !== 'ok') {
-                return response()->json(['message' => $result['message']], 422);
+        $result = DB::transaction(function () use ($approval, $approver) {
+            $approval = Approval::query()->lockForUpdate()->findOrFail($approval->id);
+            if ($approval->status !== 'PENDING') {
+                return ['status' => 'error', 'message' => 'Approval sudah diproses.'];
             }
-        }
+            if ($approval->requested_by === $approver->id) {
+                return ['status' => 'error', 'message' => 'Permintaan sendiri tidak dapat disetujui.'];
+            }
+            if ($approval->action === 'REFUND') {
+                $result = $this->processRefundApproval($approval, $approver);
+                if ($result['status'] !== 'ok') {
+                    return $result;
+                }
+            }
+            $approval->update(['status' => 'APPROVED', 'approved_by' => $approver->id]);
 
-        $approval->update([
-            'status' => 'APPROVED',
-            'approved_by' => $approver->id,
-        ]);
+            return ['status' => 'ok', 'message' => 'ok'];
+        });
+        if ($result['status'] !== 'ok') {
+            return response()->json(['message' => $result['message']], 422);
+        }
 
         return response()->json([
             'data' => $this->formatApproval($approval->fresh(['requester', 'approver', 'sale'])),
@@ -71,24 +105,26 @@ class ApprovalController extends Controller
 
     public function reject(ApprovalRejectRequest $request, Approval $approval): JsonResponse
     {
-        if ($approval->status !== 'PENDING') {
-            return response()->json(['message' => 'Approval sudah diproses.'], 422);
-        }
-
         $approver = $this->resolveApprover($request);
         if (! $approver) {
             return response()->json(['message' => 'Supervisor tidak ditemukan.'], 422);
         }
 
-        $payload = is_array($approval->payload_json) ? $approval->payload_json : [];
-        $payload['rejection_reason'] = $request->validated()['reason'];
-        $payload['rejected_at'] = now()->toDateTimeString();
+        $updated = DB::transaction(function () use ($approval, $approver, $request) {
+            $approval = Approval::query()->lockForUpdate()->findOrFail($approval->id);
+            if ($approval->status !== 'PENDING' || $approval->requested_by === $approver->id) {
+                return false;
+            }
+            $payload = is_array($approval->payload_json) ? $approval->payload_json : [];
+            $payload['rejection_reason'] = $request->validated()['reason'];
+            $payload['rejected_at'] = now()->toDateTimeString();
+            $approval->update(['status' => 'REJECTED', 'approved_by' => $approver->id, 'payload_json' => $payload]);
 
-        $approval->update([
-            'status' => 'REJECTED',
-            'approved_by' => $approver->id,
-            'payload_json' => $payload,
-        ]);
+            return true;
+        });
+        if (! $updated) {
+            return response()->json(['message' => 'Approval tidak dapat diproses.'], 422);
+        }
 
         return response()->json([
             'data' => $this->formatApproval($approval->fresh(['requester', 'approver', 'sale'])),
@@ -106,19 +142,39 @@ class ApprovalController extends Controller
             ? $approval->occurred_at->locale('id')->diffForHumans()
             : $approval->created_at?->locale('id')->diffForHumans();
 
+        // Enhanced requester visibility
+        $requester = $approval->requester;
+        $sale = $approval->sale;
+
         return [
             'id' => $approval->id,
             'action' => $approval->action,
             'status' => $approval->status ?? 'PENDING',
-            'cashier' => $approval->requester?->name ?? 'Kasir',
+            // Basic info
+            'cashier' => $requester?->name ?? 'Kasir',
             'approver' => $approval->approver?->name,
             'reason' => $approval->reason,
             'time' => $time,
-            'saleInvoice' => $approval->sale
-                ? ($approval->sale->server_invoice_no ?: '#'.$approval->sale->id)
-                : null,
+            // Enhanced: Full requester details for supervisor visibility
+            'requester' => [
+                'id' => $requester?->id,
+                'name' => $requester?->name ?? 'Unknown',
+                'role' => $requester?->role ?? 'UNKNOWN',
+                'employee_id' => $requester ? sprintf('KSR-%03d', $requester->id) : null,
+            ],
+            // Enhanced: Sale details for cross-verification
+            'sale' => $sale ? [
+                'id' => $sale->id,
+                'invoice_no' => $sale->server_invoice_no ?: '#'.$sale->id,
+                'cashier_id' => $sale->cashier_id,
+                'total' => (float) $sale->grand_total,
+                'occurred_at' => $sale->occurred_at?->format('d/m/Y H:i'),
+            ] : null,
+            // Transaction details
             'total' => $total,
-            'itemsCount' => $itemsCount,
+            'items_count' => $itemsCount,
+            // Flag if requester is different from sale cashier (for audit)
+            'is_cross_cashier_request' => $sale && $requester && $sale->cashier_id !== $requester->id,
         ];
     }
 
@@ -132,7 +188,11 @@ class ApprovalController extends Controller
      */
     private function processRefundApproval(Approval $approval, User $approver): array
     {
-        $sale = Sale::query()->with(['items'])->find($approval->sale_id);
+        if (Refund::query()->where('approval_id', $approval->id)->exists()) {
+            return ['status' => 'ok', 'message' => 'ok'];
+        }
+
+        $sale = Sale::query()->with(['items'])->lockForUpdate()->find((int) $approval->sale_id);
         if (! $sale) {
             return ['status' => 'error', 'message' => 'Transaksi penjualan tidak ditemukan.'];
         }
@@ -216,6 +276,7 @@ class ApprovalController extends Controller
 
         DB::transaction(function () use ($approval, $approver, $refundItems, $refundTotal, $sale) {
             $refund = Refund::query()->create([
+                'approval_id' => $approval->id,
                 'sale_id' => $sale->id,
                 'requested_by' => $approval->requested_by,
                 'approved_by' => $approver->id,

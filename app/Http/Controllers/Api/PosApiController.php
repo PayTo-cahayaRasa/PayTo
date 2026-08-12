@@ -10,26 +10,31 @@ use Illuminate\Http\Request;
 
 class PosApiController extends Controller
 {
+    public function __construct(
+        private readonly ProductQueryController $productQuery,
+        private readonly HistoryQueryController $historyQuery,
+        private readonly ProfileQueryController $profileQuery
+    ) {}
+
     public function products(Request $request)
     {
-        $controller = new ProductQueryController;
-
-        return response()->json(['data' => $controller->fetch()]);
+        return response()->json(['data' => $this->productQuery->fetch()]);
     }
 
     public function history(Request $request)
     {
-        $controller = new HistoryQueryController;
         $page = (int) $request->query('page', 1);
         $perPage = (int) $request->query('per_page', 10);
         $startDate = $request->query('start_date');
         $endDate = $request->query('end_date');
+        $source = $request->query('source');
         $userId = $request->user()->id;
 
-        $result = $controller->fetchPaginated($page, $perPage, [
+        $result = $this->historyQuery->fetchPaginated($page, $perPage, [
             'userId' => $userId,
             'startDate' => $startDate ? (string) $startDate : null,
             'endDate' => $endDate ? (string) $endDate : null,
+            'source' => in_array($source, ['WALK_IN', 'WHATSAPP'], true) ? (string) $source : null,
         ]);
 
         return response()->json($result);
@@ -37,9 +42,7 @@ class PosApiController extends Controller
 
     public function profile(Request $request)
     {
-        $userId = $request->query('user_id');
-        $controller = new ProfileQueryController;
-
-        return response()->json(['data' => $controller->fetch($userId ? (int) $userId : null)]);
+        // Always use authenticated user, ignore any user_id query parameter
+        return response()->json(['data' => $this->profileQuery->fetch(null)]);
     }
 }

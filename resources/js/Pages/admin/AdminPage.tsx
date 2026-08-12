@@ -33,10 +33,6 @@ export default function AdminPage() {
     const notificationRef = useRef<HTMLDivElement>(null);
     const userMenuRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        const isLoggedIn = localStorage.getItem('pos_logged_in') === 'true';
-        const role = localStorage.getItem('pos_role');
-    }, []);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -119,8 +115,6 @@ export default function AdminPage() {
             return;
         }
 
-        localStorage.removeItem('pos_logged_in');
-        localStorage.removeItem('pos_role');
         window.location.assign('/login');
     };
 
@@ -129,9 +123,10 @@ export default function AdminPage() {
     };
 
     return (
-        <div className="min-h-screen w-full bg-[#f3f4f6] flex font-sans text-slate-800 overflow-x-hidden overflow-y-hidden relative selection:bg-indigo-500 selection:text-white">
-            <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-indigo-200 rounded-full blur-[120px] opacity-30 animate-pulse-slow"></div>
-            <div className="absolute bottom-[0%] left-[0%] w-[30%] h-[30%] bg-blue-200 rounded-full blur-[100px] opacity-30"></div>
+        <div className="relative flex min-h-screen w-full overflow-x-hidden overflow-y-hidden bg-[radial-gradient(circle_at_top_left,_rgba(248,236,217,0.84),_transparent_26%),radial-gradient(circle_at_bottom_left,_rgba(219,233,223,0.7),_transparent_30%),linear-gradient(180deg,#f7f0e6_0%,#f2e9dd_100%)] font-sans text-[#2f241c] selection:bg-[#375c3f] selection:text-white">
+            <div className="pointer-events-none absolute inset-0 opacity-35 [background-image:radial-gradient(rgba(120,89,62,0.09)_0.8px,transparent_0.8px)] [background-size:18px_18px]"></div>
+            <div className="pointer-events-none absolute right-0 top-0 h-56 w-56 rounded-full bg-[#ede0cb] blur-3xl"></div>
+            <div className="pointer-events-none absolute bottom-8 left-8 h-48 w-48 rounded-full bg-[#dce8dd] blur-3xl"></div>
 
             <div
                 className={`fixed inset-y-0 left-0 z-30 transition-transform duration-300 lg:static lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
@@ -148,7 +143,7 @@ export default function AdminPage() {
                     type="button"
                     aria-label="Tutup sidebar"
                     onClick={() => setIsSidebarOpen(false)}
-                    className="fixed inset-0 z-20 bg-slate-900/40 lg:hidden"
+                    className="fixed inset-0 z-20 bg-[#2f241c]/28 backdrop-blur-[2px] lg:hidden"
                 />
             )}
 
@@ -176,7 +171,7 @@ export default function AdminPage() {
                     isSidebarOpen={isSidebarOpen}
                 />
 
-                <div className="flex-1 min-w-0 overflow-y-auto px-4 pb-8 custom-scrollbar-light sm:px-6 lg:px-8">
+                <div className="custom-scrollbar-light min-w-0 flex-1 overflow-y-auto px-4 pb-8 sm:px-6 lg:px-8">
                     {activeTab === 'DASHBOARD' && <DashboardTab />}
                     {activeTab === 'PROFILE' && <ProfileTab profile={adminProfile} />}
                     {activeTab === 'PRODUCTS' && <ProductsTab />}

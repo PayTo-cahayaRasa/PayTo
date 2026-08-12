@@ -15,8 +15,21 @@ class PosRefundTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_refund_and_approval_request_endpoints_are_hidden_while_disabled(): void
+    {
+        $cashier = User::factory()->create(['role' => 'CASHIER', 'is_active' => true]);
+        $supervisor = User::factory()->create(['role' => 'SUPERVISOR', 'is_active' => true]);
+
+        $this->actingAs($cashier)->postJson('/api/pos/refunds')->assertNotFound();
+        $this->actingAs($supervisor)->getJson('/api/admin/approvals')->assertNotFound();
+        $this->actingAs($supervisor)->getJson('/api/admin/approvals/pending')->assertNotFound();
+        $this->actingAs($supervisor)->postJson('/api/admin/approvals/1/approve')->assertNotFound();
+        $this->actingAs($supervisor)->postJson('/api/admin/approvals/1/reject')->assertNotFound();
+    }
+
     public function test_can_request_refund_and_process_approval(): void
     {
+        $this->markTestSkipped('Refund dan approval sementara dinonaktifkan.');
         $cashier = User::query()->forceCreate([
             'name' => 'Kasir',
             'username' => 'kasir',
@@ -103,7 +116,10 @@ class PosRefundTest extends TestCase
             'status' => 'PENDING',
         ]);
 
-        $this->actingAs($supervisor)->postJson("/api/admin/approvals/{$approvalId}/approve")
+        $this->actingAs($supervisor)->postJson("/api/admin/approvals/{$approvalId}/approve", [
+            'confirmed' => true,
+            'current_credential' => 'secret',
+        ])
             ->assertOk();
 
         $this->assertDatabaseHas('approvals', [
@@ -136,6 +152,7 @@ class PosRefundTest extends TestCase
 
     public function test_refund_rejected_when_window_expired(): void
     {
+        $this->markTestSkipped('Refund sementara dinonaktifkan.');
         $cashier = User::query()->forceCreate([
             'name' => 'Kasir',
             'username' => 'kasir2',

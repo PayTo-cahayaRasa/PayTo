@@ -86,6 +86,8 @@ class AuthenticationAuthorizationTest extends TestCase
 
         $response = $this->actingAs($cashier)->getJson('/api/pos/products');
         $response->assertStatus(200);
+
+        $this->actingAs($cashier)->getJson('/api/pos/profile')->assertOk();
     }
 
     /**
@@ -143,6 +145,20 @@ class AuthenticationAuthorizationTest extends TestCase
 
         $response = $this->actingAs($supervisor)->getJson('/api/admin/profile');
         $response->assertStatus(200);
+    }
+
+    public function test_authenticated_supervisor_is_not_rate_limited_on_admin_api(): void
+    {
+        $supervisor = User::factory()->create([
+            'role' => 'SUPERVISOR',
+            'is_active' => true,
+        ]);
+
+        for ($attempt = 0; $attempt < 61; $attempt++) {
+            $this->actingAs($supervisor)
+                ->getJson('/api/admin/profile')
+                ->assertOk();
+        }
     }
 
     /**

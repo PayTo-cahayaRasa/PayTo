@@ -16,15 +16,15 @@ export default function SidebarItem({ icon: Icon, label, id, isActive, onClick }
     return (
         <button
             onClick={onClick}
-            className={`w-full min-w-0 flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group ${isActive
-                ? 'bg-white shadow-md text-indigo-600'
-                : 'text-slate-500 hover:bg-white/50 hover:text-slate-700'
+            className={`group flex w-full min-w-0 items-center gap-3 rounded-2xl px-4 py-3 transition-all duration-300 ${isActive
+                ? 'bg-[#375c3f] text-white shadow-[0_20px_36px_-26px_rgba(55,92,63,0.72)]'
+                : 'text-[#6f5948] hover:bg-white/70 hover:text-[#2f241c]'
                 }`}
             data-tab-id={id}
         >
             <Icon size={20} className={isActive ? 'stroke-[2.5px]' : ''} />
             <span className="min-w-0 flex-1 font-medium text-sm truncate text-left">{label}</span>
-            {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-600"></div>}
+            {isActive && <div className="ml-auto h-2 w-2 rounded-full bg-[#f8ead6]"></div>}
         </button>
     );
 }

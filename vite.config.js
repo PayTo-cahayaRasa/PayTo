@@ -6,6 +6,7 @@ export default defineConfig({
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
+            ssr: 'resources/js/ssr.tsx',
             refresh: true,
         }),
         tailwindcss(),
@@ -16,6 +17,10 @@ export default defineConfig({
         },
     },
     server: {
+        host: '127.0.0.1',
+        hmr: {
+            host: '127.0.0.1',
+        },
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },

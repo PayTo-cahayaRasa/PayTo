@@ -2,7 +2,7 @@ import React from 'react';
 import { ChevronLeft, Menu, Search } from 'lucide-react';
 
 type HeaderBarProps = {
-    activeView: 'menu' | 'history' | 'favorites' | 'profile' | 'settings';
+    activeView: 'menu' | 'history' | 'favorites' | 'online-orders' | 'profile' | 'settings';
     searchQuery: string;
     onSearchChange: (value: string) => void;
     onBack: () => void;
@@ -53,6 +53,7 @@ export default function HeaderBar({
                         {activeView === 'menu' && <>Hi, <span className="bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-violet-600">{name}</span></>}
                         {activeView === 'history' && "Riwayat Transaksi"}
                         {activeView === 'favorites' && "Menu Favorit"}
+                        {activeView === 'online-orders' && "Pesanan Online"}
                         {activeView === 'profile' && "Profil Pengguna"}
                         {activeView === 'settings' && "Pengaturan Sistem"}
                     </h1>
@@ -60,7 +61,8 @@ export default function HeaderBar({
                         {activeView === 'menu' && "Siap melayani pesanan hari ini?"}
                         {activeView === 'history' && "Pantau semua aktivitas penjualan hari ini"}
                         {activeView === 'favorites' && "Akses cepat ke menu terlaris"}
-                        {activeView === 'profile' && "Informasi shift dan kinerja Anda"}
+                        {activeView === 'online-orders' && "Pantau dan proses pesanan dari storefront"}
+                        {activeView === 'profile' && "Ringkasan kinerja Anda hari ini"}
                         {activeView === 'settings' && "Kelola perangkat kasir"}
                     </p>
                 </div>

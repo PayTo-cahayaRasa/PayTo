@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -23,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if ($this->app->isProduction()) {
+        if (App::isProduction()) {
             URL::forceScheme('https');
         }
 
@@ -36,19 +37,45 @@ class AppServiceProvider extends ServiceProvider
     protected function configureRateLimiting(): void
     {
         RateLimiter::for('login', function (Request $request) {
-            return Limit::perMinute(5)->by($request->input('username').'|'.$request->ip());
+            if (strtoupper((string) $request->input('login_method')) === 'PIN') {
+                return Limit::perMinutes(5, 5)->by('pin-login:'.$request->ip());
+            }
+
+            return Limit::perMinute(5)->by((string) $request->input('username').'|'.$request->ip());
         });
 
         RateLimiter::for('checkout', function (Request $request) {
-            return Limit::perMinute(30)->by($request->user()?->id ?: $request->ip());
+            return Limit::perMinute(30)->by($request->user()?->getAuthIdentifier() ?: $request->ip());
         });
 
         RateLimiter::for('refund', function (Request $request) {
-            return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
+            return Limit::perMinute(10)->by($request->user()?->getAuthIdentifier() ?: $request->ip());
+        });
+
+        RateLimiter::for('sensitive-action', function (Request $request) {
+            return Limit::perMinutes(5, 5)->by('sensitive-action:'.($request->user()?->getAuthIdentifier() ?: $request->ip()));
         });
 
         RateLimiter::for('catalog', function (Request $request) {
             return Limit::perMinute(60)->by($request->ip());
+        });
+
+        // Admin API rate limiting - prevents abuse of admin endpoints
+        RateLimiter::for('admin-api', function (Request $request) {
+            if ($request->user()?->role === 'SUPERVISOR') {
+                return Limit::none();
+            }
+
+            return Limit::perMinute(60)->by(
+                'admin:'.($request->user()?->getAuthIdentifier() ?: $request->ip())
+            );
+        });
+
+        // Admin write operations - stricter rate limiting
+        RateLimiter::for('admin-write', function (Request $request) {
+            return Limit::perMinutes(5, 10)->by(
+                'admin-write:'.($request->user()?->getAuthIdentifier() ?: $request->ip())
+            );
         });
     }
 }

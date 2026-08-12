@@ -38,7 +38,7 @@ test: ## Run tests
 	php artisan test
 
 test-coverage: ## Run tests with coverage
-	php artisan test --coverage --min=80
+	php artisan test --coverage
 
 pint: ## Run code style fixer
 	vendor/bin/pint

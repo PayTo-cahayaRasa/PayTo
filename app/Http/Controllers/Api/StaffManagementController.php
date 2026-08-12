@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StaffDestroyRequest;
 use App\Http\Requests\StaffResetPinRequest;
 use App\Http\Requests\StaffStoreRequest;
 use App\Http\Requests\StaffUpdateRequest;
@@ -60,6 +61,15 @@ class StaffManagementController extends Controller
     {
         $payload = $request->validated();
 
+        $removesSupervisor = (isset($payload['role']) && $payload['role'] !== 'SUPERVISOR')
+            || (array_key_exists('is_active', $payload) && ! $payload['is_active']);
+        if ($request->user()->is($user) && $removesSupervisor) {
+            return response()->json(['message' => 'Supervisor tidak dapat menurunkan role atau menonaktifkan dirinya sendiri.'], 422);
+        }
+        if ($user->role === 'SUPERVISOR' && $removesSupervisor && $this->isLastActiveSupervisor($user)) {
+            return response()->json(['message' => 'Supervisor aktif terakhir tidak dapat diubah.'], 422);
+        }
+
         if (array_key_exists('name', $payload)) {
             $user->name = $payload['name'];
         }
@@ -103,13 +113,29 @@ class StaffManagementController extends Controller
         ]);
     }
 
-    public function destroy(User $user): JsonResponse
+    public function destroy(StaffDestroyRequest $request, User $user): JsonResponse
     {
+        if ($request->user()->is($user)) {
+            return response()->json(['message' => 'Supervisor tidak dapat menghapus dirinya sendiri.'], 422);
+        }
+        if ($user->role === 'SUPERVISOR' && $this->isLastActiveSupervisor($user)) {
+            return response()->json(['message' => 'Supervisor aktif terakhir tidak dapat dihapus.'], 422);
+        }
+
         $user->delete();
 
         return response()->json([
             'message' => 'Staf berhasil dihapus.',
         ]);
+    }
+
+    private function isLastActiveSupervisor(User $user): bool
+    {
+        return $user->is_active && ! User::query()
+            ->whereKeyNot($user->id)
+            ->where('role', 'SUPERVISOR')
+            ->where('is_active', true)
+            ->exists();
     }
 
     private function formatStaff(User $user): array

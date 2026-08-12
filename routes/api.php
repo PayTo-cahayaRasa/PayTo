@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AdminProfileController;
 use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\BusinessSettingsController;
 use App\Http\Controllers\Api\InventoryRecommendationController;
+use App\Http\Controllers\Api\OnlineOrderController;
 use App\Http\Controllers\Api\PosApiController;
 use App\Http\Controllers\Api\PosCheckoutController;
 use App\Http\Controllers\Api\PosRefundController;
@@ -12,43 +13,90 @@ use App\Http\Controllers\Api\PosSettingsController;
 use App\Http\Controllers\Api\ProductQueryController;
 use App\Http\Controllers\Api\ReceiptSettingsController;
 use App\Http\Controllers\Api\StaffManagementController;
+use App\Http\Controllers\StorefrontCheckoutController;
 use Illuminate\Support\Facades\Route;
 
-// Admin API endpoints - Supervisor only
-Route::middleware(['web', 'auth', 'role:SUPERVISOR'])->prefix('admin')->name('api.admin.')->group(function () {
+Route::middleware(['web', 'throttle:checkout'])->prefix('storefront')->name('api.storefront.')->group(function () {
+    Route::get('/destinations', [StorefrontCheckoutController::class, 'destinations'])->name('destinations');
+    Route::post('/shipping-quote', [StorefrontCheckoutController::class, 'quote'])->name('shipping-quote');
+});
+
+// Admin API endpoints - Supervisor only with rate limiting
+Route::middleware([
+    'web',
+    'auth',
+    'role:SUPERVISOR',
+    'throttle:admin-api',  // Rate limiting for admin read operations
+])->prefix('admin')->name('api.admin.')->group(function () {
+    // Dashboard & Profile (read)
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [AdminProfileController::class, 'show'])->name('profile');
 
-    // Product management
+    // Product management (read operations - 60 req/min)
     Route::get('/products', [ProductQueryController::class, 'index'])->name('products.index');
-    Route::post('/products', [ProductQueryController::class, 'store'])->name('products.store');
     Route::get('/products/{product}', [ProductQueryController::class, 'show'])->name('products.show');
-    Route::put('/products/{product}', [ProductQueryController::class, 'update'])->name('products.update');
-    Route::delete('/products/{product}', [ProductQueryController::class, 'destroy'])->name('products.destroy');
+    Route::get('/products/{product}/history', [ProductQueryController::class, 'history'])->name('products.history');
 
-    // Inventory recommendations
+    // Inventory recommendations (read)
     Route::get('/inventory/recommendations', [InventoryRecommendationController::class, 'index'])->name('inventory.recommendations');
 
-    // Receipt settings
+    // Settings (read operations)
     Route::get('/receipt-settings', [ReceiptSettingsController::class, 'index'])->name('receipt-settings.index');
-    Route::put('/receipt-settings', [ReceiptSettingsController::class, 'update'])->name('receipt-settings.update');
-
-    // Business settings
     Route::get('/business-settings', [BusinessSettingsController::class, 'index'])->name('business-settings.index');
-    Route::put('/business-settings', [BusinessSettingsController::class, 'update'])->name('business-settings.update');
 
-    // Approvals
-    Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
-    Route::post('/approvals/{approval}/approve', [ApprovalController::class, 'approve'])->name('approvals.approve');
-    Route::post('/approvals/{approval}/reject', [ApprovalController::class, 'reject'])->name('approvals.reject');
+    if (config('features.approval_requests')) {
+        Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
+        Route::get('/approvals/pending', [ApprovalController::class, 'pending'])->name('approvals.pending');
+    }
 
-    // Staff management
+    // Staff management (read operations)
     Route::get('/staff', [StaffManagementController::class, 'index'])->name('staff.index');
-    Route::post('/staff', [StaffManagementController::class, 'store'])->name('staff.store');
     Route::get('/staff/{user}', [StaffManagementController::class, 'show'])->name('staff.show');
-    Route::put('/staff/{user}', [StaffManagementController::class, 'update'])->name('staff.update');
-    Route::delete('/staff/{user}', [StaffManagementController::class, 'destroy'])->name('staff.destroy');
-    Route::post('/staff/{user}/reset-pin', [StaffManagementController::class, 'resetPin'])->name('staff.reset-pin');
+
+    // Write operations with stricter rate limiting (10 req/5 min)
+    Route::post('/products', [ProductQueryController::class, 'store'])
+        ->middleware('throttle:admin-write')
+        ->name('products.store');
+    Route::put('/products/{product}', [ProductQueryController::class, 'update'])
+        ->middleware('throttle:admin-write')
+        ->name('products.update');
+    Route::delete('/products/{product}', [ProductQueryController::class, 'destroy'])
+        ->middleware('throttle:admin-write')
+        ->name('products.destroy');
+
+    // Settings (write operations)
+    Route::put('/receipt-settings', [ReceiptSettingsController::class, 'update'])
+        ->middleware('throttle:admin-write')
+        ->name('receipt-settings.update');
+    Route::put('/business-settings', [BusinessSettingsController::class, 'update'])
+        ->middleware('throttle:admin-write')
+        ->name('business-settings.update');
+    Route::post('/business-settings/qris-image', [BusinessSettingsController::class, 'uploadQrisImage'])
+        ->middleware('throttle:admin-write')
+        ->name('business-settings.qris-image');
+
+    if (config('features.approval_requests')) {
+        Route::post('/approvals/{approval}/approve', [ApprovalController::class, 'approve'])
+            ->middleware('throttle:admin-write')
+            ->name('approvals.approve');
+        Route::post('/approvals/{approval}/reject', [ApprovalController::class, 'reject'])
+            ->middleware('throttle:admin-write')
+            ->name('approvals.reject');
+    }
+
+    // Staff management (write operations)
+    Route::post('/staff', [StaffManagementController::class, 'store'])
+        ->middleware('throttle:admin-write')
+        ->name('staff.store');
+    Route::put('/staff/{user}', [StaffManagementController::class, 'update'])
+        ->middleware('throttle:sensitive-action')
+        ->name('staff.update');
+    Route::delete('/staff/{user}', [StaffManagementController::class, 'destroy'])
+        ->middleware('throttle:sensitive-action')
+        ->name('staff.destroy');
+    Route::post('/staff/{user}/reset-pin', [StaffManagementController::class, 'resetPin'])
+        ->middleware('throttle:sensitive-action')
+        ->name('staff.reset-pin');
 });
 
 // POS API endpoints - Cashier and Supervisor
@@ -57,9 +105,25 @@ Route::middleware(['web', 'auth', 'role:CASHIER,SUPERVISOR'])->prefix('pos')->na
     Route::get('/history', [PosApiController::class, 'history'])->name('history');
     Route::get('/profile', [PosApiController::class, 'profile'])->name('profile');
     Route::post('/checkout', [PosCheckoutController::class, 'store'])->middleware('throttle:checkout')->name('checkout');
-    Route::post('/refunds', [PosRefundController::class, 'store'])->middleware('throttle:refund')->name('refunds');
+    if (config('features.refund_requests')) {
+        Route::post('/refunds', [PosRefundController::class, 'store'])->middleware('throttle:refund')->name('refunds');
+    }
     // Settings
     Route::get('/settings', [PosSettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings/printer', [PosSettingsController::class, 'updatePrinter'])->name('settings.printer');
     Route::post('/settings/printer/test', [PosSettingsController::class, 'testPrinter'])->name('settings.printer.test');
 });
+
+Route::middleware(['web', 'auth', 'role:CASHIER,SUPERVISOR', 'throttle:admin-api'])
+    ->prefix('online-orders')
+    ->name('api.online-orders.')
+    ->group(function () {
+        Route::get('/', [OnlineOrderController::class, 'index'])->name('index');
+        Route::get('/{onlineOrder}', [OnlineOrderController::class, 'show'])->name('show');
+        Route::post('/{onlineOrder}/confirm-payment', [OnlineOrderController::class, 'confirmPayment'])
+            ->middleware('throttle:admin-write')
+            ->name('confirm-payment');
+        Route::patch('/{onlineOrder}/status', [OnlineOrderController::class, 'updateStatus'])
+            ->middleware('throttle:admin-write')
+            ->name('status');
+    });

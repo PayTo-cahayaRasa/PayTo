@@ -28,13 +28,16 @@ class ProductStoreRequest extends FormRequest
             'barcode' => ['nullable', 'string', 'max:255', 'unique:products,barcode'],
             'price' => ['required', 'numeric', 'min:0'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'discount' => ['nullable', 'numeric', 'min:0'],
+            'discount' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'cost' => ['nullable', 'numeric', 'min:0'],
             'uom' => ['nullable', 'string', 'max:50'],
+            'category' => ['nullable', 'in:Makanan,Camilan,Minuman,Kerajinan,Lainnya'],
             'is_active' => ['nullable', 'boolean'],
             'is_public' => ['nullable', 'boolean'],
             'featured' => ['nullable', 'boolean'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'stock' => ['required', 'numeric', 'min:0'],
+            'weight_grams' => ['nullable', 'integer', 'min:1'],
         ];
     }
 
@@ -52,9 +55,13 @@ class ProductStoreRequest extends FormRequest
             'price.required' => 'Harga jual wajib diisi.',
             'price.min' => 'Harga jual tidak valid.',
             'discount.min' => 'Diskon tidak valid.',
+            'discount.max' => 'Diskon tidak boleh lebih dari 100%.',
             'cost.min' => 'Harga modal tidak valid.',
             'stock.required' => 'Stok awal wajib diisi.',
             'stock.min' => 'Stok awal tidak valid.',
+            'image.image' => 'Foto produk harus berupa gambar.',
+            'image.mimes' => 'Foto produk harus berformat JPG, PNG, atau WEBP.',
+            'image.max' => 'Ukuran foto produk maksimal 4 MB.',
         ];
     }
 }

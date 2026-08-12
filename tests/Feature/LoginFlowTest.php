@@ -16,7 +16,7 @@ class LoginFlowTest extends TestCase
         $response = $this->get('/');
 
         $response->assertOk();
-        $response->assertInertia(fn ($page) => $page->component('landingPage'));
+        $response->assertInertia(fn ($page) => $page->component('storefront/LandingPage'));
     }
 
     /** @test */
@@ -35,7 +35,7 @@ class LoginFlowTest extends TestCase
 
         $response = $this->actingAs($user)->get('/login');
 
-        $response->assertRedirect('/');
+        $response->assertRedirect('/kasir');
     }
 
     /** @test */
@@ -78,8 +78,7 @@ class LoginFlowTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
-    /** @test */
-    public function cashier_can_login_with_pin(): void
+    public function test_cashier_can_login_with_pin(): void
     {
         $user = User::factory()->create([
             'role' => 'CASHIER',
@@ -94,6 +93,29 @@ class LoginFlowTest extends TestCase
 
         $response->assertJson(['redirect' => '/kasir']);
         $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_pin_login_is_limited_to_five_attempts_per_five_minutes(): void
+    {
+        User::factory()->create([
+            'role' => 'CASHIER',
+            'pin_hash' => bcrypt('482951'),
+            'is_active' => true,
+        ]);
+
+        for ($attempt = 1; $attempt <= 5; $attempt++) {
+            $this->postJson('/login', [
+                'login_method' => 'PIN',
+                'pin' => '592847',
+            ])->assertUnprocessable();
+        }
+
+        $response = $this->postJson('/login', [
+            'login_method' => 'PIN',
+            'pin' => '592847',
+        ])->assertTooManyRequests();
+
+        $this->assertGreaterThanOrEqual(299, (int) $response->headers->get('Retry-After'));
     }
 
     /** @test */

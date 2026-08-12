@@ -1,9 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { router } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import axios from 'axios';
 import {
-    Zap, User, Lock, ArrowRight, Eye, EyeOff,
-    LayoutGrid, ShieldCheck, AlertCircle, Check, Download
+    AlertCircle,
+    ArrowLeft,
+    ArrowRight,
+    Check,
+    Download,
+    Eye,
+    EyeOff,
+    LayoutGrid,
+    Lock,
+    ShieldCheck,
+    User,
 } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -13,7 +22,6 @@ interface BeforeInstallPromptEvent extends Event {
 
 interface PosLoginFormProps {
     className?: string;
-    showMobileBrand?: boolean;
     title?: string;
     subtitle?: string;
     role?: 'KASIR' | 'ADMIN';
@@ -21,9 +29,8 @@ interface PosLoginFormProps {
 
 export function PosLoginForm({
     className = '',
-    showMobileBrand = true,
-    title = 'Selamat Datang',
-    subtitle = 'Silakan masuk untuk memulai shift Anda.',
+    title = 'Masuk ke akun Anda',
+    subtitle = 'Gunakan kredensial supervisor atau kasir untuk melanjutkan operasional hari ini.',
     role = 'KASIR',
 }: PosLoginFormProps) {
     const [loginMethod, setLoginMethod] = useState('CREDENTIALS');
@@ -73,8 +80,8 @@ export function PosLoginForm({
         }
     };
 
-    const handleLogin = async (e?: React.SyntheticEvent) => {
-        e?.preventDefault();
+    const handleLogin = async (event?: React.SyntheticEvent) => {
+        event?.preventDefault();
         setIsLoading(true);
         setError('');
 
@@ -101,9 +108,12 @@ export function PosLoginForm({
 
             const redirect = response.data?.redirect || (role === 'ADMIN' ? '/admin' : '/kasir');
             router.visit(redirect);
-        } catch (err: any) {
-            const message = err?.response?.data?.message || 'Login gagal. Silakan coba lagi.';
-            setError(message);
+        } catch (requestError: unknown) {
+            const message = axios.isAxiosError(requestError)
+                ? requestError.response?.data?.message
+                : null;
+
+            setError(message ?? 'Login gagal. Silakan coba lagi.');
         } finally {
             setIsLoading(false);
         }
@@ -111,150 +121,178 @@ export function PosLoginForm({
 
     const handlePinInput = (digit: string) => {
         if (pin.length < 6) {
-            setPin(prev => prev + digit);
+            setPin((previousPin) => previousPin + digit);
         }
     };
 
     const handlePinDelete = () => {
-        setPin(prev => prev.slice(0, -1));
+        setPin((previousPin) => previousPin.slice(0, -1));
     };
 
     return (
-        <div className={`max-w-md mx-auto w-full ${className}`}>
-            <div className="text-center mb-6 md:mb-8">
-                {showMobileBrand && (
-                    <div className="lg:hidden flex justify-center mb-4">
-                        <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center text-white shadow-md">
-                            <Zap size={20} fill="currentColor" />
-                        </div>
-                    </div>
-                )}
-                <h2 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2">{title}</h2>
-                <p className="text-sm md:text-base text-slate-500">{subtitle}</p>
+        <div className={`mx-auto w-full max-w-sm ${className}`}>
+            <div className="mb-5">
+                <div className="mb-3 flex justify-center lg:justify-start">
+                    <span className="inline-flex rounded-full border border-[#dfcfbb] bg-[#fff8ef] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8e6847]">
+                        {role === 'ADMIN' ? 'Supervisor access' : 'Akses kasir'}
+                    </span>
+                </div>
 
-                {installPromptEvent && (
+                <h2 className="text-balance text-3xl font-semibold tracking-[-0.04em] text-[#2f241c] md:text-4xl">
+                    {title}
+                </h2>
+                <p className="mt-2 max-w-[38ch] text-sm leading-6 text-[#806049]">
+                    {subtitle}
+                </p>
+
+                {installPromptEvent ? (
                     <button
                         type="button"
                         onClick={handleInstallApp}
                         disabled={isInstalling}
-                        className="mt-4 inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-700 hover:bg-indigo-100 disabled:opacity-60"
+                        className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-[#dfcfbb] bg-[#fff8ef] px-4 py-2 text-sm font-semibold text-[#6d4c36] transition hover:bg-[#f7eddc] disabled:opacity-60"
                     >
                         <Download size={16} />
                         {isInstalling ? 'Menyiapkan instalasi...' : 'Install App'}
                     </button>
-                )}
+                ) : null}
             </div>
 
-            <div className="flex p-1 bg-white/50 border border-white/60 rounded-xl md:rounded-2xl mb-6 relative">
+            <div className="mb-4 grid grid-cols-2 rounded-[1.2rem] border border-[#e8d9c6] bg-[#fbf4ea] p-1">
                 <button
                     type="button"
                     onClick={() => setLoginMethod('CREDENTIALS')}
-                    className={`flex-1 py-2.5 text-sm font-bold rounded-lg md:rounded-xl transition-all duration-300 flex items-center justify-center gap-2 ${loginMethod === 'CREDENTIALS'
-                        ? 'bg-white text-indigo-600 shadow-sm'
-                        : 'text-slate-500 hover:text-slate-700'
-                        }`}
+                    className={`flex items-center justify-center gap-2 rounded-2xl py-2.5 text-sm font-semibold transition-colors duration-300 ${
+                        loginMethod === 'CREDENTIALS'
+                            ? 'bg-white text-[#2f241c] shadow-[0_16px_28px_-22px_rgba(61,40,27,0.48)]'
+                            : 'text-[#8d6b4e] hover:text-[#5f4330]'
+                    }`}
                 >
-                    <User size={16} /> Username
+                    <User size={16} />
+                    Username
                 </button>
                 <button
                     type="button"
                     onClick={() => setLoginMethod('PIN')}
-                    className={`flex-1 py-2.5 text-sm font-bold rounded-lg md:rounded-xl transition-all duration-300 flex items-center justify-center gap-2 ${loginMethod === 'PIN'
-                        ? 'bg-white text-indigo-600 shadow-sm'
-                        : 'text-slate-500 hover:text-slate-700'
-                        }`}
+                    className={`flex items-center justify-center gap-2 rounded-2xl py-2.5 text-sm font-semibold transition-colors duration-300 ${
+                        loginMethod === 'PIN'
+                            ? 'bg-white text-[#2f241c] shadow-[0_16px_28px_-22px_rgba(61,40,27,0.48)]'
+                            : 'text-[#8d6b4e] hover:text-[#5f4330]'
+                    }`}
                 >
-                    <LayoutGrid size={16} /> Quick PIN
+                    <LayoutGrid size={16} />
+                    Quick PIN
                 </button>
             </div>
 
-            {error && (
-                <div className="mb-5 p-3 bg-rose-50 border border-rose-100 rounded-xl flex items-center gap-3 text-rose-600 text-sm font-medium animate-in slide-in-from-top-2">
+            {error ? (
+                <div className="mb-5 flex items-center gap-3 rounded-2xl border border-[#efc9bf] bg-[#fff3ee] p-3 text-sm font-medium text-[#a44b39] animate-in slide-in-from-top-2">
                     <AlertCircle size={18} />
                     {error}
                 </div>
-            )}
+            ) : null}
 
-            {loginMethod === 'CREDENTIALS' && (
-                <form onSubmit={handleLogin} className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+            {loginMethod === 'CREDENTIALS' ? (
+                <form onSubmit={handleLogin} className="space-y-3.5 animate-in fade-in slide-in-from-right-4 duration-300">
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">ID Pengguna</label>
-                        <div className="relative group">
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                        <label className="ml-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#8e6847]">
+                            ID Pengguna
+                        </label>
+                        <div className="group relative">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9c7d63] transition-colors group-focus-within:text-[#375c3f]">
                                 <User size={18} />
                             </div>
                             <input
                                 type="text"
                                 value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                onChange={(event) => setUsername(event.target.value)}
                                 placeholder="Masukan ID..."
-                                className="w-full bg-white/60 border border-white/60 focus:bg-white rounded-xl py-3.5 pl-11 pr-4 outline-none focus:ring-4 focus:ring-indigo-100/50 focus:border-indigo-300 transition-all text-slate-800 placeholder:text-slate-400 font-medium text-sm"
+                                className="w-full rounded-2xl border border-[#dfcfbb] bg-[#fffdf9] py-3 pl-11 pr-4 text-sm font-medium text-[#2f241c] outline-none transition-colors placeholder:text-[#b69877] focus:border-[#c2ab8d] focus:ring-4 focus:ring-[#efe3d4]"
                             />
                         </div>
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Kata Sandi</label>
-                        <div className="relative group">
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                        <label className="ml-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#8e6847]">
+                            Kata Sandi
+                        </label>
+                        <div className="group relative">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9c7d63] transition-colors group-focus-within:text-[#375c3f]">
                                 <Lock size={18} />
                             </div>
                             <input
                                 type={showPassword ? 'text' : 'password'}
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
-                                className="w-full bg-white/60 border border-white/60 focus:bg-white rounded-xl py-3.5 pl-11 pr-11 outline-none focus:ring-4 focus:ring-indigo-100/50 focus:border-indigo-300 transition-all text-slate-800 placeholder:text-slate-400 font-medium font-mono text-sm"
+                                onChange={(event) => setPassword(event.target.value)}
+                                placeholder="Kata sandi Anda"
+                                className="w-full rounded-2xl border border-[#dfcfbb] bg-[#fffdf9] py-3 pl-11 pr-11 text-sm font-medium text-[#2f241c] outline-none transition-colors placeholder:text-[#b69877] focus:border-[#c2ab8d] focus:ring-4 focus:ring-[#efe3d4]"
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 transition-colors"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9c7d63] transition-colors hover:text-[#375c3f]"
                             >
                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
                         </div>
                     </div>
 
+                    <div className="flex items-center justify-between gap-4 px-1 text-sm">
+                        <label className="flex items-center gap-2 text-[#806049]">
+                            <input
+                                type="checkbox"
+                                className="h-4 w-4 rounded border-[#d9c4ab] text-[#375c3f] focus:ring-[#e8d9c6]"
+                            />
+                            Ingat saya
+                        </label>
+                    </div>
+
                     <button
                         type="submit"
                         disabled={isLoading || !username || !password}
-                        className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:to-indigo-600 text-white py-3.5 rounded-xl font-bold text-base shadow-lg shadow-indigo-300/50 transition-all active:scale-[0.98] disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2 group mt-2"
+                        className="group mt-1 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#3d281b] py-3 text-sm font-semibold text-white shadow-[0_22px_38px_-24px_rgba(61,40,27,0.9)] transition-colors hover:bg-[#4b3223] disabled:opacity-50 disabled:shadow-none"
                     >
                         {isLoading ? (
-                            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                            <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
                         ) : (
                             <>
-                                Masuk Sekarang <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                Masuk Sekarang
+                                <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                             </>
                         )}
                     </button>
                 </form>
-            )}
+            ) : (
+                <div className="flex flex-col items-center animate-in fade-in slide-in-from-left-4 duration-300">
+                    <div className="mb-2 text-center">
+                        <p className="text-sm font-semibold text-[#2f241c]">Mode PIN untuk kasir</p>
+                        <p className="mt-1 text-xs leading-5 text-[#806049]">
+                            Gunakan PIN perangkat yang sudah terdaftar untuk masuk lebih cepat.
+                        </p>
+                    </div>
 
-            {loginMethod === 'PIN' && (
-                <div className="animate-in fade-in slide-in-from-left-4 duration-300 flex flex-col items-center">
-                    <div className="mb-6 flex gap-2 justify-center">
-                        {[...Array(6)].map((_, i) => (
+                    <div className="mb-4 flex justify-center gap-2">
+                        {[...Array(6)].map((_, index) => (
                             <div
-                                key={i}
-                                className={`w-3 h-3 rounded-full border-2 transition-all duration-200 ${i < pin.length
-                                    ? 'bg-indigo-600 border-indigo-600 scale-110'
-                                    : 'bg-white/50 border-slate-300'
-                                    }`}
+                                key={index}
+                                className={`h-3 w-3 rounded-full border-2 transition-all duration-200 ${
+                                    index < pin.length
+                                        ? 'scale-110 border-[#375c3f] bg-[#375c3f]'
+                                        : 'border-[#d8c5af] bg-[#fff8ef]'
+                                }`}
                             />
                         ))}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3 w-full max-w-[240px]">
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                    <div className="grid w-full max-w-[220px] grid-cols-3 gap-2">
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) => (
                             <button
                                 type="button"
-                                key={num}
-                                onClick={() => handlePinInput(num.toString())}
-                                className="h-12 w-full bg-white/60 hover:bg-white rounded-xl border border-white/60 shadow-sm text-lg md:text-xl font-bold text-slate-700 hover:text-indigo-600 hover:shadow-md transition-all active:scale-95 active:bg-indigo-50"
+                                key={number}
+                                onClick={() => handlePinInput(number.toString())}
+                                className="h-11 w-full rounded-xl border border-[#dfcfbb] bg-[#fffdf9] text-base font-semibold text-[#3d281b] shadow-[0_14px_26px_-24px_rgba(61,40,27,0.42)] transition-colors hover:border-[#cdb79a] hover:bg-white hover:text-[#375c3f]"
                             >
-                                {num}
+                                {number}
                             </button>
                         ))}
 
@@ -262,11 +300,11 @@ export function PosLoginForm({
                             type="button"
                             onClick={handleLogin}
                             disabled={pin.length < 6 || isLoading}
-                            className="h-12 w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-200 disabled:opacity-50 disabled:shadow-none transition-all active:scale-95 flex items-center justify-center"
+                            className="flex h-11 w-full items-center justify-center rounded-xl bg-[#375c3f] text-white shadow-[0_18px_32px_-24px_rgba(55,92,63,0.8)] transition-colors hover:bg-[#2f4d35] disabled:opacity-50 disabled:shadow-none"
                             title="Masuk"
                         >
                             {isLoading ? (
-                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
                             ) : (
                                 <Check size={24} strokeWidth={3} />
                             )}
@@ -275,7 +313,7 @@ export function PosLoginForm({
                         <button
                             type="button"
                             onClick={() => handlePinInput('0')}
-                            className="h-12 w-full bg-white/60 hover:bg-white rounded-xl border border-white/60 shadow-sm text-lg md:text-xl font-bold text-slate-700 hover:text-indigo-600 hover:shadow-md transition-all active:scale-95 active:bg-indigo-50"
+                            className="h-11 w-full rounded-xl border border-[#dfcfbb] bg-[#fffdf9] text-base font-semibold text-[#3d281b] shadow-[0_14px_26px_-24px_rgba(61,40,27,0.42)] transition-colors hover:border-[#cdb79a] hover:bg-white hover:text-[#375c3f]"
                         >
                             0
                         </button>
@@ -283,7 +321,7 @@ export function PosLoginForm({
                         <button
                             type="button"
                             onClick={handlePinDelete}
-                            className="h-12 w-full flex items-center justify-center bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl transition-all active:scale-95 font-bold text-sm tracking-wide border border-rose-100"
+                            className="flex h-11 w-full items-center justify-center rounded-xl border border-[#efc9bf] bg-[#fff3ee] text-xs font-semibold tracking-wide text-[#a44b39] transition-colors hover:bg-[#feeae2]"
                         >
                             DEL
                         </button>
@@ -296,42 +334,76 @@ export function PosLoginForm({
 
 export default function PosLoginPage() {
     return (
-        <div className="min-h-screen w-full bg-[#f3f4f6] relative flex items-center justify-center p-4 font-sans overflow-y-auto text-slate-800">
-            <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-200 rounded-full blur-[120px] opacity-40 animate-pulse-slow pointer-events-none"></div>
-            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-200 rounded-full blur-[120px] opacity-40 pointer-events-none"></div>
+        <div className="relative flex min-h-[100dvh] w-full items-center justify-center overflow-y-auto bg-[radial-gradient(circle_at_top_left,_rgba(250,236,214,0.72),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(217,231,220,0.68),_transparent_26%),linear-gradient(180deg,#f7f0e6_0%,#f2e9dc_100%)] p-3 font-sans text-[#2f241c] lg:h-[100dvh] lg:overflow-hidden">
+            <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:radial-gradient(rgba(120,89,62,0.1)_0.7px,transparent_0.7px)] [background-size:18px_18px]"></div>
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/55 to-transparent"></div>
 
-            <div className="w-full max-w-5xl md:min-h-[600px] bg-white/30 backdrop-blur-2xl border border-white/50 rounded-3xl md:rounded-[3rem] shadow-2xl flex flex-col lg:flex-row overflow-hidden relative z-10 animate-in zoom-in-95 duration-500">
-                <div className="w-full lg:w-1/2 hidden lg:flex flex-col relative bg-white/20 border-r border-white/30 p-12 justify-between">
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10"></div>
+            <div className="relative z-10 flex w-full max-w-5xl flex-col overflow-hidden rounded-[2rem] border border-[#eadfcf] bg-[#fffaf3]/94 shadow-[0_38px_80px_-42px_rgba(58,33,23,0.42)] animate-in zoom-in-95 duration-500 lg:h-[min(680px,calc(100dvh-1.5rem))] lg:flex-row lg:rounded-[2.4rem]">
+                <div className="hidden w-full overflow-y-auto border-r border-[#eadfcf] bg-[linear-gradient(180deg,rgba(245,234,216,0.76),rgba(236,220,196,0.9))] p-8 lg:flex lg:w-[42%] lg:flex-col lg:justify-center">
+                    <div className="space-y-7">
+                        <CahayaRasaBrand />
 
-                    <div className="relative z-10 flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-300/50">
-                            <Zap size={24} fill="currentColor" />
-                        </div>
-                        <span className="font-bold text-2xl text-slate-800 tracking-tight">POS System</span>
-                    </div>
+                        <div className="overflow-hidden rounded-[1.75rem] border border-[#dfcfbb] bg-[#fffaf3] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+                            <div className="relative overflow-hidden p-6">
+                                <div className="absolute inset-x-10 top-6 h-24 rounded-full bg-[#efe0c8] blur-3xl"></div>
+                                <div className="absolute -bottom-8 left-6 h-32 w-32 rounded-full bg-[#d3dfd5] blur-3xl"></div>
+                                <div className="absolute -right-6 bottom-2 h-36 w-36 rounded-full bg-[#ead4bf] blur-3xl"></div>
 
-                    <div className="relative z-10 space-y-6">
-                        <div className="w-full aspect-[4/3] bg-white/30 rounded-3xl border border-white/40 shadow-sm backdrop-blur-sm flex items-center justify-center relative overflow-hidden group">
-                            <div className="absolute w-24 h-24 bg-rose-300 rounded-full blur-2xl top-10 left-10 opacity-60 group-hover:translate-x-2 transition-transform duration-700"></div>
-                            <div className="absolute w-32 h-32 bg-indigo-300 rounded-full blur-2xl bottom-10 right-10 opacity-60 group-hover:-translate-x-2 transition-transform duration-700"></div>
-
-                            <div className="text-center p-6 backdrop-blur-sm bg-white/10 rounded-2xl border border-white/20">
-                                <ShieldCheck size={48} className="mx-auto text-indigo-600 mb-4 drop-shadow-sm" />
-                                <h3 className="font-bold text-lg text-slate-800">Aman & Terintegrasi</h3>
-                                <p className="text-slate-500 text-sm mt-1">Sistem Point of Sale untuk operasional toko yang terpusat.</p>
+                                <div className="relative z-10 space-y-4 rounded-[1.5rem] border border-white/70 bg-white/70 p-5 shadow-[0_22px_48px_-36px_rgba(58,33,23,0.28)]">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eff4ee] text-[#375c3f]">
+                                        <ShieldCheck size={20} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-semibold tracking-[-0.03em] text-[#2f241c]">
+                                            Masuk cepat, tetap terkendali
+                                        </h3>
+                                        <p className="mt-2 text-sm leading-6 text-[#806049]">
+                                            Supervisor dan kasir memakai alur yang sama, dengan validasi jelas dan akses yang tetap aman.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="relative z-10 text-xs text-slate-500 font-medium">
-                        &copy; 2026 PayTo. v2.0.1
-                    </div>
                 </div>
 
-                <div className="w-full lg:w-1/2 p-6 md:p-12 flex flex-col justify-center bg-white/40 relative">
-                    <PosLoginForm />
+                <div className="flex w-full flex-1 flex-col justify-between overflow-y-auto bg-[linear-gradient(180deg,rgba(255,252,247,0.84),rgba(255,248,238,0.98))] p-6 sm:p-8 lg:p-8">
+                    <div className="mb-6 flex items-center gap-3 lg:hidden">
+                        <CahayaRasaBrand compact />
+                    </div>
+
+                    <div className="flex-1 content-center">
+                        <PosLoginForm />
+                    </div>
+
+                    <div className="mt-5 flex items-center justify-between gap-4 text-xs text-[#8d6b4e]">
+                        <Link href="/" prefetch className="inline-flex items-center gap-2 rounded-lg font-semibold text-[#6d4c36] transition-colors hover:text-[#2f241c] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#8e6847]">
+                            <ArrowLeft size={14} aria-hidden="true" />
+                            Kembali ke beranda
+                        </Link>
+                        <span>v2.4.1</span>
+                    </div>
                 </div>
+            </div>
+        </div>
+    );
+}
+
+function CahayaRasaBrand({ compact = false }: { compact?: boolean }) {
+    return (
+        <div className="flex items-center gap-4">
+            <img
+                src="/images/logo-removed.png"
+                alt="Logo Cahaya Rasa"
+                width={compact ? 56 : 96}
+                height={compact ? 56 : 96}
+                className={`${compact ? 'size-14' : 'size-24'} shrink-0 object-contain drop-shadow-[0_12px_22px_rgba(58,33,23,0.16)]`}
+            />
+            <div className="min-w-0">
+                <h1 className={`font-display font-semibold tracking-[-0.04em] text-[#3a2117] ${compact ? 'text-2xl' : 'text-4xl'}`}>
+                    Cahaya Rasa
+                </h1>
             </div>
         </div>
     );

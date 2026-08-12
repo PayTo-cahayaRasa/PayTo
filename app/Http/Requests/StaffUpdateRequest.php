@@ -2,7 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\CurrentUserCredential;
+use App\Rules\SecurePin;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class StaffUpdateRequest extends FormRequest
 {
@@ -29,8 +33,15 @@ class StaffUpdateRequest extends FormRequest
             'username' => ['sometimes', 'required', 'string', 'max:255', 'unique:users,username,'.$userId],
             'role' => ['sometimes', 'required', 'string', 'in:CASHIER,SUPERVISOR'],
             'is_active' => ['sometimes', 'boolean'],
-            'password' => ['sometimes', 'nullable', 'string', 'min:6', 'max:255'],
-            'pin' => ['sometimes', 'nullable', 'string', 'digits:6'],
+            'password' => ['sometimes', 'nullable', 'string', 'max:255', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
+            'pin' => ['sometimes', 'nullable', 'string', 'digits:6', new SecurePin],
+            'current_credential' => [
+                Rule::requiredIf(fn (): bool => $this->filled('password') || $this->filled('pin')),
+                'nullable',
+                'string',
+                'max:255',
+                new CurrentUserCredential($this->user()),
+            ],
         ];
     }
 
@@ -45,6 +56,7 @@ class StaffUpdateRequest extends FormRequest
             'username.unique' => 'Username sudah digunakan.',
             'role.in' => 'Role tidak valid.',
             'pin.digits' => 'PIN harus 6 digit.',
+            'current_credential.required' => 'Password atau PIN supervisor wajib dikonfirmasi.',
         ];
     }
 }

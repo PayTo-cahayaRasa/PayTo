@@ -6,20 +6,22 @@ interface ReceiptItem {
     qty: number;
     price: number;
     discount_amount: number;
-    final_price: number;
-    subtotal: number;
+    line_total: number;
 }
 
 interface ReceiptSale {
     id: number;
+    invoice_no: string | null;
     local_txn_uuid: string;
-    total: number;
+    subtotal: number;
     discount_amount: number;
-    final_total: number;
+    tax_total: number;
+    total: number;
     created_at: string;
     items: ReceiptItem[];
     payment: {
         method: string;
+        amount: number;
         cash_received: number | null;
         change_amount: number | null;
     };
@@ -46,7 +48,7 @@ interface ReceiptPageProps {
 
 export default function ReceiptPage({ sale, receipt_settings, business }: ReceiptPageProps) {
     const handlePrint = () => {
-        window.print();
+        window.location.assign(`/pos/sales/${sale.id}/receipt/download`);
     };
 
     const formatCurrency = (amount: number): string => {
@@ -62,13 +64,13 @@ export default function ReceiptPage({ sale, receipt_settings, business }: Receip
             <Head title={`Struk #${sale.id}`} />
             
             <div className="receipt-container">
-                {/* Print button - hidden saat print */}
+                {/* PDF download button */}
                 <div className="no-print print-button-container">
                     <button 
                         onClick={handlePrint}
                         className="print-button"
                     >
-                        🖨️ Cetak Struk
+                        Unduh PDF
                     </button>
                 </div>
 
@@ -88,7 +90,7 @@ export default function ReceiptPage({ sale, receipt_settings, business }: Receip
 
                     {/* Transaction info */}
                     <div className="receipt-info">
-                        <div>No. Transaksi: {sale.id}</div>
+                        <div>No. Transaksi: {sale.invoice_no ?? sale.id}</div>
                         <div>Tanggal: {sale.created_at}</div>
                         <div>Kasir: {sale.cashier.name}</div>
                     </div>
@@ -102,7 +104,7 @@ export default function ReceiptPage({ sale, receipt_settings, business }: Receip
                                 <div className="item-name">{item.product_name}</div>
                                 <div className="item-detail">
                                     <span>{item.qty} x {formatCurrency(item.price)}</span>
-                                    <span className="item-subtotal">{formatCurrency(item.subtotal)}</span>
+                                    <span className="item-subtotal">{formatCurrency(item.line_total)}</span>
                                 </div>
                                 {item.discount_amount > 0 && (
                                     <div className="item-discount">
@@ -119,7 +121,7 @@ export default function ReceiptPage({ sale, receipt_settings, business }: Receip
                     <div className="receipt-totals">
                         <div className="total-line">
                             <span>Subtotal:</span>
-                            <span>{formatCurrency(sale.total)}</span>
+                            <span>{formatCurrency(sale.subtotal)}</span>
                         </div>
                         {sale.discount_amount > 0 && (
                             <div className="total-line discount">
@@ -127,9 +129,15 @@ export default function ReceiptPage({ sale, receipt_settings, business }: Receip
                                 <span>-{formatCurrency(sale.discount_amount)}</span>
                             </div>
                         )}
+                        {sale.tax_total > 0 && (
+                            <div className="total-line">
+                                <span>Pajak:</span>
+                                <span>{formatCurrency(sale.tax_total)}</span>
+                            </div>
+                        )}
                         <div className="total-line grand-total">
                             <span>TOTAL:</span>
-                            <span>{formatCurrency(sale.final_total)}</span>
+                            <span>{formatCurrency(sale.total)}</span>
                         </div>
 
                         {sale.payment.method === 'CASH' && sale.payment.cash_received && (

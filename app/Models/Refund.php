@@ -14,6 +14,7 @@ class Refund extends Model
     use HasFactory;
 
     protected $fillable = [
+        'approval_id',
         'sale_id',
         'requested_by',
         'approved_by',

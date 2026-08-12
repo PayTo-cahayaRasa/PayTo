@@ -51,6 +51,11 @@ class Sale extends Model
         return $this->hasMany(Payment::class, 'sale_id');
     }
 
+    public function payment(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Payment::class, 'sale_id')->latestOfMany();
+    }
+
     public function refunds(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Refund::class, 'sale_id');

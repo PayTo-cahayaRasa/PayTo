@@ -30,53 +30,36 @@ Gunakan format conventional commits agar riwayat perubahan jelas dan mudah di-tr
 
 ```bash
 # Fitur baru
-git commit -m "feat(payment): add QR code payment method"
+git commit -m "feat(checkout): add multi-payment support"
 
 # Bug fix
-git commit -m "fix(booking): resolve date validation error"
+git commit -m "fix(stock): resolve stock deduction error"
 
 # Refactor
-git commit -m "refactor(auth): simplify login logic"
+git commit -m "refactor(checkout): simplify checkout logic"
 
 # Chore
-git commit -m "chore(deps): update Laravel to 11.36.2"
-
-# Multiple line
-git commit -m "feat(inventory): add stock alert notification
-
-- Send email when stock below threshold
-- Add admin dashboard alert
-- Update stock model with alert_threshold field"
+git commit -m "chore(deps): update Laravel to 12.51"
 ```
 
 ### Scope (Opsional):
 
 Scope menjelaskan area mana yang berubah:
 
-- `payment` - Payment related
-- `booking` - Booking system
-- `inventory` - Inventory management  
+- `checkout` - Checkout/payment
+- `pos` - POS interface
+- `admin` - Admin dashboard
+- `product` - Product management
+- `inventory` - Inventory management
 - `auth` - Authentication
 - `api` - API endpoints
 - `ui` - User interface
-- `db` - Database changes
 
 ### Subject Guidelines:
 
 - Gunakan imperative mood: "add" bukan "added" atau "adds"
 - Tidak pakai titik di akhir
 - Maksimal 72 karakter
-- Huruf kecil setelah type
-
-### Breaking Changes:
-
-Jika ada perubahan yang breaking (tidak backward compatible), tambahkan `!` atau `BREAKING CHANGE:`:
-
-```bash
-git commit -m "feat(api)!: change payment response structure
-
-BREAKING CHANGE: Payment API now returns nested object instead of flat structure"
-```
 
 ## Development Workflow
 
@@ -84,9 +67,9 @@ BREAKING CHANGE: Payment API now returns nested object instead of flat structure
 
 ```bash
 # Format: <type>/<description>
-git checkout -b feat/qr-payment
-git checkout -b fix/booking-validation
-git checkout -b refactor/auth-logic
+git checkout -b feat/multi-payment
+git checkout -b fix/stock-calculation
+git checkout -b refactor/checkout-flow
 ```
 
 ### 2. Develop & Commit
@@ -100,13 +83,13 @@ php artisan test
 
 # Stage & commit
 git add .
-git commit -m "feat(payment): add QR code scanner"
+git commit -m "feat(checkout): add multi-payment support"
 ```
 
 ### 3. Push & Pull Request
 
 ```bash
-git push origin feat/qr-payment
+git push origin feat/multi-payment
 
 # Buat PR di GitHub
 # Review bersama tim
@@ -121,18 +104,27 @@ git push origin feat/qr-payment
 - Gunakan Laravel Pint: `./vendor/bin/pint`
 - Type hints untuk semua method parameters & return types
 - Gunakan Eloquent relationships, hindari raw queries
+- Enum keys menggunakan TitleCase (contoh: `SaleStatus::Paid`)
+- Constructor property promotion (PHP 8+)
 
-### JavaScript/Vue
+### JavaScript/React
 
-- Follow project's existing style
-- Use ESLint if configured
+- Follow existing project style
+- Use functional components dengan hooks
 - Descriptive variable names
 
 ### Testing
 
-- Minimal 80% code coverage
 - Test happy path & edge cases
 - Run tests sebelum commit: `php artisan test`
+
+## Tech Stack
+
+- PHP 8.2+
+- Laravel 12.51
+- React 19 + Inertia v2
+- Tailwind CSS v4
+- MySQL 8.0+
 
 ## Commands
 
@@ -150,6 +142,13 @@ make pint               # Fix code style
 make ci                 # Run all CI checks
 ```
 
+## Dokumentasi
+
+Update dokumentasi jika mengubah fitur atau menambahkan endpoint baru. Dokumentasi ada di `docs/`:
+- `docs/reference/api.md` - API reference
+- `docs/reference/database-schema.md` - Database schema
+- `docs/explanation/architecture.md` - Architecture overview
+
 ## Questions?
 
-Tanya ke tim! Kita hanya 2 orang, jadi komunikasi langsung lebih cepat.
+Tanya ke tim! Komunikasi langsung lebih cepat.

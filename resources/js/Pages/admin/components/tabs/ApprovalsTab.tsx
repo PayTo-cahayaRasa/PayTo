@@ -60,9 +60,15 @@ export default function ApprovalsTab() {
             return;
         }
 
+        const currentCredential = window.prompt('Masukkan password atau PIN supervisor untuk menyetujui:');
+        if (!currentCredential) return;
+
         setActionLoadingId(log.id);
         try {
-            await axios.post(`/api/admin/approvals/${log.id}/approve`);
+            await axios.post(`/api/admin/approvals/${log.id}/approve`, {
+                confirmed: true,
+                current_credential: currentCredential,
+            });
             await fetchApprovals();
         } catch (error) {
             const message = axios.isAxiosError(error)
@@ -95,10 +101,14 @@ export default function ApprovalsTab() {
             return;
         }
 
+        const currentCredential = window.prompt('Masukkan password atau PIN supervisor untuk menolak:');
+        if (!currentCredential) return;
+
         setActionLoadingId(rejectTarget.id);
         try {
             await axios.post(`/api/admin/approvals/${rejectTarget.id}/reject`, {
                 reason: rejectReason.trim(),
+                current_credential: currentCredential,
             });
             setRejectTarget(null);
             await fetchApprovals();

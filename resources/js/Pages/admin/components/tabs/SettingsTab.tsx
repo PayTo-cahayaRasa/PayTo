@@ -2,21 +2,40 @@
  * Pengaturan Toko tab - Business settings integration
  */
 
-import React, { useState, useEffect } from 'react';
-import { Save, Settings, Globe, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Save, Settings, Globe, AlertCircle, CheckCircle, Loader2, Landmark, QrCode, UploadCloud } from 'lucide-react';
 import axios from 'axios';
 
 type BusinessSettings = {
     business: {
         name: string;
+        tagline?: string;
         address: string;
         whatsapp_number: string;
         operating_hours: string;
+        shopee_url?: string;
+        instagram_url?: string;
+        tiktok_url?: string;
     };
     catalog: {
         enabled: boolean;
         whatsapp_enabled: boolean;
         whatsapp_message_template: string;
+    };
+    online_order: {
+        shipping: {
+            origin: string;
+            packaging_weight_grams: number;
+            couriers: string[];
+        };
+        payment: {
+            bank_name: string;
+            bank_account_number: string;
+            bank_account_name: string;
+            qris_image_url: string;
+            qris_image_path: string;
+            instructions: string;
+        };
     };
 };
 
@@ -28,14 +47,33 @@ export default function SettingsTab() {
     const [settings, setSettings] = useState<BusinessSettings>({
         business: {
             name: '',
+            tagline: '',
             address: '',
             whatsapp_number: '',
             operating_hours: '',
+            shopee_url: '',
+            instagram_url: '',
+            tiktok_url: '',
         },
         catalog: {
             enabled: true,
             whatsapp_enabled: true,
             whatsapp_message_template: '',
+        },
+        online_order: {
+            shipping: {
+                origin: '',
+                packaging_weight_grams: 0,
+                couriers: ['jne', 'jnt', 'sicepat'],
+            },
+            payment: {
+                bank_name: '',
+                bank_account_number: '',
+                bank_account_name: '',
+                qris_image_url: '',
+                qris_image_path: '',
+                instructions: 'Lakukan pembayaran sesuai total pesanan, lalu kirim bukti pembayaran melalui WhatsApp.',
+            },
         },
     });
 
@@ -44,6 +82,8 @@ export default function SettingsTab() {
     const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [errors, setErrors] = useState<ValidationErrors>({});
     const [errorMessage, setErrorMessage] = useState('');
+    const [isUploadingQris, setIsUploadingQris] = useState(false);
+    const qrisImageInputRef = useRef<HTMLInputElement | null>(null);
 
     // Load settings on mount
     useEffect(() => {
@@ -54,7 +94,11 @@ export default function SettingsTab() {
         try {
             setLoading(true);
             const response = await axios.get('/api/admin/business-settings');
-            setSettings(response.data.data);
+            setSettings({
+                business: response.data.data.business,
+                catalog: response.data.data.catalog,
+                online_order: response.data.data.online_order,
+            });
         } catch (error: any) {
             console.error('Failed to load settings:', error);
             setErrorMessage('Gagal memuat pengaturan. Silakan refresh halaman.');
@@ -70,7 +114,22 @@ export default function SettingsTab() {
             setErrorMessage('');
             setSaveStatus('idle');
 
-            await axios.put('/api/admin/business-settings', settings);
+            const payload = {
+                business: {
+                    ...settings.business,
+                    whatsapp_number: settings.business.whatsapp_number.replace(/\D/g, ''),
+                },
+                catalog: settings.catalog,
+                online_order: settings.online_order,
+            };
+
+            const response = await axios.put('/api/admin/business-settings', payload);
+
+            setSettings({
+                business: response.data.data.business,
+                catalog: response.data.data.catalog,
+                online_order: response.data.data.online_order,
+            });
 
             setSaveStatus('success');
             setTimeout(() => setSaveStatus('idle'), 3000);
@@ -92,6 +151,40 @@ export default function SettingsTab() {
         }
     };
 
+    const handleQrisImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const qrisImage = event.target.files?.[0];
+        if (!qrisImage) {
+            return;
+        }
+
+        const payload = new FormData();
+        payload.append('qris_image', qrisImage);
+
+        try {
+            setIsUploadingQris(true);
+            setErrorMessage('');
+            const response = await axios.post('/api/admin/business-settings/qris-image', payload);
+            const uploadedPayment = response.data.data.online_order.payment;
+            setSettings((current) => ({
+                ...current,
+                online_order: {
+                    ...current.online_order,
+                    payment: {
+                        ...current.online_order.payment,
+                        qris_image_url: uploadedPayment.qris_image_url,
+                        qris_image_path: uploadedPayment.qris_image_path,
+                    },
+                },
+            }));
+        } catch (error: any) {
+            setSaveStatus('error');
+            setErrorMessage(error.response?.data?.message || 'Gagal mengunggah gambar QRIS.');
+        } finally {
+            setIsUploadingQris(false);
+            event.target.value = '';
+        }
+    };
+
     const getFieldError = (field: string): string | null => {
         return errors[field]?.[0] || null;
     };
@@ -108,18 +201,15 @@ export default function SettingsTab() {
         <div className="animate-in slide-in-from-bottom-4 duration-500 space-y-6">
             {/* Status Messages */}
             {saveStatus === 'success' && (
-                <div className="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-start gap-3">
-                    <CheckCircle size={20} className="text-green-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                        <p className="font-bold text-sm text-green-900">Berhasil disimpan!</p>
-                        <p className="text-xs text-green-700 mt-1">Pengaturan toko berhasil diperbarui.</p>
-                    </div>
+                <div role="status" className="fixed right-4 top-4 z-50 flex items-start gap-3 rounded-2xl border border-green-200 bg-green-50 p-4 shadow-lg sm:right-6 sm:top-6">
+                    <CheckCircle size={20} className="mt-0.5 shrink-0 text-green-600" />
+                    <p className="text-sm font-bold text-green-900">Berhasil disimpan!</p>
                 </div>
             )}
 
             {saveStatus === 'error' && errorMessage && (
                 <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
-                    <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
+                    <AlertCircle size={20} className="text-red-600 shrink-0 mt-0.5" />
                     <div>
                         <p className="font-bold text-sm text-red-900">Gagal menyimpan</p>
                         <p className="text-xs text-red-700 mt-1">{errorMessage}</p>
@@ -129,7 +219,7 @@ export default function SettingsTab() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Profil Toko */}
-                <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem] p-6 shadow-sm">
+                <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-4xl p-6 shadow-sm">
                     <h3 className="font-bold text-lg text-slate-800 mb-6 flex items-center gap-2">
                         <Settings size={20} className="text-slate-400" /> Profil Toko
                     </h3>
@@ -158,6 +248,31 @@ export default function SettingsTab() {
                             />
                             {getFieldError('business.name') && (
                                 <p className="text-xs text-red-600 mt-1">{getFieldError('business.name')}</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                                Tagline
+                            </label>
+                            <input
+                                type="text"
+                                value={settings.business.tagline || ''}
+                                onChange={(e) =>
+                                    setSettings({
+                                        ...settings,
+                                        business: { ...settings.business, tagline: e.target.value },
+                                    })
+                                }
+                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none ${
+                                    getFieldError('business.tagline')
+                                        ? 'border-red-300 bg-red-50/50'
+                                        : 'border-white/60'
+                                }`}
+                                placeholder="Contoh: Oleh-Oleh Malang"
+                            />
+                            {getFieldError('business.tagline') && (
+                                <p className="text-xs text-red-600 mt-1">{getFieldError('business.tagline')}</p>
                             )}
                         </div>
 
@@ -198,7 +313,7 @@ export default function SettingsTab() {
                                 onChange={(e) =>
                                     setSettings({
                                         ...settings,
-                                        business: { ...settings.business, whatsapp_number: e.target.value },
+                                        business: { ...settings.business, whatsapp_number: e.target.value.replace(/\D/g, '') },
                                     })
                                 }
                                 className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none ${
@@ -245,11 +360,86 @@ export default function SettingsTab() {
                                 </p>
                             )}
                         </div>
+
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                                Link Shopee
+                            </label>
+                            <input
+                                type="url"
+                                value={settings.business.shopee_url || ''}
+                                onChange={(e) =>
+                                    setSettings({
+                                        ...settings,
+                                        business: { ...settings.business, shopee_url: e.target.value },
+                                    })
+                                }
+                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none ${
+                                    getFieldError('business.shopee_url')
+                                        ? 'border-red-300 bg-red-50/50'
+                                        : 'border-white/60'
+                                }`}
+                                placeholder="https://shopee.co.id/nama-toko"
+                            />
+                            {getFieldError('business.shopee_url') && (
+                                <p className="text-xs text-red-600 mt-1">{getFieldError('business.shopee_url')}</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                                Link Instagram
+                            </label>
+                            <input
+                                type="url"
+                                value={settings.business.instagram_url || ''}
+                                onChange={(e) =>
+                                    setSettings({
+                                        ...settings,
+                                        business: { ...settings.business, instagram_url: e.target.value },
+                                    })
+                                }
+                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none ${
+                                    getFieldError('business.instagram_url')
+                                        ? 'border-red-300 bg-red-50/50'
+                                        : 'border-white/60'
+                                }`}
+                                placeholder="https://www.instagram.com/cahayarasamalang/"
+                            />
+                            {getFieldError('business.instagram_url') && (
+                                <p className="text-xs text-red-600 mt-1">{getFieldError('business.instagram_url')}</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                                Link TikTok
+                            </label>
+                            <input
+                                type="url"
+                                value={settings.business.tiktok_url || ''}
+                                onChange={(e) =>
+                                    setSettings({
+                                        ...settings,
+                                        business: { ...settings.business, tiktok_url: e.target.value },
+                                    })
+                                }
+                                className={`w-full p-4 bg-white/60 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none ${
+                                    getFieldError('business.tiktok_url')
+                                        ? 'border-red-300 bg-red-50/50'
+                                        : 'border-white/60'
+                                }`}
+                                placeholder="https://www.tiktok.com/@cahayarasa_28"
+                            />
+                            {getFieldError('business.tiktok_url') && (
+                                <p className="text-xs text-red-600 mt-1">{getFieldError('business.tiktok_url')}</p>
+                            )}
+                        </div>
                     </div>
                 </div>
 
                 {/* Pengaturan Katalog */}
-                <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem] p-6 shadow-sm">
+                <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-4xl p-6 shadow-sm">
                     <h3 className="font-bold text-lg text-slate-800 mb-6 flex items-center gap-2">
                         <Globe size={20} className="text-slate-400" /> Katalog & WhatsApp
                     </h3>
@@ -322,6 +512,106 @@ export default function SettingsTab() {
                                     {getFieldError('catalog.whatsapp_message_template')}
                                 </p>
                             )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="md:col-span-2 bg-white/40 backdrop-blur-xl border border-white/60 rounded-4xl p-6 shadow-sm">
+                    <h3 className="font-bold text-lg text-slate-800 mb-2 flex items-center gap-2">
+                        <Landmark size={20} className="text-slate-400" /> Pembayaran Pesanan Online
+                    </h3>
+                    <p className="mb-6 text-sm text-slate-500">Informasi ini akan ditampilkan saat pelanggan memilih transfer bank atau QRIS.</p>
+
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Bank</label>
+                            <input
+                                type="text"
+                                value={settings.online_order.payment.bank_name}
+                                onChange={(event) => setSettings({
+                                    ...settings,
+                                    online_order: {
+                                        ...settings.online_order,
+                                        payment: { ...settings.online_order.payment, bank_name: event.target.value },
+                                    },
+                                })}
+                                placeholder="Contoh: BCA"
+                                className="w-full p-4 bg-white/60 border border-white/60 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nomor Rekening</label>
+                            <input
+                                type="text"
+                                value={settings.online_order.payment.bank_account_number}
+                                onChange={(event) => setSettings({
+                                    ...settings,
+                                    online_order: {
+                                        ...settings.online_order,
+                                        payment: { ...settings.online_order.payment, bank_account_number: event.target.value },
+                                    },
+                                })}
+                                placeholder="Contoh: 1234567890"
+                                className="w-full p-4 bg-white/60 border border-white/60 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Atas Nama</label>
+                            <input
+                                type="text"
+                                value={settings.online_order.payment.bank_account_name}
+                                onChange={(event) => setSettings({
+                                    ...settings,
+                                    online_order: {
+                                        ...settings.online_order,
+                                        payment: { ...settings.online_order.payment, bank_account_name: event.target.value },
+                                    },
+                                })}
+                                placeholder="Contoh: Cahaya Rasa"
+                                className="w-full p-4 bg-white/60 border border-white/60 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,1fr)_220px]">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Instruksi Pembayaran</label>
+                            <textarea
+                                rows={5}
+                                value={settings.online_order.payment.instructions}
+                                onChange={(event) => setSettings({
+                                    ...settings,
+                                    online_order: {
+                                        ...settings.online_order,
+                                        payment: { ...settings.online_order.payment, instructions: event.target.value },
+                                    },
+                                })}
+                                className="w-full resize-none p-4 bg-white/60 border border-white/60 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none"
+                            />
+                        </div>
+                        <div>
+                            <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">QRIS</span>
+                            <label className="flex h-[180px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 bg-white/60 text-slate-400 transition-colors hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-500">
+                                {settings.online_order.payment.qris_image_url ? (
+                                    <img src={settings.online_order.payment.qris_image_url} alt="QRIS toko" className="h-full w-full object-contain p-3" />
+                                ) : (
+                                    <>
+                                        <QrCode size={32} className="mb-2" />
+                                        <span className="text-xs font-bold">Upload QRIS</span>
+                                    </>
+                                )}
+                                <input
+                                    ref={qrisImageInputRef}
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    className="sr-only"
+                                    onChange={handleQrisImageChange}
+                                />
+                            </label>
+                            <p className="mt-2 flex items-center gap-1 text-[11px] text-slate-400">
+                                {isUploadingQris ? <Loader2 size={12} className="animate-spin" /> : <UploadCloud size={12} />}
+                                {isUploadingQris ? 'Mengunggah QRIS...' : 'JPG, PNG, atau WEBP, maks. 4 MB.'}
+                            </p>
                         </div>
                     </div>
                 </div>

@@ -22,7 +22,7 @@ class AdminProfileController extends Controller
         return response()->json([
             'data' => [
                 'name' => $user->name ?? 'Admin',
-                'role' => $user->role ?? 'SUPERVISOR',
+                'role' => $user->role ?? 'UNKNOWN',
                 'id' => sprintf('SPV-%03d', $user->id),
                 'email' => $email,
                 'phone' => '—',

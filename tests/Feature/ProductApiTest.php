@@ -6,6 +6,8 @@ use App\Models\Product;
 use App\Models\StockItem;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ProductApiTest extends TestCase
@@ -27,8 +29,10 @@ class ProductApiTest extends TestCase
             'discount' => 5,
             'cost' => 8000,
             'uom' => 'pcs',
+            'category' => 'Camilan',
             'is_active' => true,
             'stock' => 20,
+            'weight_grams' => 250,
         ];
 
         $response = $this->actingAs($supervisor)->postJson('/api/admin/products', $payload);
@@ -36,12 +40,18 @@ class ProductApiTest extends TestCase
         $response
             ->assertCreated()
             ->assertJsonPath('data.name', 'Teh Manis')
+            ->assertJsonPath('data.description', null)
+            ->assertJsonPath('data.category', 'Camilan')
             ->assertJsonPath('data.stock', 20)
+            ->assertJsonPath('data.weight_grams', 250)
             ->assertJsonPath('data.status', 'ACTIVE');
 
         $this->assertDatabaseHas('products', [
             'name' => 'Teh Manis',
             'sku' => 'BV-010',
+            'description' => null,
+            'category' => 'Camilan',
+            'weight_grams' => 250,
         ]);
 
         $this->assertDatabaseHas('stock_items', [
@@ -61,10 +71,13 @@ class ProductApiTest extends TestCase
             'sku' => 'LIST-001',
             'barcode' => 'LIST-BC',
             'price' => 10000,
+            'description' => 'Deskripsi produk untuk form edit.',
             'discount' => 0,
             'cost' => 4000,
             'uom' => 'pcs',
+            'category' => 'Minuman',
             'is_active' => true,
+            'weight_grams' => 200,
         ]);
 
         StockItem::query()->create([
@@ -77,12 +90,17 @@ class ProductApiTest extends TestCase
             ->assertJsonFragment([
                 'id' => $product->id,
                 'name' => 'Produk List',
+                'category' => 'Minuman',
                 'stock' => 7,
+                'weight_grams' => 200,
             ]);
 
         $this->actingAs($supervisor)->getJson("/api/admin/products/{$product->id}")
             ->assertOk()
             ->assertJsonPath('data.name', 'Produk List')
+            ->assertJsonPath('data.description', 'Deskripsi produk untuk form edit.')
+            ->assertJsonPath('data.category', 'Minuman')
+            ->assertJsonPath('data.weight_grams', 200)
             ->assertJsonPath('data.stock', 7);
     }
 
@@ -165,24 +183,62 @@ class ProductApiTest extends TestCase
 
         $payload = [
             'name' => 'Produk Baru',
+            'description' => 'Deskripsi produk yang diperbarui.',
             'price' => 12000,
             'stock' => 12,
+            'category' => 'Kerajinan',
+            'weight_grams' => 300,
         ];
 
         $this->actingAs($supervisor)->putJson("/api/admin/products/{$product->id}", $payload)
             ->assertOk()
             ->assertJsonPath('data.name', 'Produk Baru')
+            ->assertJsonPath('data.description', 'Deskripsi produk yang diperbarui.')
+            ->assertJsonPath('data.category', 'Kerajinan')
+            ->assertJsonPath('data.weight_grams', 300)
             ->assertJsonPath('data.stock', 12);
 
         $this->assertDatabaseHas('products', [
             'id' => $product->id,
             'name' => 'Produk Baru',
+            'description' => 'Deskripsi produk yang diperbarui.',
+            'category' => 'Kerajinan',
+            'weight_grams' => 300,
         ]);
 
         $this->assertDatabaseHas('stock_items', [
             'product_id' => $product->id,
             'on_hand' => 12,
         ]);
+    }
+
+    public function test_supervisor_can_upload_product_image_when_creating_and_updating_product(): void
+    {
+        $storage = Storage::fake('public');
+        $supervisor = User::factory()->create(['role' => 'SUPERVISOR', 'is_active' => true]);
+
+        $created = $this->actingAs($supervisor)->post('/api/admin/products', [
+            'name' => 'Produk Bergambar',
+            'price' => 15000,
+            'stock' => 5,
+            'image' => UploadedFile::fake()->image('produk-awal.jpg'),
+        ])->assertCreated();
+
+        $product = Product::query()->findOrFail($created->json('data.id'));
+        $this->assertNotNull($product->image_path);
+        $storage->assertExists($product->image_path);
+        $created->assertJsonPath('data.image_url', '/storage/'.$product->image_path);
+
+        $oldImagePath = $product->image_path;
+        $this->actingAs($supervisor)->post("/api/admin/products/{$product->id}", [
+            '_method' => 'PUT',
+            'image' => UploadedFile::fake()->image('produk-baru.png'),
+        ])->assertOk();
+
+        $product->refresh();
+        $this->assertNotSame($oldImagePath, $product->image_path);
+        $storage->assertMissing($oldImagePath);
+        $storage->assertExists($product->image_path);
     }
 
     public function test_can_delete_product_and_stock_item(): void
@@ -211,12 +267,25 @@ class ProductApiTest extends TestCase
         $this->actingAs($supervisor)->deleteJson("/api/admin/products/{$product->id}")
             ->assertOk();
 
-        $this->assertDatabaseMissing('products', [
+        $this->assertSoftDeleted('products', [
             'id' => $product->id,
         ]);
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'is_active' => false,
+            'is_public' => false,
+        ]);
 
-        $this->assertDatabaseMissing('stock_items', [
+        $this->assertDatabaseHas('stock_items', [
             'product_id' => $product->id,
         ]);
+    }
+
+    public function test_public_product_image_urls_use_the_current_application_origin(): void
+    {
+        $this->assertSame(
+            '/storage/products/example.jpg',
+            Storage::url('products/example.jpg'),
+        );
     }
 }
