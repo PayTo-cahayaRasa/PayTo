@@ -102,32 +102,32 @@ export default function LandingPage({ business, catalog, featuredProducts = [], 
                         <div className="mx-auto max-w-462 rounded-t-[2.25rem] border border-b-0 border-[#f1e6d7] bg-[#fffdf9]/98 px-4 py-6 shadow-[0_-18px_46px_-38px_rgba(58,33,23,0.32)] backdrop-blur-sm sm:px-7 sm:py-9 lg:px-9">
                             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                                 <div>
-                                    <h2 className="font-display text-[2.35rem] font-semibold leading-none tracking-[-0.05em] text-[#3a2117] sm:text-[3rem]">
+                                    <h2 className="font-display text-[2.35rem] font-semibold leading-none tracking-[-0.05em] text-[var(--color-cocoa-800)] sm:text-[3rem]">
                                         Shop Produk
                                     </h2>
                                     <p className="mt-2 text-sm leading-6 text-[#7a5d47]">Pilih camilan favorit Anda, langsung dari {business.name}.</p>
                                 </div>
                                 <form onSubmit={submitSearch} className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
-                                    <label className="flex min-h-12 items-center gap-3 rounded-full border border-[#eadfcf] bg-white px-4">
+                                    <label className="flex min-h-12 items-center gap-3 rounded-full border border-[var(--color-cream-200)] bg-white px-4">
                                         <Search size={17} strokeWidth={1.8} className="text-[#8d6b4e]" />
                                         <input
                                             id="catalog-search"
                                             value={searchQuery}
                                             onChange={(event) => setSearchQuery(event.target.value)}
                                             placeholder="Cari produk"
-                                            className="w-full bg-transparent text-sm text-[#3a2117] outline-none placeholder:text-[#b69877]"
+                                            className="w-full bg-transparent text-sm text-[var(--color-cocoa-800)] outline-none placeholder:text-[#b69877]"
                                         />
                                     </label>
-                                    <button className="min-h-12 rounded-full bg-[#3a2117] px-5 text-sm font-semibold text-white" type="submit">Cari</button>
+                                    <button className="min-h-12 rounded-full bg-[var(--color-cocoa-800)] px-5 text-sm font-semibold text-white" type="submit">Cari</button>
                                 </form>
                             </div>
 
                             {!catalog.enabled ? (
-                                <div className="mt-7 rounded-3xl border border-dashed border-[#eadfcf] bg-white px-5 py-8 text-center text-[#7a5d47]">
+                                <div className="mt-7 rounded-3xl border border-dashed border-[var(--color-cream-200)] bg-white px-5 py-8 text-center text-[#7a5d47]">
                                     Katalog sedang dinonaktifkan.
                                 </div>
                             ) : visibleProducts.length === 0 ? (
-                                <div className="mt-7 rounded-3xl border border-dashed border-[#eadfcf] bg-white px-5 py-8 text-center text-[#7a5d47]">
+                                <div className="mt-7 rounded-3xl border border-dashed border-[var(--color-cream-200)] bg-white px-5 py-8 text-center text-[#7a5d47]">
                                     Belum ada produk toko yang tersedia.
                                 </div>
                             ) : (

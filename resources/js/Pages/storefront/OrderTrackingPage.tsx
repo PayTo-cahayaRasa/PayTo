@@ -67,19 +67,19 @@ export default function OrderTrackingPage({ business, order }: { business: Busin
                 onClearCart={clearCart}
             />
 
-            <main id="main-content" className="px-4 pb-10 pt-5 text-[#3a2117] sm:px-5 lg:px-8 lg:pb-14">
+            <main id="main-content" className="px-4 pb-10 pt-5 text-[var(--color-cocoa-800)] sm:px-5 lg:px-8 lg:pb-14">
                 <div className="mx-auto max-w-6xl">
-                    <Link href="/lacak-pesanan" className="inline-flex items-center gap-2 rounded-md text-sm font-bold text-[#8d5f3b] hover:text-[#3a2117] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9b5c22]">
+                    <Link href="/lacak-pesanan" className="inline-flex items-center gap-2 rounded-md text-sm font-bold text-[#8d5f3b] hover:text-[var(--color-cocoa-800)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-caramel-600)]">
                         <ArrowLeft aria-hidden="true" className="size-4" />
                         Lacak pesanan lain
                     </Link>
 
-                    <header className={`mt-5 overflow-hidden rounded-3xl p-6 text-white shadow-[0_24px_55px_rgba(72,42,22,0.13)] sm:p-8 ${isCancelled ? 'bg-[#793c35]' : 'bg-[#3a2117]'}`}>
+                    <header className={`mt-5 overflow-hidden rounded-3xl p-6 text-white shadow-[0_24px_55px_rgba(72,42,22,0.13)] sm:p-8 ${isCancelled ? 'bg-[#793c35]' : 'bg-[var(--color-cocoa-800)]'}`}>
                         <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
                             <div>
                                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#ffbd62]">Status pesanan</p>
                                 <h1 className="mt-2 font-display text-3xl font-semibold tracking-[-0.03em] sm:text-5xl">{statusLabels[order.status] ?? order.status.replaceAll('_', ' ')}</h1>
-                                <p className="mt-3 text-sm text-[#ead8ca]">Pesanan <strong className="text-white">{order.order_number}</strong> · {order.customer_name}</p>
+                                <p className="mt-3 text-sm text-[#ead8ca]">Pesanan <strong className="text-white">{order.order_number}</strong> Â· {order.customer_name}</p>
                             </div>
                             <div className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-[#f5e7dc]">
                                 <Clock3 aria-hidden="true" className="size-4" />
@@ -88,13 +88,13 @@ export default function OrderTrackingPage({ business, order }: { business: Busin
                         </div>
                     </header>
 
-                    <section aria-labelledby="progress-heading" className="mt-5 rounded-3xl border border-[#eadfcf] bg-[#fffdf9] p-5 shadow-[0_16px_45px_rgba(72,42,22,0.06)] sm:p-7">
+                    <section aria-labelledby="progress-heading" className="mt-5 rounded-3xl border border-[var(--color-cream-200)] bg-[#fffdf9] p-5 shadow-[0_16px_45px_rgba(72,42,22,0.06)] sm:p-7">
                         <div className="flex items-center justify-between gap-4">
                             <div>
-                                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#a2642f]">Perjalanan pesanan</p>
+                                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-caramel-500)]">Perjalanan pesanan</p>
                                 <h2 id="progress-heading" className="mt-1 text-lg font-bold">{isCancelled ? 'Pesanan tidak dilanjutkan' : 'Progres terbaru'}</h2>
                             </div>
-                            {order.fulfillment_method === 'DELIVERY' ? <Truck aria-hidden="true" className="size-6 text-[#a2642f]" /> : <Store aria-hidden="true" className="size-6 text-[#a2642f]" />}
+                            {order.fulfillment_method === 'DELIVERY' ? <Truck aria-hidden="true" className="size-6 text-[var(--color-caramel-500)]" /> : <Store aria-hidden="true" className="size-6 text-[var(--color-caramel-500)]" />}
                         </div>
 
                         {isCancelled ? <div className="mt-5 flex items-start gap-3 rounded-2xl bg-red-50 p-4 text-sm text-red-800">
@@ -106,13 +106,13 @@ export default function OrderTrackingPage({ business, order }: { business: Busin
                                 const active = index === currentStep;
 
                                 return <li key={step} className="relative flex gap-3 sm:block">
-                                    {index < steps.length - 1 && <span aria-hidden="true" className={`absolute left-4 top-8 h-[calc(100%+1rem)] w-px sm:left-8 sm:top-4 sm:h-px sm:w-[calc(100%-1rem)] ${index < currentStep ? 'bg-[#ef921e]' : 'bg-[#dfcfbb]'}`} />}
-                                    <span className={`relative z-10 grid size-8 shrink-0 place-items-center rounded-full border-2 ${complete ? 'border-[#ef921e] bg-[#ef921e] text-[#3a2117]' : 'border-[#dfcfbb] bg-white text-[#a58e79]'}`}>
+                                    {index < steps.length - 1 && <span aria-hidden="true" className={`absolute left-4 top-8 h-[calc(100%+1rem)] w-px sm:left-8 sm:top-4 sm:h-px sm:w-[calc(100%-1rem)] ${index < currentStep ? 'bg-[var(--color-snack-500)]' : 'bg-[var(--color-cream-300)]'}`} />}
+                                    <span className={`relative z-10 grid size-8 shrink-0 place-items-center rounded-full border-2 ${complete ? 'border-[var(--color-snack-500)] bg-[var(--color-snack-500)] text-[var(--color-cocoa-800)]' : 'border-[var(--color-cream-300)] bg-white text-[#a58e79]'}`}>
                                         {complete ? <Check aria-hidden="true" className="size-4" /> : <Circle aria-hidden="true" className="size-2 fill-current" />}
                                     </span>
                                     <div className="pb-3 sm:mt-3 sm:pb-0 sm:pr-3">
-                                        <p className={`text-sm font-bold ${active ? 'text-[#3a2117]' : complete ? 'text-[#70513d]' : 'text-[#9b8877]'}`}>{step}</p>
-                                        {active && <p className="mt-1 text-xs text-[#806049]">Status saat ini</p>}
+                                        <p className={`text-sm font-bold ${active ? 'text-[var(--color-cocoa-800)]' : complete ? 'text-[#70513d]' : 'text-[#9b8877]'}`}>{step}</p>
+                                        {active && <p className="mt-1 text-xs text-[var(--color-cocoa-500)]">Status saat ini</p>}
                                     </div>
                                 </li>;
                             })}
@@ -120,14 +120,14 @@ export default function OrderTrackingPage({ business, order }: { business: Busin
                     </section>
 
                     <div className="mt-5 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
-                        <section aria-labelledby="items-heading" className="rounded-3xl border border-[#eadfcf] bg-[#fffdf9] p-5 shadow-[0_16px_45px_rgba(72,42,22,0.06)] sm:p-7">
+                        <section aria-labelledby="items-heading" className="rounded-3xl border border-[var(--color-cream-200)] bg-[#fffdf9] p-5 shadow-[0_16px_45px_rgba(72,42,22,0.06)] sm:p-7">
                             <div className="flex items-center gap-3">
-                                <span className="grid size-10 place-items-center rounded-xl bg-[#fff0d8] text-[#a2642f]"><ReceiptText aria-hidden="true" className="size-5" /></span>
-                                <div><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#a2642f]">Detail</p><h2 id="items-heading" className="text-lg font-bold">Item pesanan</h2></div>
+                                <span className="grid size-10 place-items-center rounded-xl bg-[#fff0d8] text-[var(--color-caramel-500)]"><ReceiptText aria-hidden="true" className="size-5" /></span>
+                                <div><p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-caramel-500)]">Detail</p><h2 id="items-heading" className="text-lg font-bold">Item pesanan</h2></div>
                             </div>
-                            <div className="mt-5 divide-y divide-[#eadfcf] border-y border-[#eadfcf]">
+                            <div className="mt-5 divide-y divide-[var(--color-cream-200)] border-y border-[var(--color-cream-200)]">
                                 {order.items.map((item, index) => <div key={`${item.product_name_snapshot}-${index}`} className="flex items-start justify-between gap-4 py-4">
-                                    <div><p className="text-sm font-semibold">{item.product_name_snapshot}</p><p className="mt-1 text-xs text-[#806049]">{item.quantity} × {formatRupiah(Number(item.unit_price))}</p></div>
+                                    <div><p className="text-sm font-semibold">{item.product_name_snapshot}</p><p className="mt-1 text-xs text-[var(--color-cocoa-500)]">{item.quantity} × {formatRupiah(Number(item.unit_price))}</p></div>
                                     <strong className="shrink-0 text-sm">{formatRupiah(Number(item.line_total))}</strong>
                                 </div>)}
                             </div>
@@ -139,23 +139,23 @@ export default function OrderTrackingPage({ business, order }: { business: Busin
 
                             {order.tracking_number && <div className="mt-5 rounded-2xl border border-[#efd3aa] bg-[#fff3df] p-4">
                                 <div className="flex items-start gap-3">
-                                    <MapPin aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-[#a2642f]" />
-                                    <div><p className="text-xs font-bold uppercase tracking-[0.15em] text-[#a2642f]">Nomor resi</p><p className="mt-1 break-all text-lg font-bold tracking-wide">{order.tracking_number}</p><p className="mt-1 text-sm text-[#806049]">{order.shipping_courier_name} {order.shipping_service}{order.shipping_etd ? ` · Estimasi ${order.shipping_etd}` : ''}</p></div>
+                                    <MapPin aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-[var(--color-caramel-500)]" />
+                                    <div><p className="text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-caramel-500)]">Nomor resi</p><p className="mt-1 break-all text-lg font-bold tracking-wide">{order.tracking_number}</p><p className="mt-1 text-sm text-[var(--color-cocoa-500)]">{order.shipping_courier_name} {order.shipping_service}{order.shipping_etd ? ` Â· Estimasi ${order.shipping_etd}` : ''}</p></div>
                                 </div>
                             </div>}
                         </section>
 
-                        <aside aria-labelledby="summary-heading" className="rounded-3xl border border-[#dfcfbb] bg-[#fff8ed] p-5 shadow-[0_20px_50px_rgba(72,42,22,0.09)] lg:sticky lg:top-5">
+                        <aside aria-labelledby="summary-heading" className="rounded-3xl border border-[var(--color-cream-300)] bg-[#fff8ed] p-5 shadow-[0_20px_50px_rgba(72,42,22,0.09)] lg:sticky lg:top-5">
                             <h2 id="summary-heading" className="font-display text-2xl font-semibold">Ringkasan biaya</h2>
                             <dl className="mt-5 space-y-3 text-sm">
-                                <div className="flex justify-between gap-4"><dt className="text-[#806049]">Subtotal</dt><dd className="font-semibold">{formatRupiah(Number(order.subtotal))}</dd></div>
-                                {Number(order.discount_total) > 0 && <div className="flex justify-between gap-4"><dt className="text-[#806049]">Diskon</dt><dd className="font-semibold text-[#168c45]">−{formatRupiah(Number(order.discount_total))}</dd></div>}
-                                {order.fulfillment_method === 'DELIVERY' && <div className="flex justify-between gap-4"><dt className="text-[#806049]">Ongkir</dt><dd className="font-semibold">{formatRupiah(Number(order.shipping_cost))}</dd></div>}
-                                <div className="flex items-end justify-between gap-4 border-t border-[#3a2117] pt-4"><dt className="font-bold">Total</dt><dd className="font-display text-2xl font-semibold">{formatRupiah(Number(order.grand_total))}</dd></div>
+                                <div className="flex justify-between gap-4"><dt className="text-[var(--color-cocoa-500)]">Subtotal</dt><dd className="font-semibold">{formatRupiah(Number(order.subtotal))}</dd></div>
+                                {Number(order.discount_total) > 0 && <div className="flex justify-between gap-4"><dt className="text-[var(--color-cocoa-500)]">Diskon</dt><dd className="font-semibold text-[#168c45]">−{formatRupiah(Number(order.discount_total))}</dd></div>}
+                                {order.fulfillment_method === 'DELIVERY' && <div className="flex justify-between gap-4"><dt className="text-[var(--color-cocoa-500)]">Ongkir</dt><dd className="font-semibold">{formatRupiah(Number(order.shipping_cost))}</dd></div>}
+                                <div className="flex items-end justify-between gap-4 border-t border-[var(--color-cocoa-800)] pt-4"><dt className="font-bold">Total</dt><dd className="font-display text-2xl font-semibold">{formatRupiah(Number(order.grand_total))}</dd></div>
                             </dl>
 
                             {whatsappUrl && <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#168c45] px-5 text-sm font-bold text-white transition-colors hover:bg-[#11773a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#0e6d35] motion-reduce:transition-none"><MessageCircle aria-hidden="true" className="size-4" />Butuh bantuan?</a>}
-                            <p className="mt-3 text-center text-xs leading-5 text-[#806049]">Sertakan nomor pesanan saat menghubungi toko.</p>
+                            <p className="mt-3 text-center text-xs leading-5 text-[var(--color-cocoa-500)]">Sertakan nomor pesanan saat menghubungi toko.</p>
                         </aside>
                     </div>
                 </div>
@@ -195,7 +195,7 @@ type IconComponent = typeof Store;
 
 function InfoCard({ icon: Icon, label, value }: { icon: IconComponent; label: string; value: string }) {
     return <div className="flex items-start gap-3 rounded-2xl bg-[#f8f1e8] p-4">
-        <Icon aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-[#a2642f]" />
-        <div><p className="text-xs text-[#806049]">{label}</p><p className="mt-1 text-sm font-bold">{value}</p></div>
+        <Icon aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-[var(--color-caramel-500)]" />
+        <div><p className="text-xs text-[var(--color-cocoa-500)]">{label}</p><p className="mt-1 text-sm font-bold">{value}</p></div>
     </div>;
 }

@@ -198,8 +198,8 @@ function HeroProductShowcase() {
             <ChipOrnament className="absolute right-[8%] top-[4%] z-[5] h-8 w-8 rotate-18 sm:right-[11%] sm:h-10 sm:w-10" />
             <ChipOrnament className="absolute bottom-[4%] left-[31%] z-[5] h-7 w-7 -rotate-25 sm:h-9 sm:w-9" />
 
-            <div className="absolute left-[43%] top-[53%] z-[6] flex h-43 w-43 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-4 border-[#3a2117] bg-[radial-gradient(circle_at_35%_35%,#fff3b3_0%,#fcd84b_45%,#f4b81a_100%)] p-3 shadow-[0_28px_60px_-24px_rgba(58,33,23,0.58)] sm:left-[48%] sm:top-[51%] sm:h-54 sm:w-54 sm:border-[5px] sm:p-4 lg:h-61 lg:w-61 lg:border-[6px] lg:p-5">
-                <div className="absolute inset-2 rounded-full border-[1.5px] border-[#3a2117]/80 sm:inset-2.5 lg:inset-3 lg:border-2" />
+            <div className="absolute left-[43%] top-[53%] z-[6] flex h-43 w-43 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-4 border-[var(--color-cocoa-800)] bg-[radial-gradient(circle_at_35%_35%,#fff3b3_0%,#fcd84b_45%,#f4b81a_100%)] p-3 shadow-[0_28px_60px_-24px_rgba(58,33,23,0.58)] sm:left-[48%] sm:top-[51%] sm:h-54 sm:w-54 sm:border-[5px] sm:p-4 lg:h-61 lg:w-61 lg:border-[6px] lg:p-5">
+                <div className="absolute inset-2 rounded-full border-[1.5px] border-[var(--color-cocoa-800)]/80 sm:inset-2.5 lg:inset-3 lg:border-2" />
                 <img
                     src="/images/logo-removed.png"
                     alt="Logo Cahaya Rasa"
@@ -216,12 +216,12 @@ function HeroProductShowcase() {
 function FeatureItem({ title, subtitle, icon }: { title: string; subtitle: string; icon: ReactNode }) {
     return (
         <div className="flex items-start gap-3">
-            <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center text-[#3a2117] sm:h-7 sm:w-7">
+            <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center text-[var(--color-cocoa-800)] sm:h-7 sm:w-7">
                 {icon}
             </span>
             <div>
-                <p className="text-[0.95rem] font-semibold leading-5 text-[#3a2117] sm:text-[0.98rem]">{title}</p>
-                <p className="text-[0.95rem] font-medium leading-5 text-[#3a2117] sm:text-[0.98rem]">{subtitle}</p>
+                <p className="text-[0.95rem] font-semibold leading-5 text-[var(--color-cocoa-800)] sm:text-[0.98rem]">{title}</p>
+                <p className="text-[0.95rem] font-medium leading-5 text-[var(--color-cocoa-800)] sm:text-[0.98rem]">{subtitle}</p>
             </div>
         </div>
     );
@@ -235,7 +235,7 @@ export function HeroSection({ business }: HeroSectionProps) {
                 <HeroClouds />
                 <div className="relative z-10 grid items-start gap-8 lg:grid-cols-[0.54fr_0.46fr]">
                     <div className="max-w-132 pt-1 sm:pt-2">
-                        <h1 className="mt-4 font-display text-[2.8rem] font-semibold leading-[0.88] tracking-[-0.06em] text-[#3a2117] sm:mt-5 sm:text-[3.6rem] lg:text-[4.5rem]">
+                        <h1 className="mt-4 font-display text-[2.8rem] font-semibold leading-[0.88] tracking-[-0.06em] text-[var(--color-cocoa-800)] sm:mt-5 sm:text-[3.6rem] lg:text-[4.5rem]">
                             Renyahnya
                             <br />
                             Cahaya Rasa
@@ -247,24 +247,24 @@ export function HeroSection({ business }: HeroSectionProps) {
                         <div className="mt-6 flex flex-col gap-3 sm:mt-7 sm:flex-row">
                             <a
                                 href={storefrontShopHref}
-                                className="inline-flex min-h-[3.2rem] w-full items-center justify-center gap-2 rounded-full bg-[#f59a21] px-6 text-sm font-semibold text-white shadow-[0_22px_36px_-26px_rgba(245,154,33,0.65)] transition hover:-translate-y-0.5 hover:bg-[#e08913] sm:w-auto"
+                                className="inline-flex min-h-[3.2rem] w-full items-center justify-center gap-2 rounded-full bg-[var(--color-snack-500)] px-6 text-sm font-semibold text-white shadow-[0_22px_36px_-26px_rgba(245,154,33,0.65)] transition hover:-translate-y-0.5 hover:bg-[#e08913] sm:w-auto"
                             >
                                 <ShoppingCart size={16} strokeWidth={1.9} />
                                 Belanja Sekarang
                             </a>
                             <a
                                 href={storefrontShopHref}
-                                className="inline-flex min-h-[3.2rem] w-full items-center justify-center gap-2 rounded-full border border-[#e5d7c5] bg-white/80 px-6 text-sm font-semibold text-[#3a2117] transition hover:-translate-y-0.5 hover:bg-white sm:w-auto"
+                                className="inline-flex min-h-[3.2rem] w-full items-center justify-center gap-2 rounded-full border border-[#e5d7c5] bg-white/80 px-6 text-sm font-semibold text-[var(--color-cocoa-800)] transition hover:-translate-y-0.5 hover:bg-white sm:w-auto"
                             >
                                 Lihat Produk
                                 <ChevronRight size={16} strokeWidth={1.9} />
                             </a>
                         </div>
-                        <div className="mt-7 grid gap-4 text-[#3a2117] sm:mt-8 sm:grid-cols-[1fr_auto_1fr_auto_1fr] sm:items-start">
+                        <div className="mt-7 grid gap-4 text-[var(--color-cocoa-800)] sm:mt-8 sm:grid-cols-[1fr_auto_1fr_auto_1fr] sm:items-start">
                             <FeatureItem title="Bahan Pilihan" subtitle="Berkualitas" icon={<Medal size={18} strokeWidth={1.8} />} />
-                            <div className="hidden h-10 w-px bg-[#eadfcf] sm:block" />
+                            <div className="hidden h-10 w-px bg-[var(--color-cream-200)] sm:block" />
                             <FeatureItem title="Tanpa Pengawet" subtitle="& Pewarna Buatan" icon={<Leaf size={18} strokeWidth={1.8} />} />
-                            <div className="hidden h-10 w-px bg-[#eadfcf] sm:block" />
+                            <div className="hidden h-10 w-px bg-[var(--color-cream-200)] sm:block" />
                             <FeatureItem title="Dibuat Dengan Hati" subtitle="Rasa Rumahan" icon={<Heart size={18} strokeWidth={1.8} />} />
                         </div>
                     </div>

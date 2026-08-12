@@ -23,7 +23,7 @@ export function CatalogSidebar({ categories, selectedCategory, onSelectCategory 
                             onClick={onSelectCategory ? () => onSelectCategory(category.id) : undefined}
                             className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[0.98rem] transition ${
                                 isActive
-                                    ? 'bg-[#fff0d7] font-semibold text-[#3a2117]'
+                                    ? 'bg-[#fff0d7] font-semibold text-[var(--color-cocoa-800)]'
                                     : 'font-medium text-[#5f5044] hover:bg-[#fff8ed]'
                             }`}
                         >

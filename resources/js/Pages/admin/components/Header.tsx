@@ -66,7 +66,7 @@ export default function Header({
 }: HeaderProps) {
     return (
         <header className="relative z-30 px-4 pt-4 pb-5 sm:px-6 sm:pt-5 sm:pb-6 lg:px-8">
-            <div className="rounded-[1.75rem] border border-[#eadfcf] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(250,243,233,0.92))] px-4 py-4 shadow-[0_28px_56px_-42px_rgba(58,33,23,0.34)] sm:px-5 sm:py-5">
+            <div className="rounded-[1.75rem] border border-[var(--color-cream-200)] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(250,243,233,0.92))] px-4 py-4 shadow-[0_28px_56px_-42px_rgba(58,33,23,0.34)] sm:px-5 sm:py-5">
                 <div className="flex items-start justify-between gap-3 sm:gap-4">
                     <div className="flex items-start gap-3 min-w-0 sm:items-center">
                         <button
@@ -82,10 +82,10 @@ export default function Header({
                             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8e6847]">
                                 Area supervisor
                             </p>
-                            <h2 className="break-words text-xl font-semibold tracking-[-0.04em] text-[#2f241c] sm:text-[2rem]">
+                            <h2 className="break-words text-xl font-semibold tracking-[-0.04em] text-[var(--color-cocoa-900)] sm:text-[2rem]">
                                 {headerTitleMap[activeTab]}
                             </h2>
-                            <p className="mt-1 break-words text-sm text-[#806049]">
+                            <p className="mt-1 break-words text-sm text-[var(--color-cocoa-500)]">
                                 {headerSubtitleMap[activeTab]}
                             </p>
                         </div>

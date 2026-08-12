@@ -17,8 +17,8 @@ export default function SidebarItem({ icon: Icon, label, id, isActive, onClick }
         <button
             onClick={onClick}
             className={`group flex w-full min-w-0 items-center gap-3 rounded-2xl px-4 py-3 transition-all duration-300 ${isActive
-                ? 'bg-[#375c3f] text-white shadow-[0_20px_36px_-26px_rgba(55,92,63,0.72)]'
-                : 'text-[#6f5948] hover:bg-white/70 hover:text-[#2f241c]'
+                ? 'bg-[var(--color-leaf-600)] text-white shadow-[0_20px_36px_-26px_rgba(55,92,63,0.72)]'
+                : 'text-[#6f5948] hover:bg-white/70 hover:text-[var(--color-cocoa-900)]'
                 }`}
             data-tab-id={id}
         >

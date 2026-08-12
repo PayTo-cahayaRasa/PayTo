@@ -3,7 +3,7 @@ import type { BusinessProfile } from '../types';
 export function BrandMark({ business }: { business: BusinessProfile }) {
     return (
         <div className="flex min-w-0 items-center gap-2.5">
-            <span className="truncate font-display text-[1.5rem] font-bold leading-none tracking-[-0.04em] text-[#3a2117] sm:text-[2.1rem]">
+            <span className="truncate font-display text-[1.5rem] font-bold leading-none tracking-[-0.04em] text-[var(--color-cocoa-800)] sm:text-[2.1rem]">
                 {business.name}
             </span>
             {business.tagline ? (

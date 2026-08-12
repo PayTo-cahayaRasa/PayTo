@@ -159,16 +159,16 @@ export default function ProductImageCropper({ file, onApply, onCancel }: Product
     }
 
     return (
-        <div className="fixed inset-0 z-70 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="product-crop-title">
+        <div className="fixed inset-0 z-70 flex items-center justify-center bg-cocoa-950/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="product-crop-title">
             <div className="flex max-h-[94vh] w-full max-w-3xl flex-col overflow-hidden rounded-4xl bg-white shadow-2xl">
-                <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-7 sm:py-5">
+                <div className="flex items-start justify-between gap-4 border-b border-cocoa-100 px-5 py-4 sm:px-7 sm:py-5">
                     <div>
-                        <h3 id="product-crop-title" className="flex items-center gap-2 text-lg font-bold text-slate-900 sm:text-xl">
-                            <Crop size={20} className="text-indigo-600" /> Crop & Reposisi Foto
+                        <h3 id="product-crop-title" className="flex items-center gap-2 text-lg font-bold text-cocoa-900 sm:text-xl">
+                            <Crop size={20} className="text-snack-600" /> Crop & Reposisi Foto
                         </h3>
-                        <p className="mt-1 text-xs leading-5 text-slate-500 sm:text-sm">Geser foto dan atur zoom hingga produk pas di dalam frame.</p>
+                        <p className="mt-1 text-xs leading-5 text-cocoa-500 sm:text-sm">Geser foto dan atur zoom hingga produk pas di dalam frame.</p>
                     </div>
-                    <button type="button" onClick={onCancel} disabled={isProcessing} aria-label="Tutup editor foto" className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 disabled:opacity-50">
+                    <button type="button" onClick={onCancel} disabled={isProcessing} aria-label="Tutup editor foto" className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-cocoa-500 transition hover:bg-cocoa-100 disabled:opacity-50">
                         <X size={19} />
                     </button>
                 </div>
@@ -179,7 +179,7 @@ export default function ProductImageCropper({ file, onApply, onCancel }: Product
                         role="application"
                         tabIndex={0}
                         aria-label="Area crop foto. Geser dengan mouse atau gunakan tombol panah."
-                        className={`relative touch-none cursor-move overflow-hidden rounded-3xl bg-slate-950 outline-none ring-indigo-400 focus-visible:ring-4 ${isPortraitOrSquare ? 'mx-auto h-[52vh] max-h-128 max-w-full' : 'w-full'}`}
+                        className={`relative touch-none cursor-move overflow-hidden rounded-3xl bg-cocoa-950 outline-none ring-snack-400 focus-visible:ring-4 ${isPortraitOrSquare ? 'mx-auto h-[52vh] max-h-128 max-w-full' : 'w-full'}`}
                         style={{ aspectRatio: cropAspectRatio }}
                         onKeyDown={handleCropKeyboard}
                         onPointerDown={(event) => {
@@ -220,10 +220,10 @@ export default function ProductImageCropper({ file, onApply, onCancel }: Product
                         </div>
                     </div>
 
-                    <p className="mt-3 text-center text-xs text-slate-500">Drag untuk menggeser • Tombol panah untuk reposisi presisi • Rasio mengikuti foto otomatis</p>
+                    <p className="mt-3 text-center text-xs text-cocoa-500">Drag untuk menggeser • Tombol panah untuk reposisi presisi • Rasio mengikuti foto otomatis</p>
 
-                    <label htmlFor="product-image-zoom" className="mt-5 flex items-center gap-3 text-sm font-semibold text-slate-700">
-                        <ZoomIn size={17} className="text-indigo-600" />
+                    <label htmlFor="product-image-zoom" className="mt-5 flex items-center gap-3 text-sm font-semibold text-cocoa-700">
+                        <ZoomIn size={17} className="text-snack-600" />
                         <span>Zoom</span>
                         <input
                             id="product-image-zoom"
@@ -233,23 +233,23 @@ export default function ProductImageCropper({ file, onApply, onCancel }: Product
                             step="0.05"
                             value={zoom}
                             onChange={(event) => handleZoom(Number(event.target.value))}
-                            className="min-w-0 flex-1 accent-indigo-600"
+                            className="min-w-0 flex-1 accent-snack-600"
                         />
-                        <span className="w-12 text-right text-xs tabular-nums text-slate-500">{Math.round(zoom * 100)}%</span>
+                        <span className="w-12 text-right text-xs tabular-nums text-cocoa-500">{Math.round(zoom * 100)}%</span>
                     </label>
 
                     {errorMessage ? (
-                        <p className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600">{errorMessage}</p>
+                        <p className="mt-4 rounded-2xl border border-danger-200 bg-danger-50 px-4 py-3 text-sm font-semibold text-danger-600">{errorMessage}</p>
                     ) : null}
                 </div>
 
-                <div className="flex flex-col-reverse gap-2 border-t border-slate-100 bg-slate-50 p-5 sm:flex-row sm:items-center sm:justify-between">
-                    <button type="button" onClick={() => { setZoom(1); setOffset({ x: 0, y: 0 }); }} disabled={isProcessing} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 transition hover:bg-slate-100 disabled:opacity-50">
+                <div className="flex flex-col-reverse gap-2 border-t border-cocoa-100 bg-cocoa-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+                    <button type="button" onClick={() => { setZoom(1); setOffset({ x: 0, y: 0 }); }} disabled={isProcessing} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-cocoa-200 bg-white px-4 text-sm font-bold text-cocoa-600 transition hover:bg-cocoa-100 disabled:opacity-50">
                         <RotateCcw size={16} /> Reset Posisi
                     </button>
                     <div className="flex flex-col-reverse gap-2 sm:flex-row">
-                        <button type="button" onClick={onCancel} disabled={isProcessing} className="min-h-11 rounded-xl px-5 text-sm font-bold text-slate-500 transition hover:bg-slate-200 disabled:opacity-50">Batal</button>
-                        <button type="button" onClick={applyCrop} disabled={!geometry || isProcessing} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 text-sm font-bold text-white shadow-lg shadow-indigo-200 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60">
+                        <button type="button" onClick={onCancel} disabled={isProcessing} className="min-h-11 rounded-xl px-5 text-sm font-bold text-cocoa-500 transition hover:bg-cocoa-200 disabled:opacity-50">Batal</button>
+                        <button type="button" onClick={applyCrop} disabled={!geometry || isProcessing} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-snack-600 px-5 text-sm font-bold text-white shadow-lg shadow-snack-200 transition hover:bg-snack-700 disabled:cursor-not-allowed disabled:opacity-60">
                             <Save size={17} /> {isProcessing ? 'Memproses...' : 'Gunakan Foto'}
                         </button>
                     </div>

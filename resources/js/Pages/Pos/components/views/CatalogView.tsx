@@ -35,8 +35,8 @@ export default function CatalogView({
                             key={cat.id}
                             onClick={() => onSelectCategory(cat.id)}
                             className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all duration-300 ${selectedCategory === cat.id
-                                ? 'bg-white shadow-md text-indigo-600 scale-100'
-                                : 'text-slate-500 hover:text-slate-700 hover:bg-white/40'
+                                ? 'bg-white shadow-md text-snack-600 scale-100'
+                                : 'text-cocoa-500 hover:text-cocoa-700 hover:bg-white/40'
                                 }`}
                         >
                             <cat.icon size={16} className={selectedCategory === cat.id ? 'stroke-[2.5px]' : ''} />

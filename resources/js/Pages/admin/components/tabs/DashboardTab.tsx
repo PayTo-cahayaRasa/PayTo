@@ -115,13 +115,13 @@ export default function DashboardTab() {
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <section className="min-h-[300px] rounded-[2rem] border border-[#eadfcf] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(249,243,234,0.92))] p-6 shadow-[0_24px_44px_-36px_rgba(58,33,23,0.28)] lg:col-span-2">
+                <section className="min-h-[300px] rounded-[2rem] border border-[var(--color-cream-200)] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(249,243,234,0.92))] p-6 shadow-[0_24px_44px_-36px_rgba(58,33,23,0.28)] lg:col-span-2">
                     <div className="mb-6 flex items-center justify-between">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8e6847]">Ringkasan mingguan</p>
-                            <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#2f241c]">Trend Penjualan (7 Hari)</h3>
+                            <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[var(--color-cocoa-900)]">Trend Penjualan (7 Hari)</h3>
                         </div>
-                        <span className="rounded-full bg-[#edf5ee] px-3 py-1 text-xs font-semibold text-[#375c3f]">Real-time</span>
+                        <span className="rounded-full bg-[#edf5ee] px-3 py-1 text-xs font-semibold text-[var(--color-leaf-600)]">Real-time</span>
                     </div>
 
                     <div className="flex h-48 items-end justify-between gap-4 px-4">
@@ -139,7 +139,7 @@ export default function DashboardTab() {
                                     <div key={point.date} className="group relative w-full rounded-t-xl bg-[#f1e6d7]">
                                         <div
                                             style={{ height: `${height}%` }}
-                                            className="absolute bottom-0 w-full rounded-t-xl bg-[#375c3f] transition-all group-hover:bg-[#2f4d35]"
+                                            className="absolute bottom-0 w-full rounded-t-xl bg-[var(--color-leaf-600)] transition-all group-hover:bg-[#2f4d35]"
                                         ></div>
                                         <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-[#8d6b4e] opacity-0 transition group-hover:opacity-100">
                                             {currencyFormatter.format(point.total)}
@@ -148,7 +148,7 @@ export default function DashboardTab() {
                                 );
                             })
                         ) : (
-                            <div className="rounded-[1.5rem] border border-dashed border-[#dfcfbb] bg-[#fffdf9] px-4 py-5 text-sm text-[#806049]">
+                            <div className="rounded-[1.5rem] border border-dashed border-[var(--color-cream-300)] bg-[#fffdf9] px-4 py-5 text-sm text-[var(--color-cocoa-500)]">
                                 Belum ada data penjualan minggu ini.
                             </div>
                         )}
@@ -164,8 +164,8 @@ export default function DashboardTab() {
                     </div>
                 </section>
 
-                <section className="rounded-[2rem] border border-[#eadfcf] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(249,243,234,0.92))] p-6 shadow-[0_24px_44px_-36px_rgba(58,33,23,0.28)] lg:col-span-1">
-                    <h3 className="mb-4 text-xl font-semibold tracking-[-0.03em] text-[#2f241c]">Aktivitas Terkini</h3>
+                <section className="rounded-[2rem] border border-[var(--color-cream-200)] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(249,243,234,0.92))] p-6 shadow-[0_24px_44px_-36px_rgba(58,33,23,0.28)] lg:col-span-1">
+                    <h3 className="mb-4 text-xl font-semibold tracking-[-0.03em] text-[var(--color-cocoa-900)]">Aktivitas Terkini</h3>
                     <div className="space-y-4">
                         {isLoading ? (
                             Array.from({ length: 3 }).map((_, index) => (
@@ -180,12 +180,12 @@ export default function DashboardTab() {
                         ) : dashboard?.recent_activities?.length ? (
                             dashboard.recent_activities.map((activity) => (
                                 <div key={activity.id} className="flex items-start gap-3">
-                                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#edf5ee] text-[#375c3f]">
+                                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#edf5ee] text-[var(--color-leaf-600)]">
                                         <CheckCircle size={14} />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-semibold text-[#2f241c]">{activity.title}</p>
-                                        <p className="text-xs text-[#806049]">
+                                        <p className="text-sm font-semibold text-[var(--color-cocoa-900)]">{activity.title}</p>
+                                        <p className="text-xs text-[var(--color-cocoa-500)]">
                                             {currencyFormatter.format(activity.amount)} | {activity.method} | {activity.cashier}
                                         </p>
                                         <p className="mt-0.5 text-[10px] text-[#a3886c]">{activity.time}</p>
@@ -193,7 +193,7 @@ export default function DashboardTab() {
                                 </div>
                             ))
                         ) : (
-                            <div className="rounded-[1.6rem] border border-dashed border-[#dfcfbb] bg-[#fffdf9] px-4 py-5 text-sm text-[#806049]">
+                            <div className="rounded-[1.6rem] border border-dashed border-[var(--color-cream-300)] bg-[#fffdf9] px-4 py-5 text-sm text-[var(--color-cocoa-500)]">
                                 Belum ada aktivitas terbaru. Riwayat transaksi dan approval akan muncul di sini setelah operasional berjalan.
                             </div>
                         )}
@@ -201,11 +201,11 @@ export default function DashboardTab() {
                 </section>
             </div>
 
-            <section className="rounded-[2rem] border border-[#eadfcf] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(249,243,234,0.92))] p-6 shadow-[0_24px_44px_-36px_rgba(58,33,23,0.28)]">
+            <section className="rounded-[2rem] border border-[var(--color-cream-200)] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(249,243,234,0.92))] p-6 shadow-[0_24px_44px_-36px_rgba(58,33,23,0.28)]">
                 <div className="mb-4 flex items-center justify-between">
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8e6847]">Kontrol stok</p>
-                        <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[#2f241c]">Stok Hampir Habis</h3>
+                        <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-[var(--color-cocoa-900)]">Stok Hampir Habis</h3>
                     </div>
                     <span className="text-xs text-[#8d6b4e]">Top {dashboard?.low_stock?.items?.length ?? 0}</span>
                 </div>
@@ -222,17 +222,17 @@ export default function DashboardTab() {
                         dashboard.low_stock.items.map((item) => (
                             <div key={item.id} className="flex items-center justify-between gap-4 rounded-2xl border border-[#f0e4d5] bg-white/75 px-4 py-3">
                                 <div>
-                                    <p className="text-sm font-semibold text-[#2f241c]">{item.name}</p>
+                                    <p className="text-sm font-semibold text-[var(--color-cocoa-900)]">{item.name}</p>
                                     <p className="text-xs text-[#8d6b4e]">{item.sku ?? 'Tanpa SKU'}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-semibold text-[#b76046]">{item.stock ?? 0}</p>
+                                    <p className="text-sm font-semibold text-[var(--color-danger-500)]">{item.stock ?? 0}</p>
                                     <p className="text-[10px] text-[#a3886c]">stok tersedia</p>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <div className="rounded-[1.6rem] border border-dashed border-[#d8cdbd] bg-[#fffdf9] px-4 py-5 text-sm text-[#806049]">
+                        <div className="rounded-[1.6rem] border border-dashed border-[#d8cdbd] bg-[#fffdf9] px-4 py-5 text-sm text-[var(--color-cocoa-500)]">
                             Semua stok aman saat ini. Daftar prioritas restock akan muncul otomatis saat barang mendekati batas aman.
                         </div>
                     )}
