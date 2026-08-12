@@ -30,23 +30,19 @@ interface ReceiptSale {
     };
 }
 
-interface ReceiptSettings {
-    header: string;
-    footer: string;
-}
-
 interface Business {
     name: string;
     address: string;
+    instagram_username: string | null;
+    tiktok_username: string | null;
 }
 
 interface ReceiptPageProps {
     sale: ReceiptSale;
-    receipt_settings: ReceiptSettings;
     business: Business;
 }
 
-export default function ReceiptPage({ sale, receipt_settings, business }: ReceiptPageProps) {
+export default function ReceiptPage({ sale, business }: ReceiptPageProps) {
     const handlePrint = () => {
         window.location.assign(`/pos/sales/${sale.id}/receipt/download`);
     };
@@ -79,11 +75,7 @@ export default function ReceiptPage({ sale, receipt_settings, business }: Receip
                     {/* Header */}
                     <div className="receipt-header">
                         <div className="store-name">{business.name}</div>
-                        <div className="store-info">
-                            {receipt_settings.header.split('\n').map((line, i) => (
-                                <div key={i}>{line}</div>
-                            ))}
-                        </div>
+                        <div className="store-info">{business.address}</div>
                     </div>
 
                     <div className="receipt-divider">{'='.repeat(32)}</div>
@@ -158,9 +150,9 @@ export default function ReceiptPage({ sale, receipt_settings, business }: Receip
 
                     {/* Footer */}
                     <div className="receipt-footer">
-                        {receipt_settings.footer.split('\n').map((line, i) => (
-                            <div key={i}>{line}</div>
-                        ))}
+                        <div>Terima kasih atas kunjungan Anda</div>
+                        {business.instagram_username && <div>Instagram: {business.instagram_username}</div>}
+                        {business.tiktok_username && <div>TikTok: {business.tiktok_username}</div>}
                     </div>
                 </div>
             </div>
