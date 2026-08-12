@@ -23,6 +23,7 @@ type PaymentModalProps = {
     totalDue: number;
     subtotal: number;
     change: number;
+    qrisImageUrl?: string;
     formatRupiah: (num: number) => string;
 };
 
@@ -46,6 +47,7 @@ export default function PaymentModal({
     totalDue,
     subtotal,
     change,
+    qrisImageUrl,
     formatRupiah,
 }: PaymentModalProps) {
     if (!isOpen) return null;
@@ -364,8 +366,11 @@ export default function PaymentModal({
                             {paymentMethod === 'EWALLET' && (
                                 <div className="flex flex-col h-full animate-in slide-in-from-right-4 duration-300">
                                     <div className="mt-3 mx-auto w-full max-w-64 aspect-square rounded-2xl bg-cocoa-100 border-2 border-cocoa-200 flex items-center justify-center relative overflow-hidden group">
-                                        {/* Placeholder for QR Code Image */}
-                                        <div className="w-20 h-20 rounded-xl bg-white shadow-md flex items-center justify-center text-cocoa-500 text-xs font-bold ring-4 ring-cocoa-50">QR CODE</div>
+                                        {qrisImageUrl ? (
+                                            <img src={qrisImageUrl} alt="Kode QRIS pembayaran toko" className="h-full w-full object-contain p-3" />
+                                        ) : (
+                                            <div className="w-20 h-20 rounded-xl bg-white shadow-md flex items-center justify-center text-cocoa-500 text-xs font-bold ring-4 ring-cocoa-50">QR CODE</div>
+                                        )}
                                     </div>
 
                                     <div className="mt-auto py-4">

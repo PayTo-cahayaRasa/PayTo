@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Sale;
 use App\Services\Settings\AppSettingsService;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -20,29 +19,16 @@ class ReceiptController extends Controller
     /**
      * Show receipt for a sale
      */
-    public function show(Request $request, Sale $sale): Response
+    public function show(Sale $sale): Response
     {
-        $this->authorizeReceipt($request, $sale);
-
         return Inertia::render('receipt', $this->receiptData($sale));
     }
 
-    public function download(Request $request, Sale $sale): HttpResponse
+    public function download(Sale $sale): HttpResponse
     {
-        $this->authorizeReceipt($request, $sale);
-
         return Pdf::loadView('receipt.pdf', $this->receiptData($sale))
             ->setPaper([0, 0, 226.77, 841.89])
             ->download("struk-{$sale->id}.pdf");
-    }
-
-    private function authorizeReceipt(Request $request, Sale $sale): void
-    {
-        $user = $request->user();
-
-        if ($user->role === 'CASHIER' && $sale->cashier_id !== $user->id) {
-            abort(403, 'Unauthorized access to receipt.');
-        }
     }
 
     /**

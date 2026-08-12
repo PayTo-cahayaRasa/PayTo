@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Pos;
 
 use App\Http\Controllers\Controller;
+use App\Services\Settings\AppSettingsService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -11,7 +12,8 @@ class PosController extends Controller
     public function __construct(
         private readonly ProductQueryController $productQuery,
         private readonly HistoryQueryController $historyQuery,
-        private readonly ProfileQueryController $profileQuery
+        private readonly ProfileQueryController $profileQuery,
+        private readonly AppSettingsService $settingsService
     ) {}
 
     public function index(Request $request)
@@ -27,6 +29,7 @@ class PosController extends Controller
             'products' => $products,
             'history' => $history,
             'profile' => $profile,
+            'payment' => $this->settingsService->getOnlineOrderSettings()['payment'],
         ]);
     }
 }

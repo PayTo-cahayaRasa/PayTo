@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AppSetting;
 use App\Models\Product;
 use App\Models\StockItem;
 use App\Models\User;
@@ -77,5 +78,26 @@ class PosCheckoutApiTest extends TestCase
             ->assertOk()
             ->assertJsonFragment(['name' => 'Produk Publik', 'category' => 'Camilan', 'imageUrl' => '/storage/products/produk-publik.jpg'])
             ->assertJsonFragment(['name' => 'Produk Internal']);
+    }
+
+    public function test_pos_page_receives_configured_qris_image_url(): void
+    {
+        $cashier = User::factory()->create(['role' => 'CASHIER', 'is_active' => true]);
+        AppSetting::query()->create([
+            'key' => 'online_order.settings',
+            'value' => [
+                'payment' => [
+                    'qris_image_url' => '/storage/payment/qris/toko.png',
+                ],
+            ],
+        ]);
+
+        $this->actingAs($cashier)
+            ->get(route('pos.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('kasir')
+                ->where('payment.qris_image_url', '/storage/payment/qris/toko.png')
+            );
     }
 }

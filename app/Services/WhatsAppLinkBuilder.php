@@ -59,7 +59,7 @@ class WhatsAppLinkBuilder
 
     public function buildShippingUpdateLink(OnlineOrder $order): ?string
     {
-        $whatsappNumber = $this->whatsappNumber();
+        $whatsappNumber = $this->validWhatsAppNumber($order->customer_phone);
         if ($whatsappNumber === null) {
             return null;
         }
@@ -103,7 +103,12 @@ class WhatsAppLinkBuilder
 
     private function whatsappNumber(): ?string
     {
-        $whatsappNumber = preg_replace('/\D+/', '', (string) ($this->settings->getBusinessProfile()['whatsapp_number'] ?? ''));
+        return $this->validWhatsAppNumber($this->settings->getBusinessProfile()['whatsapp_number'] ?? '');
+    }
+
+    private function validWhatsAppNumber(?string $number): ?string
+    {
+        $whatsappNumber = preg_replace('/\D+/', '', (string) $number);
 
         if ($whatsappNumber === null || ! preg_match('/^[0-9]{8,15}$/', $whatsappNumber)) {
             return null;
