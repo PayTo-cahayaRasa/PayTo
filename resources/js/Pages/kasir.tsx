@@ -16,7 +16,7 @@ import UniversalModal from '../Components/UniversalModal';
 import { logDevelopmentError, NotificationProvider, useNotification } from '../Components/notifications/NotificationProvider';
 // import { CATEGORIES, QUICK_CASH_AMOUNTS } from './Pos/data';
 import type { CartItem, Product, SaleSource, TransactionHistory } from './Pos/types';
-import { Box, Coffee, LayoutGrid, Palette, Utensils } from 'lucide-react';
+import { Box, Coffee, LayoutGrid, Palette, Utensils, ShoppingBag } from 'lucide-react';
 
 export const CATEGORIES = [
     { id: 'All', label: 'Semua', icon: LayoutGrid },
@@ -46,6 +46,7 @@ function PosInterfaceContent() {
     const [logoutError, setLogoutError] = useState<string | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isMobileSidebarMode, setIsMobileSidebarMode] = useState(false);
+    const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
     const [showPaymentSuccessModal, setShowPaymentSuccessModal] = useState(false);
     const [checkoutError, setCheckoutError] = useState<string | null>(null);
     const [lastPaymentSummary, setLastPaymentSummary] = useState<{
@@ -501,7 +502,7 @@ function PosInterfaceContent() {
 
     return (
         // Main Background
-        <div className="min-h-screen lg:h-screen w-full bg-cream-50 relative flex flex-col lg:flex-row font-sans overflow-x-hidden lg:overflow-hidden text-cocoa-800 selection:bg-snack-500 selection:text-white">
+        <div className="h-screen h-[100dvh] w-full bg-cream-50 relative flex flex-col lg:flex-row font-sans overflow-hidden text-cocoa-800 selection:bg-snack-500 selection:text-white">
 
             {/* Background Ambience */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-caramel-200 rounded-full blur-[120px] opacity-40 animate-pulse-slow pointer-events-none"></div>
@@ -532,7 +533,7 @@ function PosInterfaceContent() {
             )}
 
             {/* 2. DYNAMIC CONTENT AREA */}
-            <div className="flex-1 flex flex-col relative min-w-0 lg:h-full py-3 lg:py-4 px-3 sm:px-4 lg:px-6 gap-4 lg:gap-6 z-10">
+            <div className="flex-1 flex flex-col relative min-w-0 h-full py-3 lg:py-4 px-3 sm:px-4 lg:px-6 gap-3 lg:gap-6 z-10 overflow-hidden">
 
                 {/* Header (Dynamic) */}
                 <HeaderBar
@@ -610,7 +611,7 @@ function PosInterfaceContent() {
 
             </div>
 
-            {/* 3. CART PANEL (Unchanged Style) */}
+            {/* 3. CART PANEL */}
             {activeView !== 'profile' && activeView !== 'settings' && activeView !== 'online-orders' && (
                 <CartPanel
                     cart={cart}
@@ -622,13 +623,42 @@ function PosInterfaceContent() {
                         setSaleSource('WALK_IN');
                         setCustomerName('');
                         setCustomerPhone('');
+                        setIsMobileCartOpen(false);
                     }}
                     onUpdateQty={updateQty}
                     onRemoveFromCart={removeFromCart}
-
-                    onCheckout={() => setShowPaymentModal(true)}
+                    onCheckout={() => {
+                        setIsMobileCartOpen(false);
+                        setShowPaymentModal(true);
+                    }}
                     formatRupiah={formatRupiah}
+                    isMobileOpen={isMobileCartOpen}
+                    onCloseMobile={() => setIsMobileCartOpen(false)}
                 />
+            )}
+
+            {/* Mobile Floating Cart Bar */}
+            {activeView !== 'profile' && activeView !== 'settings' && activeView !== 'online-orders' && cart.length > 0 && !isMobileCartOpen && (
+                <div className="fixed bottom-3 inset-x-3 z-30 lg:hidden">
+                    <button
+                        type="button"
+                        onClick={() => setIsMobileCartOpen(true)}
+                        className="w-full bg-[#3d281b] text-white rounded-2xl p-3 sm:p-3.5 shadow-2xl shadow-cocoa-900/30 flex items-center justify-between active:scale-[0.99] transition-all border border-[#523827]"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-snack-600 flex items-center justify-center font-bold text-sm text-white shadow-xs">
+                                {totalItems}
+                            </div>
+                            <div className="text-left">
+                                <p className="text-[11px] text-[#c9b29e] font-medium">Keranjang Belanja</p>
+                                <p className="text-sm font-bold font-mono text-white">{formatRupiah(grandTotal).replace(",00", "")}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-xl text-xs font-bold text-white hover:bg-white/20">
+                            <ShoppingBag size={16} /> Lihat Order
+                        </div>
+                    </button>
+                </div>
             )}
 
             {/* --- PAYMENT MODAL (Modern Glass) --- */}

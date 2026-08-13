@@ -71,7 +71,7 @@ export default function ReceiptTab() {
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in slide-in-from-bottom-4 duration-500">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 animate-in slide-in-from-bottom-4 duration-500">
             <div className="space-y-6">
                 {errorMessage ? (
                     <div className="bg-danger-50 text-danger-600 border border-danger-200 rounded-2xl px-4 py-3 text-sm font-semibold">
@@ -84,7 +84,7 @@ export default function ReceiptTab() {
                     </div>
                 ) : null}
 
-                <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-4xl p-6 shadow-sm">
+                <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-3xl sm:rounded-4xl p-4 sm:p-6 shadow-sm">
                     <h3 className="font-bold text-cocoa-800 mb-4 flex items-center gap-2">
                         <Settings size={20} className="text-cocoa-400" /> Konfigurasi Template
                     </h3>

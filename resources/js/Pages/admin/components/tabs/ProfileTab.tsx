@@ -13,11 +13,11 @@ type ProfileTabProps = {
 export default function ProfileTab({ profile }: ProfileTabProps) {
     return (
         <div className="animate-in slide-in-from-bottom-4 duration-500 space-y-6">
-            <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem] p-8 shadow-sm relative overflow-hidden">
+            <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-2xl sm:rounded-[2rem] p-4 sm:p-8 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-snack-200 rounded-full blur-[80px] opacity-40 -mr-16 -mt-16 pointer-events-none"></div>
 
                 <div className="flex flex-col gap-6 relative z-10 lg:flex-row lg:items-center">
-                    <div className="w-32 h-32 rounded-full p-1 bg-white shadow-xl shadow-snack-100 relative group cursor-pointer mx-auto lg:mx-0">
+                    <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full p-1 bg-white shadow-xl shadow-snack-100 relative group cursor-pointer mx-auto lg:mx-0 shrink-0">
                         <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Supervisor" alt="Profile" className="w-full h-full rounded-full object-cover bg-cocoa-50" />
                         <div className="absolute bottom-1 right-1 bg-snack-600 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
                             <Edit size={16} />
@@ -26,35 +26,35 @@ export default function ProfileTab({ profile }: ProfileTabProps) {
                     <div className="flex-1 min-w-0">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                             <div>
-                                <h2 className="text-2xl font-bold text-cocoa-800 break-words sm:text-3xl">{profile.name}</h2>
-                                <p className="text-cocoa-500 font-medium text-lg break-words">{profile.role} • {profile.id}</p>
+                                <h2 className="text-xl font-bold text-cocoa-800 break-words sm:text-3xl">{profile.name}</h2>
+                                <p className="text-cocoa-500 font-medium text-sm sm:text-lg break-words">{profile.role} • {profile.id}</p>
                             </div>
-                            <div className="text-right">
-                                <div className="px-4 py-1.5 bg-leaf-100 text-leaf-700 text-xs font-bold rounded-full border border-leaf-200 inline-flex items-center gap-2">
+                            <div className="text-left sm:text-right">
+                                <div className="px-3 py-1 sm:px-4 sm:py-1.5 bg-leaf-100 text-leaf-700 text-xs font-bold rounded-full border border-leaf-200 inline-flex items-center gap-2">
                                     <div className="w-2 h-2 rounded-full bg-leaf-500 animate-pulse"></div>
                                     Akun Aktif
                                 </div>
-                                <p className="text-xs text-cocoa-400 mt-2">Login terakhir: {profile.lastLogin}</p>
+                                <p className="text-xs text-cocoa-400 mt-1 sm:mt-2">Login terakhir: {profile.lastLogin}</p>
                             </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-3 mt-6">
-                            <div className="flex items-center gap-2 text-sm text-cocoa-600 bg-white/50 px-4 py-2 rounded-xl border border-white/50 max-w-full break-words">
-                                <Mail size={16} className="text-snack-500" /> {profile.email}
+                        <div className="flex flex-wrap gap-2 sm:gap-3 mt-4 sm:mt-6">
+                            <div className="flex items-center gap-2 text-xs sm:text-sm text-cocoa-600 bg-white/50 px-3 py-2 sm:px-4 sm:py-2 rounded-xl border border-white/50 max-w-full break-all">
+                                <Mail size={16} className="text-snack-500 shrink-0" /> {profile.email}
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-cocoa-600 bg-white/50 px-4 py-2 rounded-xl border border-white/50 max-w-full break-words">
-                                <Phone size={16} className="text-snack-500" /> {profile.phone}
+                            <div className="flex items-center gap-2 text-xs sm:text-sm text-cocoa-600 bg-white/50 px-3 py-2 sm:px-4 sm:py-2 rounded-xl border border-white/50 max-w-full break-all">
+                                <Phone size={16} className="text-snack-500 shrink-0" /> {profile.phone}
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-cocoa-600 bg-white/50 px-4 py-2 rounded-xl border border-white/50 max-w-full break-words">
-                                <Clock size={16} className="text-snack-500" /> Bergabung: {profile.joinDate}
+                            <div className="flex items-center gap-2 text-xs sm:text-sm text-cocoa-600 bg-white/50 px-3 py-2 sm:px-4 sm:py-2 rounded-xl border border-white/50 max-w-full break-all">
+                                <Clock size={16} className="text-snack-500 shrink-0" /> Bergabung: {profile.joinDate}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem] p-6 shadow-sm">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 shadow-sm">
                     <h3 className="font-bold text-lg text-cocoa-800 mb-6 flex items-center gap-2">
                         <ShieldCheck size={20} className="text-cocoa-400" /> Keamanan Akun
                     </h3>
