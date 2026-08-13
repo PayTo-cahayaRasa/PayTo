@@ -121,6 +121,13 @@ export default function AdminPage() {
         window.location.assign('/login');
     };
 
+    const handleTabChange = (tab: AdminTab) => {
+        setActiveTab(tab);
+        if (!isLargeScreen) {
+            setIsSidebarOpen(false);
+        }
+    };
+
     const toggleSidebar = () => {
         setIsSidebarOpen(state => !state);
     };
@@ -137,7 +144,7 @@ export default function AdminPage() {
             >
                 <Sidebar
                     activeTab={activeTab}
-                    onChangeTab={setActiveTab}
+                    onChangeTab={handleTabChange}
                     onLogout={handleLogout}
                 />
             </div>
@@ -168,8 +175,8 @@ export default function AdminPage() {
                     userMenuRef={userMenuRef}
                     notifications={NOTIFICATIONS_DATA}
                     profile={adminProfile}
-                    onNavigateProfile={() => { setActiveTab('PROFILE'); setShowUserMenu(false); }}
-                    onNavigateSettings={() => { setActiveTab('SETTINGS'); setShowUserMenu(false); }}
+                    onNavigateProfile={() => { handleTabChange('PROFILE'); setShowUserMenu(false); }}
+                    onNavigateSettings={() => { handleTabChange('SETTINGS'); setShowUserMenu(false); }}
                     onLogout={handleLogout}
                     onToggleSidebar={toggleSidebar}
                     isSidebarOpen={isSidebarOpen}

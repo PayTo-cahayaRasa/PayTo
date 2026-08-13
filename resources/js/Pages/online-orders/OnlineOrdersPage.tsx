@@ -186,10 +186,11 @@ export default function OnlineOrdersPage({ role, embedded = false }: OnlineOrder
                         </p>
                     ) : null}
 
-                    <div className={`grid gap-6 ${orders.length > 0 ? 'lg:grid-cols-[minmax(0,1fr)_25rem]' : ''}`}>
-                        <section className="overflow-hidden rounded-[2rem] border border-[#eadfcf] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(249,243,234,0.92))] shadow-[0_24px_44px_-36px_rgba(58,33,23,0.28)]">
-                            <div className="border-b border-[#efe3d4] px-5 py-4">
-                                <div className="min-w-[44rem] grid grid-cols-[1.3fr_1fr_1fr_0.9fr_0.9fr] gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#8e6847]">
+                    <div className={`grid gap-4 sm:gap-6 ${orders.length > 0 ? 'lg:grid-cols-[minmax(0,1fr)_25rem]' : ''}`}>
+                        <section className="overflow-hidden rounded-2xl sm:rounded-[2rem] border border-[#eadfcf] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(249,243,234,0.92))] shadow-[0_24px_44px_-36px_rgba(58,33,23,0.28)]">
+                            {/* Table Header for Desktop */}
+                            <div className="hidden md:block border-b border-[#efe3d4] px-5 py-4">
+                                <div className="grid grid-cols-[1.3fr_1fr_1fr_0.9fr_0.9fr] gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#8e6847]">
                                     <span>Order</span>
                                     <span>Pelanggan</span>
                                     <span>Fulfillment</span>
@@ -198,62 +199,85 @@ export default function OnlineOrdersPage({ role, embedded = false }: OnlineOrder
                                 </div>
                             </div>
 
-                            <div className="divide-y divide-[#f2e7d9] overflow-x-auto">
+                            {/* Mobile List Header */}
+                            <div className="md:hidden border-b border-[#efe3d4] px-4 py-3 flex items-center justify-between">
+                                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8e6847]">Daftar Pesanan ({orders.length})</span>
+                            </div>
+
+                            {/* Order Items */}
+                            <div className="divide-y divide-[#f2e7d9]">
                                 {orders.map((order) => (
                                     <button
                                         type="button"
                                         key={order.id}
                                         onClick={() => void openOrder(order)}
-                                        className={`grid min-w-[44rem] w-full grid-cols-[1.3fr_1fr_1fr_0.9fr_0.9fr] gap-3 px-5 py-4 text-left transition ${
+                                        className={`w-full px-4 py-3.5 sm:px-5 sm:py-4 text-left transition ${
                                             selected?.id === order.id
                                                 ? 'bg-[#f8f2e7]'
                                                 : 'hover:bg-white/75'
                                         }`}
                                     >
-                                        <div>
-                                            <p className="text-sm font-semibold text-[#2f241c]">{order.order_number}</p>
-                                            <p className="mt-1 text-xs text-[#8d6b4e]">{new Date(order.created_at).toLocaleString('id-ID')}</p>
+                                        {/* Desktop Grid Layout */}
+                                        <div className="hidden md:grid grid-cols-[1.3fr_1fr_1fr_0.9fr_0.9fr] gap-3 items-center">
+                                            <div>
+                                                <p className="text-sm font-semibold text-[#2f241c]">{order.order_number}</p>
+                                                <p className="mt-1 text-xs text-[#8d6b4e]">{new Date(order.created_at).toLocaleString('id-ID')}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-[#2f241c]">{order.customer_name}</p>
+                                                <p className="mt-1 text-xs text-[#8d6b4e]">{order.customer_phone}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-[#2f241c]">{order.fulfillment_method}</p>
+                                                <p className="mt-1 text-xs text-[#8d6b4e]">{order.shipping_courier_name} {order.shipping_service}</p>
+                                            </div>
+                                            <p className="text-sm font-semibold text-[#2f241c]">{money(order.grand_total)}</p>
+                                            <div>
+                                                <span className="inline-flex rounded-full bg-[#edf5ee] px-3 py-1 text-xs font-semibold text-[#375c3f]">
+                                                    {statusLabel(order.status)}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-[#2f241c]">{order.customer_name}</p>
-                                            <p className="mt-1 text-xs text-[#8d6b4e]">{order.customer_phone}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-[#2f241c]">{order.fulfillment_method}</p>
-                                            <p className="mt-1 text-xs text-[#8d6b4e]">{order.shipping_courier_name} {order.shipping_service}</p>
-                                        </div>
-                                        <p className="text-sm font-semibold text-[#2f241c]">{money(order.grand_total)}</p>
-                                        <div>
-                                            <span className="inline-flex rounded-full bg-[#edf5ee] px-3 py-1 text-xs font-semibold text-[#375c3f]">
-                                                {statusLabel(order.status)}
-                                            </span>
+
+                                        {/* Mobile Card Layout */}
+                                        <div className="md:hidden flex flex-col gap-2">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <p className="text-sm font-bold text-[#2f241c]">{order.order_number}</p>
+                                                    <p className="text-[11px] text-[#8d6b4e]">{new Date(order.created_at).toLocaleString('id-ID')}</p>
+                                                </div>
+                                                <span className="inline-flex rounded-full bg-[#edf5ee] px-2.5 py-0.5 text-[11px] font-semibold text-[#375c3f]">
+                                                    {statusLabel(order.status)}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between items-end pt-1.5 border-t border-[#f2e7d9]/60 text-xs">
+                                                <div>
+                                                    <p className="font-semibold text-[#2f241c]">{order.customer_name} • <span className="font-normal text-[#8d6b4e]">{order.fulfillment_method}</span></p>
+                                                    <p className="text-[11px] text-[#8d6b4e]">{order.customer_phone}</p>
+                                                </div>
+                                                <span className="text-sm font-bold font-mono text-[#2f241c]">{money(order.grand_total)}</span>
+                                            </div>
                                         </div>
                                     </button>
                                 ))}
                             </div>
 
                             {loading ? (
-                                <div className="space-y-3 px-5 py-5">
+                                <div className="space-y-3 p-4 sm:p-5">
                                     {Array.from({ length: 3 }).map((_, index) => (
-                                        <div key={index} className="grid min-w-[44rem] grid-cols-[1.3fr_1fr_1fr_0.9fr_0.9fr] gap-3 animate-pulse">
-                                            <div className="h-10 rounded-2xl bg-[#efe5d8]"></div>
-                                            <div className="h-10 rounded-2xl bg-[#efe5d8]"></div>
-                                            <div className="h-10 rounded-2xl bg-[#efe5d8]"></div>
-                                            <div className="h-10 rounded-2xl bg-[#efe5d8]"></div>
-                                            <div className="h-10 rounded-2xl bg-[#efe5d8]"></div>
-                                        </div>
+                                        <div key={index} className="h-16 rounded-2xl bg-[#efe5d8] animate-pulse"></div>
                                     ))}
                                 </div>
                             ) : null}
 
                             {!loading && orders.length === 0 ? (
-                                <div className="px-5 py-10">
-                                    <div className="rounded-[1.8rem] border border-dashed border-[#dfcfbb] bg-[#fffdf9] px-6 py-8 text-center">
-                                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#f5eadb] text-[#8e6847]">
-                                            <PackageSearch size={24} />
+                                <div className="px-4 py-8 sm:px-5 sm:py-10">
+                                    <div className="rounded-2xl sm:rounded-[1.8rem] border border-dashed border-[#dfcfbb] bg-[#fffdf9] px-4 py-6 sm:px-6 sm:py-8 text-center">
+                                        <div className="mx-auto flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-[#f5eadb] text-[#8e6847]">
+                                            <PackageSearch size={22} />
                                         </div>
-                                        <p className="mt-4 text-base font-semibold text-[#2f241c]">Belum ada pesanan online.</p>
-                                        <p className="mt-2 text-sm leading-6 text-[#806049]">
+                                        <p className="mt-3 sm:mt-4 text-sm sm:text-base font-semibold text-[#2f241c]">Belum ada pesanan online.</p>
+                                        <p className="mt-1 sm:mt-2 text-xs sm:text-sm leading-5 sm:leading-6 text-[#806049]">
                                             Pesanan dari storefront akan muncul di sini untuk dipantau dan diproses.
                                         </p>
                                     </div>
@@ -261,17 +285,27 @@ export default function OnlineOrdersPage({ role, embedded = false }: OnlineOrder
                             ) : null}
                         </section>
 
-                        {orders.length > 0 && (<aside className="rounded-[2rem] border border-[#eadfcf] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(249,243,234,0.92))] p-5 shadow-[0_24px_44px_-36px_rgba(58,33,23,0.28)]">
-                            {selected ? (
-                                <div className="space-y-5">
-                                    <div>
-                                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8e6847]">Detail pesanan</p>
-                                        <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#2f241c]">{selected.order_number}</h2>
-                                        <p className="mt-2 text-sm text-[#6f5948]">{selected.customer_name} | {selected.customer_phone}</p>
-                                        <p className="mt-1 text-sm leading-6 text-[#806049]">
-                                            {selected.shipping_address || 'Pickup di toko'} {selected.destination_label}
-                                        </p>
-                                    </div>
+                        {orders.length > 0 && (
+                            <aside className={`rounded-2xl sm:rounded-[2rem] border border-[#eadfcf] bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(249,243,234,0.92))] p-4 sm:p-5 shadow-[0_24px_44px_-36px_rgba(58,33,23,0.28)] ${selected ? 'block' : 'hidden lg:block'}`}>
+                                {selected ? (
+                                    <div className="space-y-4 sm:space-y-5">
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.18em] text-[#8e6847]">Detail pesanan</p>
+                                                <h2 className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold tracking-[-0.04em] text-[#2f241c]">{selected.order_number}</h2>
+                                                <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-[#6f5948]">{selected.customer_name} | {selected.customer_phone}</p>
+                                                <p className="mt-1 text-xs sm:text-sm leading-5 sm:leading-6 text-[#806049]">
+                                                    {selected.shipping_address || 'Pickup di toko'} {selected.destination_label}
+                                                </p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setSelected(null)}
+                                                className="lg:hidden px-3 py-1.5 rounded-xl border border-[#d9c8b2] bg-white text-xs font-bold text-[#806049] hover:bg-[#fffaf3]"
+                                            >
+                                                Tutup
+                                            </button>
+                                        </div>
 
                                     <div className="rounded-[1.5rem] border border-[#efe3d4] bg-white/75">
                                         {selected.items.map((item) => (

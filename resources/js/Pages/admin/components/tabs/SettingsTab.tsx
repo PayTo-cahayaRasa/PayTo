@@ -217,9 +217,9 @@ export default function SettingsTab() {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 {/* Profil Toko */}
-                <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-4xl p-6 shadow-sm">
+                <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-3xl sm:rounded-4xl p-4 sm:p-6 shadow-sm">
                     <h3 className="font-bold text-lg text-cocoa-800 mb-6 flex items-center gap-2">
                         <Settings size={20} className="text-cocoa-400" /> Profil Toko
                     </h3>
