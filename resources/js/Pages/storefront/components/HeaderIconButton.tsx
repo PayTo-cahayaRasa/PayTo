@@ -14,7 +14,7 @@ export function HeaderIconButton({ badge, ariaLabel, children, className, isActi
         <button
             type="button"
             aria-label={ariaLabel}
-            aria-expanded={isActive || undefined}
+            aria-expanded={isActive}
             onClick={onClick}
             title={ariaLabel}
             className={`group relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-[var(--color-cocoa-800)] transition duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-caramel-600)] motion-reduce:transition-none ${

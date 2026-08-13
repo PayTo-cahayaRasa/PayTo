@@ -10,6 +10,7 @@ import { HeaderIconButton } from './HeaderIconButton';
 
 export function PublicHeader({ business, cartItems, onIncreaseCartItem, onDecreaseCartItem, onClearCart }: PublicHeaderProps) {
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isCartBumping, setIsCartBumping] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const cartRef = useRef<HTMLDivElement | null>(null);
@@ -107,11 +108,29 @@ export function PublicHeader({ business, cartItems, onIncreaseCartItem, onDecrea
                     </Link>
 
                     <div className="lg:hidden">
-                        <HeaderIconButton ariaLabel="Buka menu">
-                            <Menu size={20} strokeWidth={1.8} />
+                        <HeaderIconButton
+                            ariaLabel={isMobileMenuOpen ? 'Tutup menu' : 'Buka menu'}
+                            isActive={isMobileMenuOpen}
+                            onClick={() => setIsMobileMenuOpen((current) => !current)}
+                        >
+                            {isMobileMenuOpen ? <X size={20} strokeWidth={1.8} /> : <Menu size={20} strokeWidth={1.8} />}
                         </HeaderIconButton>
                     </div>
                 </div>
+
+                {isMobileMenuOpen ? (
+                    <div className="absolute inset-x-0 top-[calc(100%+0.65rem)] z-40 overflow-hidden rounded-[1.75rem] border border-[var(--color-cream-200)] bg-[#fffdf9]/96 p-2 shadow-[0_30px_80px_-28px_rgba(58,33,23,0.42)] backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200 motion-reduce:animate-none lg:hidden">
+                        <a href={storefrontShopHref} onClick={() => setIsMobileMenuOpen(false)} className="flex min-h-12 items-center rounded-2xl px-4 text-sm font-semibold text-[#6f503c] transition hover:bg-[#f8ead6] hover:text-[var(--color-cocoa-800)]">Produk</a>
+                        <a href="/lacak-pesanan" onClick={() => setIsMobileMenuOpen(false)} className="flex min-h-12 items-center rounded-2xl px-4 text-sm font-semibold text-[#6f503c] transition hover:bg-[#f8ead6] hover:text-[var(--color-cocoa-800)]">Lacak Pesanan</a>
+                        <a href="#kontak" onClick={() => setIsMobileMenuOpen(false)} className="flex min-h-12 items-center rounded-2xl px-4 text-sm font-semibold text-[#6f503c] transition hover:bg-[#f8ead6] hover:text-[var(--color-cocoa-800)]">Kontak</a>
+                        <div className="mt-2 border-t border-[#efe3d4] pt-2">
+                            <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[var(--color-cocoa-800)] px-4 text-sm font-bold text-white transition hover:bg-[#523326] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-caramel-600)]">
+                                <LogIn size={18} strokeWidth={1.8} />
+                                Masuk
+                            </Link>
+                        </div>
+                    </div>
+                ) : null}
 
                 {isCartOpen ? (
                     <div
