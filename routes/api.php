@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\BusinessSettingsController;
 use App\Http\Controllers\Api\InventoryRecommendationController;
 use App\Http\Controllers\Api\OnlineOrderController;
+use App\Http\Controllers\Api\OwnProfileController;
 use App\Http\Controllers\Api\PosApiController;
 use App\Http\Controllers\Api\PosCheckoutController;
 use App\Http\Controllers\Api\PosRefundController;
@@ -104,6 +105,8 @@ Route::middleware(['web', 'auth', 'role:CASHIER,SUPERVISOR'])->prefix('pos')->na
     Route::get('/products', [PosApiController::class, 'products'])->name('products');
     Route::get('/history', [PosApiController::class, 'history'])->name('history');
     Route::get('/profile', [PosApiController::class, 'profile'])->name('profile');
+    Route::get('/profile/email', [OwnProfileController::class, 'show'])->name('profile.email');
+    Route::put('/profile/email', [OwnProfileController::class, 'update'])->name('profile.email.update');
     Route::post('/checkout', [PosCheckoutController::class, 'store'])->middleware('throttle:checkout')->name('checkout');
     if (config('features.refund_requests')) {
         Route::post('/refunds', [PosRefundController::class, 'store'])->middleware('throttle:refund')->name('refunds');

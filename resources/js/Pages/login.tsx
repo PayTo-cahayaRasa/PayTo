@@ -245,6 +245,9 @@ export function PosLoginForm({
                             />
                             Ingat saya
                         </label>
+                        <Link href="/lupa-password" className="font-semibold text-[#6d4c36] hover:text-[#2f241c]">
+                            Lupa password?
+                        </Link>
                     </div>
 
                     <button
@@ -270,6 +273,9 @@ export function PosLoginForm({
                             Gunakan PIN perangkat yang sudah terdaftar untuk masuk lebih cepat.
                         </p>
                     </div>
+                    <Link href="/lupa-pin" className="mb-4 text-sm font-semibold text-[#6d4c36] hover:text-[#2f241c]">
+                        Lupa PIN?
+                    </Link>
 
                     <div className="mb-4 flex justify-center gap-2">
                         {[...Array(6)].map((_, index) => (
