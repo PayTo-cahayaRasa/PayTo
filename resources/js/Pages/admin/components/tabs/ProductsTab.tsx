@@ -7,6 +7,7 @@ import axios from 'axios';
 import { Edit, Minus, Package, Plus, Save, Settings, Trash2, UploadCloud, X } from 'lucide-react';
 import type { Product } from '../../types';
 import ProductImageCropper from '../products/ProductImageCropper';
+import { logDevelopmentError, useNotification } from '../../../../Components/notifications/NotificationProvider';
 
 type ProductFormState = {
     name: string;
@@ -40,6 +41,7 @@ const formatStockProductLabel = (product: Product) => `${product.name} (${produc
 const normalizeSearchValue = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
 export default function ProductsTab() {
+    const notification = useNotification();
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -61,7 +63,6 @@ export default function ProductsTab() {
     const [debouncedStockProductKeyword, setDebouncedStockProductKeyword] = useState('');
     const [showStockProductDropdown, setShowStockProductDropdown] = useState(false);
     const [stockError, setStockError] = useState<string | null>(null);
-    const [stockSuccess, setStockSuccess] = useState<string | null>(null);
     const [stockSubmitting, setStockSubmitting] = useState(false);
     const stockProductDropdownRef = useRef<HTMLDivElement | null>(null);
     const productImageInputRef = useRef<HTMLInputElement | null>(null);
@@ -234,12 +235,10 @@ export default function ProductsTab() {
         setDebouncedStockProductKeyword('');
         setShowStockProductDropdown(false);
         setStockError(null);
-        setStockSuccess(null);
     };
 
     const handleOpenStockModal = () => {
         setStockError(null);
-        setStockSuccess(null);
         setStockAction('ADD');
         setStockQuantity('');
         setStockProductKeyword('');
@@ -262,7 +261,6 @@ export default function ProductsTab() {
         setSelectedStockProductId('');
         setShowStockProductDropdown(true);
         setStockError(null);
-        setStockSuccess(null);
     };
 
     const handleSelectStockProduct = (product: Product) => {
@@ -272,7 +270,6 @@ export default function ProductsTab() {
         setDebouncedStockProductKeyword(nextLabel);
         setShowStockProductDropdown(false);
         setStockError(null);
-        setStockSuccess(null);
     };
 
     const handleChange = (field: keyof ProductFormState) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -410,7 +407,6 @@ export default function ProductsTab() {
 
         setStockSubmitting(true);
         setStockError(null);
-        setStockSuccess(null);
 
         try {
             const response = await axios.put(`/api/admin/products/${selectedStockProduct.id}`, {
@@ -419,11 +415,13 @@ export default function ProductsTab() {
             const updated = response.data?.data;
             if (updated) {
                 setProducts((items) => items.map((item) => (item.id === updated.id ? updated : item)));
-                setStockSuccess(`Stok ${updated.name} berhasil diperbarui.`);
+                notification.success(`Stok ${updated.name} berhasil diperbarui.`);
             }
             setStockQuantity('');
         } catch (error) {
+            logDevelopmentError('update stock', error);
             setStockError('Gagal memperbarui stok.');
+            notification.error('Gagal memperbarui stok.');
         } finally {
             setStockSubmitting(false);
         }
@@ -655,12 +653,6 @@ export default function ProductsTab() {
                                     {stockError}
                                 </div>
                             )}
-                            {stockSuccess && (
-                                <div className="rounded-2xl border border-leaf-200 bg-leaf-50 px-4 py-3 text-sm font-semibold text-leaf-600">
-                                    {stockSuccess}
-                                </div>
-                            )}
-
                             <div>
                                 <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">
                                     Cari & Pilih Produk
@@ -782,7 +774,6 @@ export default function ProductsTab() {
                                         onChange={(event) => {
                                             setStockQuantity(event.target.value);
                                             setStockError(null);
-                                            setStockSuccess(null);
                                         }}
                                         placeholder="0"
                                         className={`w-full p-3.5 bg-cocoa-50 border border-cocoa-200 rounded-2xl text-sm font-bold outline-none transition-all focus:ring-2 ${stockAction === 'ADD' ? 'focus:ring-leaf-200' : stockAction === 'SUBTRACT' ? 'focus:ring-snack-200' : 'focus:ring-snack-200'} ${stockAction === 'SUBTRACT' ? 'pl-10' : ''}`}

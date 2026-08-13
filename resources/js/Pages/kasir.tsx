@@ -13,6 +13,7 @@ import ProfileView from './Pos/components/views/ProfileView';
 import SettingsView from './Pos/components/views/SettingsView';
 import OnlineOrdersPage from './online-orders/OnlineOrdersPage';
 import UniversalModal from '../Components/UniversalModal';
+import { logDevelopmentError, NotificationProvider, useNotification } from '../Components/notifications/NotificationProvider';
 // import { CATEGORIES, QUICK_CASH_AMOUNTS } from './Pos/data';
 import type { CartItem, Product, SaleSource, TransactionHistory } from './Pos/types';
 import { Box, Coffee, LayoutGrid, Palette, Utensils } from 'lucide-react';
@@ -28,7 +29,8 @@ export const CATEGORIES = [
 
 export const QUICK_CASH_AMOUNTS = [20000, 50000, 100000];
 
-export default function PosInterface() {
+function PosInterfaceContent() {
+    const notification = useNotification();
     // authentication and role will be validated by the backend header/profile controller
 
     // State Management
@@ -259,6 +261,7 @@ export default function PosInterface() {
                 setShowPaymentSuccessModal(true);
             }
         } catch (e: unknown) {
+            logDevelopmentError('cashier checkout', e);
             const isNetworkError = axios.isAxiosError(e) && !e.response;
             const responseMessage = axios.isAxiosError(e)
                 ? e.response?.data?.message
@@ -267,6 +270,11 @@ export default function PosInterface() {
             setCheckoutError(
                 isNetworkError
                     ? 'Tidak dapat terhubung ke server. Periksa koneksi lalu coba checkout kembali.'
+                    : responseMessage || 'Checkout gagal diproses. Periksa data transaksi lalu coba kembali.',
+            );
+            notification.error(
+                isNetworkError
+                    ? 'Tidak dapat terhubung ke server. Periksa koneksi lalu coba lagi.'
                     : responseMessage || 'Checkout gagal diproses. Periksa data transaksi lalu coba kembali.',
             );
         }
@@ -292,6 +300,7 @@ export default function PosInterface() {
                 lastPage: Number(meta.last_page ?? 1),
             });
         } catch (e) {
+            logDevelopmentError('cashier history', e);
             // silent
         }
     };
@@ -349,9 +358,10 @@ export default function PosInterface() {
             setShowRefundModal(false);
             setRefundSuccess({ message, total: totalAmount });
             await refreshHistory();
-        } catch (e: any) {
-            const errorMessage = e?.response?.data?.message || 'Refund gagal diproses.';
-            setRefundError(errorMessage);
+        } catch (e: unknown) {
+            logDevelopmentError('cashier refund', e);
+            const errorMessage = axios.isAxiosError(e) ? e.response?.data?.message : null;
+            setRefundError(errorMessage || 'Refund gagal diproses.');
         } finally {
             setRefundSubmitting(false);
         }
@@ -370,6 +380,7 @@ export default function PosInterface() {
         try {
             await axios.post('/logout');
         } catch (error) {
+            logDevelopmentError('cashier logout', error);
             const message = axios.isAxiosError(error)
                 ? error.response?.data?.message
                 : null;
@@ -449,6 +460,7 @@ export default function PosInterface() {
                     setProfileData(res.data.data || {});
                 }
             } catch (e) {
+                logDevelopmentError('cashier initial data', e);
                 // silent
             }
         }
@@ -702,15 +714,6 @@ export default function PosInterface() {
             </UniversalModal>
 
             <UniversalModal
-                isOpen={Boolean(checkoutError)}
-                title="Checkout Gagal"
-                description={checkoutError ?? undefined}
-                tone="danger"
-                cancelLabel="Tutup"
-                onClose={() => setCheckoutError(null)}
-            />
-
-            <UniversalModal
                 isOpen={showRefundModal}
                 title={`Refund ${refundTarget?.invoiceNo ?? ''}`}
                 description="Pilih item dan jumlah refund. Permintaan akan dikirim untuk approval supervisor."
@@ -800,5 +803,13 @@ export default function PosInterface() {
                 </div>
             </UniversalModal>
         </div>
+    );
+}
+
+export default function PosInterface() {
+    return (
+        <NotificationProvider>
+            <PosInterfaceContent />
+        </NotificationProvider>
     );
 }

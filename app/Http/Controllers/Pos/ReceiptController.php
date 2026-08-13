@@ -37,7 +37,6 @@ class ReceiptController extends Controller
     private function receiptData(Sale $sale): array
     {
         $sale->load(['items.product', 'payment', 'cashier']);
-        $receiptSettings = $this->settingsService->getReceiptSettings();
         $businessProfile = $this->settingsService->getBusinessProfile();
 
         return [
@@ -67,14 +66,36 @@ class ReceiptController extends Controller
                     'name' => $sale->cashier?->name ?? '-',
                 ],
             ],
-            'receipt_settings' => [
-                'header' => $receiptSettings['header'],
-                'footer' => $receiptSettings['footer'],
-            ],
             'business' => [
                 'name' => $businessProfile['name'],
                 'address' => $businessProfile['address'],
+                'instagram_username' => $this->socialUsername($businessProfile['instagram_url'] ?? null, 'instagram'),
+                'tiktok_username' => $this->socialUsername($businessProfile['tiktok_url'] ?? null, 'tiktok'),
             ],
         ];
+    }
+
+    private function socialUsername(?string $url, string $platform): ?string
+    {
+        if (! is_string($url) || $url === '') {
+            return null;
+        }
+
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        $path = trim((string) parse_url($url, PHP_URL_PATH), '/');
+
+        if (! in_array($host, ["{$platform}.com", "www.{$platform}.com"], true) || $path === '') {
+            return null;
+        }
+
+        $username = $platform === 'tiktok'
+            ? ltrim($path, '@')
+            : explode('/', $path)[0];
+
+        if (str_contains($username, '/') || preg_match('/^[A-Za-z0-9._-]+$/', $username) !== 1) {
+            return null;
+        }
+
+        return "@{$username}";
     }
 }

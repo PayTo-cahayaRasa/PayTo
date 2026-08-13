@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AppSetting;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Sale;
@@ -96,7 +97,6 @@ class ReceiptPageTest extends TestCase
         $response->assertInertia(fn ($page) => $page
             ->component('receipt')
             ->has('sale')
-            ->has('receipt_settings')
             ->has('business')
         );
     }
@@ -180,7 +180,7 @@ class ReceiptPageTest extends TestCase
         );
     }
 
-    public function test_receipt_contains_settings(): void
+    public function test_receipt_contains_business_profile(): void
     {
         $cashier = $this->createCashier();
         $sale = $this->createSaleWithItems($cashier);
@@ -189,10 +189,61 @@ class ReceiptPageTest extends TestCase
 
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
-            ->has('receipt_settings.header')
-            ->has('receipt_settings.footer')
             ->has('business.name')
             ->has('business.address')
+            ->has('business.instagram_username')
+            ->has('business.tiktok_username')
+        );
+    }
+
+    public function test_receipt_uses_business_profile_and_parses_social_usernames(): void
+    {
+        $cashier = $this->createCashier();
+        $sale = $this->createSaleWithItems($cashier);
+
+        AppSetting::query()->updateOrCreate(
+            ['key' => 'business.profile'],
+            ['value' => [
+                'name' => 'Cahaya Rasa',
+                'address' => 'Alamat Toko',
+                'instagram_url' => 'https://www.instagram.com/cahaya.rasa/?utm_source=qr',
+                'tiktok_url' => 'https://www.tiktok.com/@cahayarasa_28/',
+            ]]
+        );
+
+        $response = $this->actingAs($cashier)->get(route('pos.receipt', $sale));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->where('business.name', 'Cahaya Rasa')
+            ->where('business.address', 'Alamat Toko')
+            ->where('business.instagram_username', '@cahaya.rasa')
+            ->where('business.tiktok_username', '@cahayarasa_28')
+            ->missing('receipt_settings')
+        );
+    }
+
+    public function test_receipt_omits_social_usernames_from_invalid_urls(): void
+    {
+        $cashier = $this->createCashier();
+        $sale = $this->createSaleWithItems($cashier);
+
+        AppSetting::query()->updateOrCreate(
+            ['key' => 'business.profile'],
+            ['value' => [
+                'name' => 'Cahaya Rasa',
+                'address' => 'Alamat Toko',
+                'instagram_url' => 'https://bukaninstagram.com/cahaya.rasa',
+                'tiktok_url' => '',
+            ]]
+        );
+
+        $response = $this->actingAs($cashier)->get(route('pos.receipt', $sale));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->where('business.instagram_username', null)
+            ->where('business.tiktok_username', null)
         );
     }
 

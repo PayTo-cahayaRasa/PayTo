@@ -17,9 +17,6 @@
 <body>
     <div class="center">
         <strong>{{ $business['name'] }}</strong><br>
-        @foreach (preg_split('/\r\n|\r|\n/', $receipt_settings['header']) as $line)
-            {{ $line }}<br>
-        @endforeach
         {{ $business['address'] }}
     </div>
 
@@ -52,9 +49,13 @@
     </table>
     <div class="divider"></div>
     <div class="center">
-        @foreach (preg_split('/\r\n|\r|\n/', $receipt_settings['footer']) as $line)
-            {{ $line }}<br>
-        @endforeach
+        Terima kasih atas kunjungan Anda<br>
+        @if ($business['instagram_username'])
+            Instagram: {{ $business['instagram_username'] }}<br>
+        @endif
+        @if ($business['tiktok_username'])
+            TikTok: {{ $business['tiktok_username'] }}<br>
+        @endif
     </div>
 </body>
 </html>

@@ -17,6 +17,7 @@ import ApprovalsTab from './components/tabs/ApprovalsTab';
 import UsersTab from './components/tabs/UsersTab';
 import SettingsTab from './components/tabs/SettingsTab';
 import UniversalModal from '../../Components/UniversalModal';
+import { logDevelopmentError, NotificationProvider } from '../../Components/notifications/NotificationProvider';
 
 export default function AdminPage() {
     const [activeTab, setActiveTab] = useState<AdminTab>('DASHBOARD');
@@ -81,6 +82,7 @@ export default function AdminPage() {
                     setAdminProfile(payload);
                 }
             } catch (error) {
+                logDevelopmentError('admin profile', error);
                 // fallback to mock profile
             }
         };
@@ -105,6 +107,7 @@ export default function AdminPage() {
         try {
             await axios.post('/logout');
         } catch (error) {
+            logDevelopmentError('admin logout', error);
             const message = axios.isAxiosError(error)
                 ? error.response?.data?.message
                 : null;
@@ -123,6 +126,7 @@ export default function AdminPage() {
     };
 
     return (
+        <NotificationProvider>
         <div className="relative flex min-h-screen w-full overflow-x-hidden overflow-y-hidden bg-[radial-gradient(circle_at_top_left,_rgba(248,236,217,0.84),_transparent_26%),radial-gradient(circle_at_bottom_left,_rgba(219,233,223,0.7),_transparent_30%),linear-gradient(180deg,#f7f0e6_0%,#f2e9dd_100%)] font-sans text-[var(--color-cocoa-900)] selection:bg-[var(--color-leaf-600)] selection:text-white">
             <div className="pointer-events-none absolute inset-0 opacity-35 [background-image:radial-gradient(rgba(120,89,62,0.09)_0.8px,transparent_0.8px)] [background-size:18px_18px]"></div>
             <div className="pointer-events-none absolute right-0 top-0 h-56 w-56 rounded-full bg-[#ede0cb] blur-3xl"></div>
@@ -199,5 +203,6 @@ export default function AdminPage() {
                 onConfirm={confirmLogout}
             />
         </div>
+        </NotificationProvider>
     );
 }
