@@ -6,6 +6,7 @@ use App\Models\AppSetting;
 use App\Models\Product;
 use App\Models\StockItem;
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,6 +16,8 @@ class PosCheckoutApiTest extends TestCase
 
     public function test_authenticated_cashier_can_process_online_checkout(): void
     {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+
         $cashier = User::factory()->create([
             'role' => 'CASHIER',
             'is_active' => true,
