@@ -20,4 +20,11 @@ class ResetPasswordRequest extends FormRequest
             'password' => ['required', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'password.mixed' => 'Kata sandi harus memiliki minimal satu huruf besar dan satu huruf kecil.',
+        ];
+    }
 }

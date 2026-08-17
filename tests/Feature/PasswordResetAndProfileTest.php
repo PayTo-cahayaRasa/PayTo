@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Notifications\PasswordResetNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
@@ -22,7 +23,7 @@ class PasswordResetAndProfileTest extends TestCase
             ->assertRedirect()
             ->assertSessionHas('status', 'Jika email terdaftar, tautan reset telah dikirim.');
 
-        NotificationFacade::assertSentTo($user, \Illuminate\Auth\Notifications\ResetPassword::class);
+        NotificationFacade::assertSentTo($user, PasswordResetNotification::class);
     }
 
     public function test_unknown_email_has_generic_response_without_notification(): void
@@ -81,7 +82,9 @@ class PasswordResetAndProfileTest extends TestCase
             'email' => $user->email,
             'password' => 'weakpass',
             'password_confirmation' => 'weakpass',
-        ])->assertSessionHasErrors('password');
+        ])->assertSessionHasErrors([
+            'password' => 'Kata sandi harus memiliki minimal satu huruf besar dan satu huruf kecil.',
+        ]);
     }
 
     public function test_user_can_reset_pin_without_changing_password(): void

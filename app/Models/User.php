@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\PasswordResetNotification;
 use App\Notifications\PinResetNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,7 +26,7 @@ class User extends Authenticatable
             return;
         }
 
-        parent::sendPasswordResetNotification($token);
+        $this->notify(new PasswordResetNotification($token));
     }
 
     /**
