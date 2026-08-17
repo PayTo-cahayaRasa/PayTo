@@ -14,7 +14,6 @@ class UserSeeder extends Seeder
         $accounts = [
             ['name' => 'Kasir Cahaya Rasa', 'username' => 'kasir-cahayarasa', 'email' => config('seeders.cahayarasa.cashier_email'), 'password' => config('seeders.cahayarasa.cashier_password'), 'pin' => config('seeders.cahayarasa.cashier_pin'), 'role' => 'CASHIER'],
             ['name' => 'Supervisor Cahaya Rasa', 'username' => 'supervisor-cahayarasa', 'email' => config('seeders.cahayarasa.supervisor_email'), 'password' => config('seeders.cahayarasa.supervisor_password'), 'pin' => config('seeders.cahayarasa.supervisor_pin'), 'role' => 'SUPERVISOR'],
-            ['name' => 'Dev Dimas', 'username' => 'dimas', 'email' => config('seeders.dimas.email'), 'password' => config('seeders.dimas.password'), 'pin' => config('seeders.dimas.pin'), 'role' => 'SUPERVISOR'],
         ];
 
         foreach ($accounts as $account) {
