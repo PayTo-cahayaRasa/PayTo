@@ -22,6 +22,7 @@ class StaffManagementApiTest extends TestCase
         $payload = [
             'name' => 'Staf Baru',
             'username' => 'staf.baru',
+            'email' => 'staf.baru@gmail.com',
             'role' => 'CASHIER',
             'is_active' => true,
             'password' => 'CashierPass1!',

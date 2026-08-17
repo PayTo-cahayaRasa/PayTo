@@ -9,6 +9,7 @@ use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\StockItem;
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -249,6 +250,8 @@ class ReceiptPageTest extends TestCase
 
     public function test_checkout_returns_receipt_url(): void
     {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+
         $cashier = $this->createCashier();
 
         $product = Product::factory()->create([

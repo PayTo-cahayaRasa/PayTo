@@ -16,8 +16,10 @@ class UserSeederTest extends TestCase
     public function test_it_seeds_reusable_cahayarasa_production_accounts(): void
     {
         config()->set([
+            'seeders.cahayarasa.cashier_email' => 'kasir@cahayarasa.test',
             'seeders.cahayarasa.cashier_password' => 'KasirTest#2026',
             'seeders.cahayarasa.cashier_pin' => '111111',
+            'seeders.cahayarasa.supervisor_email' => 'supervisor@cahayarasa.test',
             'seeders.cahayarasa.supervisor_password' => 'SupervisorTest#2026',
             'seeders.cahayarasa.supervisor_pin' => '222222',
         ]);
@@ -28,6 +30,8 @@ class UserSeederTest extends TestCase
         $this->assertSame(2, User::query()->count());
         $this->assertTrue(Hash::check('KasirTest#2026', User::query()->where('username', 'kasir-cahayarasa')->value('password_hash')));
         $this->assertTrue(Hash::check('SupervisorTest#2026', User::query()->where('username', 'supervisor-cahayarasa')->value('password_hash')));
+        $this->assertDatabaseHas('users', ['username' => 'kasir-cahayarasa', 'email' => 'kasir@cahayarasa.test']);
+        $this->assertDatabaseHas('users', ['username' => 'supervisor-cahayarasa', 'email' => 'supervisor@cahayarasa.test']);
         $this->assertNotNull(User::fetchForPin('111111', 'CASHIER'));
         $this->assertNotNull(User::fetchForPin('222222', 'SUPERVISOR'));
     }

@@ -15,16 +15,12 @@ class AdminProfileController extends Controller
     {
         $user = request()->user();
 
-        $email = $user->username && str_contains($user->username, '@')
-            ? $user->username
-            : '—';
-
         return response()->json([
             'data' => [
                 'name' => $user->name ?? 'Admin',
                 'role' => $user->role ?? 'UNKNOWN',
                 'id' => sprintf('SPV-%03d', $user->id),
-                'email' => $email,
+                'email' => $user->email ?? '—',
                 'phone' => '—',
                 'joinDate' => $user->created_at?->locale('id')->translatedFormat('d F Y') ?? '—',
                 'lastLogin' => $user->last_login_at?->locale('id')->diffForHumans() ?? '—',

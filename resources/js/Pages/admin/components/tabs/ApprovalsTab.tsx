@@ -191,7 +191,7 @@ export default function ApprovalsTab() {
                                         </p>
                                     )}
                                 </div>
-                                <div className="flex flex-col items-end gap-2">
+                                <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start w-full sm:w-auto gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/50">
                                     <span className={`px-3 py-1 text-xs font-bold rounded-lg border ${statusStyle.badge} ${statusStyle.text}`}>
                                         {log.status}
                                     </span>

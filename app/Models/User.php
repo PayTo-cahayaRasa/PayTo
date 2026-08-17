@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\PinResetNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -14,6 +15,19 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+    public ?string $passwordResetType = null;
+
+    public function sendPasswordResetNotification($token): void
+    {
+        if ($this->passwordResetType === 'pin') {
+            $this->notify(new PinResetNotification($token));
+
+            return;
+        }
+
+        parent::sendPasswordResetNotification($token);
+    }
+
     /**
      * The attributes that are mass assignable.
      *
@@ -22,7 +36,8 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'password',
+        'username',
+        'password_hash',
         'last_login_at',
         'last_logout_at',
         'work_date',
@@ -60,6 +75,16 @@ class User extends Authenticatable
             'password_hash' => 'hashed',
             'pin_hash' => 'hashed',
         ];
+    }
+
+    public function getAuthPasswordName(): string
+    {
+        return 'password_hash';
+    }
+
+    public function getEmailForPasswordReset(): string
+    {
+        return (string) $this->email;
     }
 
     /**

@@ -25,6 +25,7 @@ class StaffStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'email' => ['required', 'email:rfc,dns', 'unique:users,email'],
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', 'unique:users,username'],
             'role' => ['required', 'string', 'in:CASHIER,SUPERVISOR'],

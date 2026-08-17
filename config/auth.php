@@ -97,6 +97,12 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+        'pins' => [
+            'provider' => 'users',
+            'table' => env('AUTH_PIN_RESET_TOKEN_TABLE', 'pin_reset_tokens'),
+            'expire' => 60,
+            'throttle' => 60,
+        ],
     ],
 
     /*

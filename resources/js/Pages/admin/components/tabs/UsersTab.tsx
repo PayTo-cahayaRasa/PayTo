@@ -235,7 +235,7 @@ export default function UsersTab() {
                 </div>
             ) : null}
 
-            <div className="flex flex-col gap-4 bg-white/40 backdrop-blur-xl border border-white/60 rounded-4xl p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-4 bg-white/40 backdrop-blur-xl border border-white/60 rounded-3xl sm:rounded-4xl p-4 sm:p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h3 className="font-bold text-lg text-cocoa-800">Daftar Pengguna</h3>
                     <p className="text-xs text-cocoa-500">Kelola akses Kasir dan Supervisor.</p>
@@ -248,10 +248,10 @@ export default function UsersTab() {
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {isLoading ? (
                     Array.from({ length: 3 }).map((_, index) => (
-                        <div key={index} className="bg-white/50 backdrop-blur-md border border-white/60 rounded-4xl p-6 shadow-sm animate-pulse">
+                        <div key={index} className="bg-white/50 backdrop-blur-md border border-white/60 rounded-3xl sm:rounded-4xl p-4 sm:p-6 shadow-sm animate-pulse">
                             <div className="h-6 bg-cocoa-200 rounded w-1/2 mb-4"></div>
                             <div className="h-4 bg-cocoa-200 rounded w-3/4 mb-2"></div>
                             <div className="h-4 bg-cocoa-200 rounded w-1/2"></div>
@@ -259,7 +259,7 @@ export default function UsersTab() {
                     ))
                 ) : (sortedStaff.length ? (
                     sortedStaff.map(user => (
-                        <div key={user.id} className="bg-white/50 backdrop-blur-md border border-white/60 rounded-4xl p-6 shadow-sm relative group hover:bg-white/70 transition-all min-w-0">
+                        <div key={user.id} className="bg-white/50 backdrop-blur-md border border-white/60 rounded-3xl sm:rounded-4xl p-4 sm:p-6 shadow-sm relative group hover:bg-white/70 transition-all min-w-0">
                             <div className="flex justify-between items-start mb-4">
                                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl shadow-inner ${user.role === 'SUPERVISOR' ? 'bg-snack-100 text-snack-600' : 'bg-leaf-100 text-leaf-600'
                                     }`}>
