@@ -9,4 +9,9 @@ return [
         'supervisor_password' => env('SEEDER_CAHAYARASA_SUPERVISOR_PASSWORD'),
         'supervisor_pin' => env('SEEDER_CAHAYARASA_SUPERVISOR_PIN'),
     ],
+    'dimas' => [
+        'email' => env('SEEDER_DIMAS_EMAIL'),
+        'password' => env('SEEDER_DIMAS_PASSWORD'),
+        'pin' => env('SEEDER_DIMAS_PIN'),
+    ],
 ];

@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
 
         foreach ($accounts as $account) {
             if (! is_string($account['email']) || ! filter_var($account['email'], FILTER_VALIDATE_EMAIL) || ! is_string($account['password']) || $account['password'] === '' || ! is_string($account['pin']) || $account['pin'] === '') {
-                throw new LogicException('Set all Cahaya Rasa seeder credentials before running the seeder.');
+                throw new LogicException("Set all {$account['name']} seeder credentials before running the seeder.");
             }
         }
 
