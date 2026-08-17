@@ -165,11 +165,11 @@ class WhatsAppLinkBuilderTest extends TestCase
     #[Test]
     public function builds_shipping_update_with_order_courier_receipt_and_tracking_link(): void
     {
-        $this->mockSettings->shouldReceive('getBusinessProfile')->andReturn(['whatsapp_number' => '6281234567890']);
         $order = new OnlineOrder([
             'order_number' => 'WEB-20260714-TEST',
             'tracking_token' => str_repeat('a', 64),
             'customer_name' => 'Dimas',
+            'customer_phone' => '6289876543210',
             'shipping_courier_name' => 'JNE',
             'shipping_service' => 'REG',
             'tracking_number' => 'JNE123456',
@@ -177,11 +177,22 @@ class WhatsAppLinkBuilderTest extends TestCase
 
         $link = urldecode((string) $this->builder->buildShippingUpdateLink($order));
 
-        $this->assertStringContainsString('https://wa.me/'.self::WHATSAPP_NUMBER.'?text=', $link);
+        $this->assertStringContainsString('https://wa.me/6289876543210?text=', $link);
         $this->assertStringContainsString('WEB-20260714-TEST', $link);
         $this->assertStringContainsString('JNE REG', $link);
         $this->assertStringContainsString('JNE123456', $link);
         $this->assertStringContainsString('/pesanan/WEB-20260714-TEST?token=', $link);
+    }
+
+    #[Test]
+    public function returns_null_when_shipping_update_customer_number_is_missing(): void
+    {
+        $order = new OnlineOrder([
+            'order_number' => 'WEB-20260714-TEST',
+            'tracking_number' => 'JNE123456',
+        ]);
+
+        $this->assertNull($this->builder->buildShippingUpdateLink($order));
     }
 
     #[Test]

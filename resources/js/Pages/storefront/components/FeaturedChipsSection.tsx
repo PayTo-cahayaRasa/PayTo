@@ -83,7 +83,7 @@ export function FeaturedChipsSection({ onExplore }: FeaturedChipsSectionProps) {
                         <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#ad641c]">Produk Unggulan</p>
                         <h2
                             id="featured-chips-title"
-                            className="mt-4 text-balance font-display text-[2.35rem] font-semibold leading-[0.96] tracking-[-0.055em] text-[#3a2117] sm:text-[3rem] lg:text-[3.45rem]"
+                            className="mt-4 text-balance font-display text-[2.35rem] font-semibold leading-[0.96] tracking-[-0.055em] text-[var(--color-cocoa-800)] sm:text-[3rem] lg:text-[3.45rem]"
                         >
                             Keripik Renyah yang Bikin Sulit Berhenti
                         </h2>
@@ -109,7 +109,7 @@ export function FeaturedChipsSection({ onExplore }: FeaturedChipsSectionProps) {
                         <a
                             href="#shop-products"
                             onClick={onExplore}
-                            className="mt-7 inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-full bg-[#3a2117] px-6 text-sm font-semibold text-white shadow-[0_20px_34px_-24px_rgba(58,33,23,0.68)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#4b2d20] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#9b5c22] active:translate-y-px sm:w-auto"
+                            className="mt-7 inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-full bg-[var(--color-cocoa-800)] px-6 text-sm font-semibold text-white shadow-[0_20px_34px_-24px_rgba(58,33,23,0.68)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#4b2d20] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-caramel-600)] active:translate-y-px sm:w-auto"
                         >
                             Lihat Koleksi Keripik
                             <ArrowRight size={17} strokeWidth={1.9} aria-hidden="true" />

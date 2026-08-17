@@ -15,6 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->string('name');
             $table->string('username')->unique();
+            $table->string('email')->nullable()->unique();
             $table->string('password_hash');
             $table->rememberToken();
             $table->enum('role', ['CASHIER', 'SUPERVISOR'])->default(value: 'CASHIER');

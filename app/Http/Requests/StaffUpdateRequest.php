@@ -29,6 +29,7 @@ class StaffUpdateRequest extends FormRequest
         $userId = is_object($user) ? $user->id : $user;
 
         return [
+            'email' => ['sometimes', 'required', 'email:rfc,dns', 'unique:users,email,'.$userId],
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'username' => ['sometimes', 'required', 'string', 'max:255', 'unique:users,username,'.$userId],
             'role' => ['sometimes', 'required', 'string', 'in:CASHIER,SUPERVISOR'],

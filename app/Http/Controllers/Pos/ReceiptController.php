@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Sale;
 use App\Services\Settings\AppSettingsService;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -20,29 +19,16 @@ class ReceiptController extends Controller
     /**
      * Show receipt for a sale
      */
-    public function show(Request $request, Sale $sale): Response
+    public function show(Sale $sale): Response
     {
-        $this->authorizeReceipt($request, $sale);
-
         return Inertia::render('receipt', $this->receiptData($sale));
     }
 
-    public function download(Request $request, Sale $sale): HttpResponse
+    public function download(Sale $sale): HttpResponse
     {
-        $this->authorizeReceipt($request, $sale);
-
         return Pdf::loadView('receipt.pdf', $this->receiptData($sale))
             ->setPaper([0, 0, 226.77, 841.89])
             ->download("struk-{$sale->id}.pdf");
-    }
-
-    private function authorizeReceipt(Request $request, Sale $sale): void
-    {
-        $user = $request->user();
-
-        if ($user->role === 'CASHIER' && $sale->cashier_id !== $user->id) {
-            abort(403, 'Unauthorized access to receipt.');
-        }
     }
 
     /**
@@ -51,7 +37,6 @@ class ReceiptController extends Controller
     private function receiptData(Sale $sale): array
     {
         $sale->load(['items.product', 'payment', 'cashier']);
-        $receiptSettings = $this->settingsService->getReceiptSettings();
         $businessProfile = $this->settingsService->getBusinessProfile();
 
         return [
@@ -81,14 +66,36 @@ class ReceiptController extends Controller
                     'name' => $sale->cashier?->name ?? '-',
                 ],
             ],
-            'receipt_settings' => [
-                'header' => $receiptSettings['header'],
-                'footer' => $receiptSettings['footer'],
-            ],
             'business' => [
                 'name' => $businessProfile['name'],
                 'address' => $businessProfile['address'],
+                'instagram_username' => $this->socialUsername($businessProfile['instagram_url'] ?? null, 'instagram'),
+                'tiktok_username' => $this->socialUsername($businessProfile['tiktok_url'] ?? null, 'tiktok'),
             ],
         ];
+    }
+
+    private function socialUsername(?string $url, string $platform): ?string
+    {
+        if (! is_string($url) || $url === '') {
+            return null;
+        }
+
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        $path = trim((string) parse_url($url, PHP_URL_PATH), '/');
+
+        if (! in_array($host, ["{$platform}.com", "www.{$platform}.com"], true) || $path === '') {
+            return null;
+        }
+
+        $username = $platform === 'tiktok'
+            ? ltrim($path, '@')
+            : explode('/', $path)[0];
+
+        if (str_contains($username, '/') || preg_match('/^[A-Za-z0-9._-]+$/', $username) !== 1) {
+            return null;
+        }
+
+        return "@{$username}";
     }
 }

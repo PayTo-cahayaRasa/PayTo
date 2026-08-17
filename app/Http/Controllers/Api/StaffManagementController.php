@@ -32,6 +32,7 @@ class StaffManagementController extends Controller
         $user = new User;
         $user->name = $payload['name'];
         $user->username = $payload['username'];
+        $user->email = $payload['email'];
         $user->role = $payload['role'];
         $user->is_active = $payload['is_active'] ?? true;
 
@@ -76,6 +77,10 @@ class StaffManagementController extends Controller
 
         if (array_key_exists('username', $payload)) {
             $user->username = $payload['username'];
+        }
+
+        if (array_key_exists('email', $payload)) {
+            $user->email = $payload['email'];
         }
 
         if (array_key_exists('role', $payload)) {
@@ -148,6 +153,7 @@ class StaffManagementController extends Controller
             'id' => $user->id,
             'name' => $user->name,
             'username' => $user->username,
+            'email' => $user->email,
             'role' => $user->role,
             'status' => $user->is_active ? 'ACTIVE' : 'INACTIVE',
             'is_active' => (bool) $user->is_active,

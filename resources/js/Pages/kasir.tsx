@@ -13,9 +13,10 @@ import ProfileView from './Pos/components/views/ProfileView';
 import SettingsView from './Pos/components/views/SettingsView';
 import OnlineOrdersPage from './online-orders/OnlineOrdersPage';
 import UniversalModal from '../Components/UniversalModal';
+import { logDevelopmentError, NotificationProvider, useNotification } from '../Components/notifications/NotificationProvider';
 // import { CATEGORIES, QUICK_CASH_AMOUNTS } from './Pos/data';
 import type { CartItem, Product, SaleSource, TransactionHistory } from './Pos/types';
-import { Box, Coffee, LayoutGrid, Palette, Utensils } from 'lucide-react';
+import { Box, Coffee, LayoutGrid, Palette, Utensils, ShoppingBag } from 'lucide-react';
 
 export const CATEGORIES = [
     { id: 'All', label: 'Semua', icon: LayoutGrid },
@@ -28,7 +29,8 @@ export const CATEGORIES = [
 
 export const QUICK_CASH_AMOUNTS = [20000, 50000, 100000];
 
-export default function PosInterface() {
+function PosInterfaceContent() {
+    const notification = useNotification();
     // authentication and role will be validated by the backend header/profile controller
 
     // State Management
@@ -44,6 +46,7 @@ export default function PosInterface() {
     const [logoutError, setLogoutError] = useState<string | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isMobileSidebarMode, setIsMobileSidebarMode] = useState(false);
+    const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
     const [showPaymentSuccessModal, setShowPaymentSuccessModal] = useState(false);
     const [checkoutError, setCheckoutError] = useState<string | null>(null);
     const [lastPaymentSummary, setLastPaymentSummary] = useState<{
@@ -109,7 +112,7 @@ export default function PosInterface() {
         };
     }, []);
 
-    const { products: serverProducts = [], history: serverHistory = [], profile: serverProfile = {} } = usePage().props as any;
+    const { products: serverProducts = [], history: serverHistory = [], profile: serverProfile = {}, payment = {} } = usePage().props as any;
 
     const [productsData, setProductsData] = useState<any[]>(Array.isArray(serverProducts) ? serverProducts : []);
     const [historyData, setHistoryData] = useState<any[]>(Array.isArray(serverHistory) ? serverHistory : []);
@@ -259,6 +262,7 @@ export default function PosInterface() {
                 setShowPaymentSuccessModal(true);
             }
         } catch (e: unknown) {
+            logDevelopmentError('cashier checkout', e);
             const isNetworkError = axios.isAxiosError(e) && !e.response;
             const responseMessage = axios.isAxiosError(e)
                 ? e.response?.data?.message
@@ -267,6 +271,11 @@ export default function PosInterface() {
             setCheckoutError(
                 isNetworkError
                     ? 'Tidak dapat terhubung ke server. Periksa koneksi lalu coba checkout kembali.'
+                    : responseMessage || 'Checkout gagal diproses. Periksa data transaksi lalu coba kembali.',
+            );
+            notification.error(
+                isNetworkError
+                    ? 'Tidak dapat terhubung ke server. Periksa koneksi lalu coba lagi.'
                     : responseMessage || 'Checkout gagal diproses. Periksa data transaksi lalu coba kembali.',
             );
         }
@@ -292,6 +301,7 @@ export default function PosInterface() {
                 lastPage: Number(meta.last_page ?? 1),
             });
         } catch (e) {
+            logDevelopmentError('cashier history', e);
             // silent
         }
     };
@@ -349,9 +359,10 @@ export default function PosInterface() {
             setShowRefundModal(false);
             setRefundSuccess({ message, total: totalAmount });
             await refreshHistory();
-        } catch (e: any) {
-            const errorMessage = e?.response?.data?.message || 'Refund gagal diproses.';
-            setRefundError(errorMessage);
+        } catch (e: unknown) {
+            logDevelopmentError('cashier refund', e);
+            const errorMessage = axios.isAxiosError(e) ? e.response?.data?.message : null;
+            setRefundError(errorMessage || 'Refund gagal diproses.');
         } finally {
             setRefundSubmitting(false);
         }
@@ -370,6 +381,7 @@ export default function PosInterface() {
         try {
             await axios.post('/logout');
         } catch (error) {
+            logDevelopmentError('cashier logout', error);
             const message = axios.isAxiosError(error)
                 ? error.response?.data?.message
                 : null;
@@ -449,6 +461,7 @@ export default function PosInterface() {
                     setProfileData(res.data.data || {});
                 }
             } catch (e) {
+                logDevelopmentError('cashier initial data', e);
                 // silent
             }
         }
@@ -489,12 +502,12 @@ export default function PosInterface() {
 
     return (
         // Main Background
-        <div className="min-h-screen lg:h-screen w-full bg-[#f3f4f6] relative flex flex-col lg:flex-row font-sans overflow-x-hidden lg:overflow-hidden text-slate-800 selection:bg-indigo-500 selection:text-white">
+        <div className="h-screen h-[100dvh] w-full bg-cream-50 relative flex flex-col lg:flex-row font-sans overflow-hidden text-cocoa-800 selection:bg-snack-500 selection:text-white">
 
             {/* Background Ambience */}
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-200 rounded-full blur-[120px] opacity-40 animate-pulse-slow pointer-events-none"></div>
-            <div className="absolute bottom-[-10%] left-[20%] w-[30%] h-[30%] bg-blue-200 rounded-full blur-[100px] opacity-40 pointer-events-none"></div>
-            <div className="absolute top-[20%] right-[40%] w-[25%] h-[25%] bg-indigo-200 rounded-full blur-[100px] opacity-30 pointer-events-none"></div>
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-caramel-200 rounded-full blur-[120px] opacity-40 animate-pulse-slow pointer-events-none"></div>
+            <div className="absolute bottom-[-10%] left-[20%] w-[30%] h-[30%] bg-cream-200 rounded-full blur-[100px] opacity-40 pointer-events-none"></div>
+            <div className="absolute top-[20%] right-[40%] w-[25%] h-[25%] bg-snack-200 rounded-full blur-[100px] opacity-30 pointer-events-none"></div>
 
             {/* 1. SIDEBAR (Navigation) */}
             <div
@@ -515,12 +528,12 @@ export default function PosInterface() {
                     type="button"
                     aria-label="Tutup sidebar"
                     onClick={() => setIsSidebarOpen(false)}
-                    className="fixed inset-0 z-30 bg-slate-900/40 lg:hidden"
+                    className="fixed inset-0 z-30 bg-cocoa-900/40 lg:hidden"
                 />
             )}
 
             {/* 2. DYNAMIC CONTENT AREA */}
-            <div className="flex-1 flex flex-col relative min-w-0 lg:h-full py-3 lg:py-4 px-3 sm:px-4 lg:px-6 gap-4 lg:gap-6 z-10">
+            <div className="flex-1 flex flex-col relative min-w-0 h-full py-3 lg:py-4 px-3 sm:px-4 lg:px-6 gap-3 lg:gap-6 z-10 overflow-hidden">
 
                 {/* Header (Dynamic) */}
                 <HeaderBar
@@ -598,7 +611,7 @@ export default function PosInterface() {
 
             </div>
 
-            {/* 3. CART PANEL (Unchanged Style) */}
+            {/* 3. CART PANEL */}
             {activeView !== 'profile' && activeView !== 'settings' && activeView !== 'online-orders' && (
                 <CartPanel
                     cart={cart}
@@ -610,13 +623,42 @@ export default function PosInterface() {
                         setSaleSource('WALK_IN');
                         setCustomerName('');
                         setCustomerPhone('');
+                        setIsMobileCartOpen(false);
                     }}
                     onUpdateQty={updateQty}
                     onRemoveFromCart={removeFromCart}
-
-                    onCheckout={() => setShowPaymentModal(true)}
+                    onCheckout={() => {
+                        setIsMobileCartOpen(false);
+                        setShowPaymentModal(true);
+                    }}
                     formatRupiah={formatRupiah}
+                    isMobileOpen={isMobileCartOpen}
+                    onCloseMobile={() => setIsMobileCartOpen(false)}
                 />
+            )}
+
+            {/* Mobile Floating Cart Bar */}
+            {activeView !== 'profile' && activeView !== 'settings' && activeView !== 'online-orders' && cart.length > 0 && !isMobileCartOpen && (
+                <div className="fixed bottom-3 inset-x-3 z-30 lg:hidden">
+                    <button
+                        type="button"
+                        onClick={() => setIsMobileCartOpen(true)}
+                        className="w-full bg-[#3d281b] text-white rounded-2xl p-3 sm:p-3.5 shadow-2xl shadow-cocoa-900/30 flex items-center justify-between active:scale-[0.99] transition-all border border-[#523827]"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-snack-600 flex items-center justify-center font-bold text-sm text-white shadow-xs">
+                                {totalItems}
+                            </div>
+                            <div className="text-left">
+                                <p className="text-[11px] text-[#c9b29e] font-medium">Keranjang Belanja</p>
+                                <p className="text-sm font-bold font-mono text-white">{formatRupiah(grandTotal).replace(",00", "")}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-xl text-xs font-bold text-white hover:bg-white/20">
+                            <ShoppingBag size={16} /> Lihat Order
+                        </div>
+                    </button>
+                </div>
             )}
 
             {/* --- PAYMENT MODAL (Modern Glass) --- */}
@@ -643,6 +685,7 @@ export default function PosInterface() {
                 totalDue={totalDue}
                 subtotal={subtotal}
                 change={change}
+                qrisImageUrl={payment.qris_image_url}
                 formatRupiah={formatRupiah}
             />
 
@@ -674,40 +717,31 @@ export default function PosInterface() {
                     {lastPaymentSummary?.invoiceNo && (
                         <div className="flex justify-between">
                             <span>Invoice</span>
-                            <span className="font-mono font-bold text-slate-700">{lastPaymentSummary.invoiceNo}</span>
+                            <span className="font-mono font-bold text-cocoa-700">{lastPaymentSummary.invoiceNo}</span>
                         </div>
                     )}
                     <div className="flex justify-between">
                         <span>Metode</span>
-                        <span className="font-bold text-slate-700">{lastPaymentSummary?.method === 'CASH' ? 'Tunai' : 'QRIS'}</span>
+                        <span className="font-bold text-cocoa-700">{lastPaymentSummary?.method === 'CASH' ? 'Tunai' : 'QRIS'}</span>
                     </div>
                     <div className="flex justify-between">
                         <span>Total</span>
-                        <span className="font-mono font-bold text-slate-700">{formatRupiah(lastPaymentSummary?.total ?? 0)}</span>
+                        <span className="font-mono font-bold text-cocoa-700">{formatRupiah(lastPaymentSummary?.total ?? 0)}</span>
                     </div>
                     <div className="flex justify-between">
                         <span>Dibayar</span>
-                        <span className="font-mono font-bold text-slate-700">{formatRupiah(lastPaymentSummary?.paidTotal ?? 0)}</span>
+                        <span className="font-mono font-bold text-cocoa-700">{formatRupiah(lastPaymentSummary?.paidTotal ?? 0)}</span>
                     </div>
                     {lastPaymentSummary?.method === 'CASH' && (
                         <div className="flex justify-between">
                             <span>Kembalian</span>
-                            <span className="font-mono font-bold text-emerald-600">
+                            <span className="font-mono font-bold text-leaf-600">
                                 {lastPaymentSummary?.change >= 0 ? formatRupiah(lastPaymentSummary.change).replace(",00", "") : '-'}
                             </span>
                         </div>
                     )}
                 </div>
             </UniversalModal>
-
-            <UniversalModal
-                isOpen={Boolean(checkoutError)}
-                title="Checkout Gagal"
-                description={checkoutError ?? undefined}
-                tone="danger"
-                cancelLabel="Tutup"
-                onClose={() => setCheckoutError(null)}
-            />
 
             <UniversalModal
                 isOpen={showRefundModal}
@@ -723,17 +757,17 @@ export default function PosInterface() {
             >
                 <div className="space-y-4">
                     {refundError && (
-                        <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600">
+                        <div className="rounded-xl border border-danger-200 bg-danger-50 px-3 py-2 text-xs font-semibold text-danger-600">
                             {refundError}
                         </div>
                     )}
                     <div className="space-y-3">
                         {refundTarget?.itemsDetail.map((item) => (
-                            <div key={item.id} className="flex flex-col gap-2 rounded-xl border border-slate-200/70 bg-white/80 p-3">
+                            <div key={item.id} className="flex flex-col gap-2 rounded-xl border border-cocoa-200/70 bg-white/80 p-3">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm font-semibold text-slate-800">{item.name}</p>
-                                        <p className="text-xs text-slate-500">
+                                        <p className="text-sm font-semibold text-cocoa-800">{item.name}</p>
+                                        <p className="text-xs text-cocoa-500">
                                             Sisa {item.refundableQty} × {formatRupiah(item.refundUnitPrice).replace(',00', '')}
                                         </p>
                                     </div>
@@ -755,13 +789,13 @@ export default function PosInterface() {
                                             const clamped = Math.max(0, Math.min(numeric, item.refundableQty));
                                             setRefundQuantities(prev => ({ ...prev, [item.id]: clamped ? clamped.toString() : '' }));
                                         }}
-                                        className="w-28 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700"
+                                        className="w-28 rounded-xl border border-cocoa-200 bg-white px-3 py-2 text-xs font-semibold text-cocoa-700"
                                         placeholder="0"
                                         disabled={item.refundableQty <= 0}
                                     />
                                 </div>
                                 {item.refundedQty > 0 && (
-                                    <p className="text-[10px] text-amber-600">
+                                    <p className="text-[10px] text-snack-600">
                                         Sudah direfund: {item.refundedQty}
                                     </p>
                                 )}
@@ -770,11 +804,11 @@ export default function PosInterface() {
                     </div>
                     <div className="space-y-2">
                         <div>
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Alasan Refund</label>
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-cocoa-400">Alasan Refund</label>
                             <textarea
                                 value={refundReason}
                                 onChange={(event) => setRefundReason(event.target.value)}
-                                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
+                                className="mt-1 w-full rounded-xl border border-cocoa-200 bg-white px-3 py-2 text-xs font-medium text-cocoa-700"
                                 rows={3}
                                 placeholder="Tuliskan alasan refund (min. 10 karakter)"
                             />
@@ -793,11 +827,19 @@ export default function PosInterface() {
             >
                 <div className="flex items-center justify-between">
                     <span>Total refund</span>
-                    <span className="font-mono font-bold text-emerald-600">
+                    <span className="font-mono font-bold text-leaf-600">
                         {formatRupiah(refundSuccess?.total ?? 0).replace(',00', '')}
                     </span>
                 </div>
             </UniversalModal>
         </div>
+    );
+}
+
+export default function PosInterface() {
+    return (
+        <NotificationProvider>
+            <PosInterfaceContent />
+        </NotificationProvider>
     );
 }

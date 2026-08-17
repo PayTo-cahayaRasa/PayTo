@@ -230,72 +230,72 @@ export default function UsersTab() {
     return (
         <div className="animate-in slide-in-from-bottom-4 duration-500 space-y-6">
             {errorMessage ? (
-                <div className="bg-rose-50 text-rose-600 border border-rose-200 rounded-2xl px-4 py-3 text-sm font-semibold">
+                <div className="bg-danger-50 text-danger-600 border border-danger-200 rounded-2xl px-4 py-3 text-sm font-semibold">
                     {errorMessage}
                 </div>
             ) : null}
 
-            <div className="flex flex-col gap-4 bg-white/40 backdrop-blur-xl border border-white/60 rounded-4xl p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-4 bg-white/40 backdrop-blur-xl border border-white/60 rounded-3xl sm:rounded-4xl p-4 sm:p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h3 className="font-bold text-lg text-slate-800">Daftar Pengguna</h3>
-                    <p className="text-xs text-slate-500">Kelola akses Kasir dan Supervisor.</p>
+                    <h3 className="font-bold text-lg text-cocoa-800">Daftar Pengguna</h3>
+                    <p className="text-xs text-cocoa-500">Kelola akses Kasir dan Supervisor.</p>
                 </div>
                 <button
                     onClick={handleOpenCreate}
-                    className="flex w-full items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all sm:w-auto"
+                    className="flex w-full items-center justify-center gap-2 px-4 py-3 bg-snack-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-snack-200 hover:bg-snack-700 transition-all sm:w-auto"
                 >
                     <Plus size={18} /> Tambah Staf Baru
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {isLoading ? (
                     Array.from({ length: 3 }).map((_, index) => (
-                        <div key={index} className="bg-white/50 backdrop-blur-md border border-white/60 rounded-4xl p-6 shadow-sm animate-pulse">
-                            <div className="h-6 bg-slate-200 rounded w-1/2 mb-4"></div>
-                            <div className="h-4 bg-slate-200 rounded w-3/4 mb-2"></div>
-                            <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+                        <div key={index} className="bg-white/50 backdrop-blur-md border border-white/60 rounded-3xl sm:rounded-4xl p-4 sm:p-6 shadow-sm animate-pulse">
+                            <div className="h-6 bg-cocoa-200 rounded w-1/2 mb-4"></div>
+                            <div className="h-4 bg-cocoa-200 rounded w-3/4 mb-2"></div>
+                            <div className="h-4 bg-cocoa-200 rounded w-1/2"></div>
                         </div>
                     ))
                 ) : (sortedStaff.length ? (
                     sortedStaff.map(user => (
-                        <div key={user.id} className="bg-white/50 backdrop-blur-md border border-white/60 rounded-4xl p-6 shadow-sm relative group hover:bg-white/70 transition-all min-w-0">
+                        <div key={user.id} className="bg-white/50 backdrop-blur-md border border-white/60 rounded-3xl sm:rounded-4xl p-4 sm:p-6 shadow-sm relative group hover:bg-white/70 transition-all min-w-0">
                             <div className="flex justify-between items-start mb-4">
-                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl shadow-inner ${user.role === 'SUPERVISOR' ? 'bg-indigo-100 text-indigo-600' : 'bg-emerald-100 text-emerald-600'
+                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl shadow-inner ${user.role === 'SUPERVISOR' ? 'bg-snack-100 text-snack-600' : 'bg-leaf-100 text-leaf-600'
                                     }`}>
                                     <User size={24} />
                                 </div>
                                 <div className={`px-3 py-1 text-[10px] font-bold rounded-full border ${user.status === 'ACTIVE'
-                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                                    : 'bg-slate-100 text-slate-400 border-slate-200'
+                                    ? 'bg-leaf-50 text-leaf-600 border-leaf-100'
+                                    : 'bg-cocoa-100 text-cocoa-400 border-cocoa-200'
                                     }`}>
                                     {user.status === 'ACTIVE' ? 'AKTIF' : 'NON-AKTIF'}
                                 </div>
                             </div>
 
-                            <h4 className="font-bold text-lg text-slate-800 wrap-break-word">{user.name}</h4>
-                            <p className="text-sm text-slate-500 mb-4 wrap-break-word">@{user.username} • {user.role}</p>
+                            <h4 className="font-bold text-lg text-cocoa-800 wrap-break-word">{user.name}</h4>
+                            <p className="text-sm text-cocoa-500 mb-4 wrap-break-word">@{user.username} • {user.role}</p>
 
-                            <div className="flex items-center gap-2 text-xs text-slate-400 mb-6 font-medium">
+                            <div className="flex items-center gap-2 text-xs text-cocoa-400 mb-6 font-medium">
                                 <CheckCircle size={12} /> Login Terakhir: {user.lastLogin}
                             </div>
 
                             <div className="flex flex-wrap gap-2">
                                 <button
                                     onClick={() => handleOpenResetPin(user)}
-                                    className="flex-1 min-w-35 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 flex items-center justify-center gap-2"
+                                    className="flex-1 min-w-35 py-2.5 rounded-xl bg-white border border-cocoa-200 text-cocoa-600 font-bold text-xs hover:bg-cocoa-50 flex items-center justify-center gap-2"
                                 >
                                     <Lock size={14} /> Reset PIN
                                 </button>
                                 <button
                                     onClick={() => handleOpenEdit(user)}
-                                    className="shrink-0 py-2.5 px-3 rounded-xl bg-white border border-slate-200 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                                    className="shrink-0 py-2.5 px-3 rounded-xl bg-white border border-cocoa-200 text-snack-600 hover:text-snack-700 hover:bg-snack-50"
                                 >
                                     <Edit size={16} />
                                 </button>
                                 <button
                                     onClick={() => handleOpenDelete(user)}
-                                    className="shrink-0 py-2.5 px-3 rounded-xl bg-white border border-slate-200 text-rose-500 hover:text-rose-600 hover:bg-rose-50"
+                                    className="shrink-0 py-2.5 px-3 rounded-xl bg-white border border-cocoa-200 text-danger-500 hover:text-danger-600 hover:bg-danger-50"
                                 >
                                     <Trash2 size={16} />
                                 </button>
@@ -303,60 +303,60 @@ export default function UsersTab() {
                         </div>
                     ))
                 ) : (
-                    <div className="text-sm text-slate-400">Belum ada staf.</div>
+                    <div className="text-sm text-cocoa-400">Belum ada staf.</div>
                 ))}
             </div>
 
             {showFormModal ? (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm animate-in fade-in duration-200">
                     <div className="bg-white w-full max-w-2xl rounded-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-                        <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                        <div className="px-8 py-6 border-b border-cocoa-100 flex justify-between items-center bg-cocoa-50/50">
                             <div>
-                                <h3 className="font-bold text-xl text-slate-800">
+                                <h3 className="font-bold text-xl text-cocoa-800">
                                     {selectedStaff ? 'Edit Staf' : 'Tambah Staf Baru'}
                                 </h3>
-                                <p className="text-sm text-slate-500">Lengkapi informasi staf di bawah ini.</p>
+                                <p className="text-sm text-cocoa-500">Lengkapi informasi staf di bawah ini.</p>
                             </div>
-                            <button onClick={() => setShowFormModal(false)} className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-500">
+                            <button onClick={() => setShowFormModal(false)} className="p-2 hover:bg-cocoa-200 rounded-full transition-colors text-cocoa-500">
                                 <X size={20} />
                             </button>
                         </div>
 
                         <div className="p-8 overflow-y-auto custom-scrollbar-light space-y-6">
                             {errorMessage ? (
-                                <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600">
+                                <div className="rounded-xl border border-danger-200 bg-danger-50 px-4 py-3 text-sm font-semibold text-danger-600">
                                     {errorMessage}
                                 </div>
                             ) : null}
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                 <div className="sm:col-span-2">
-                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Staf</label>
+                                    <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">Nama Staf</label>
                                     <input
                                         type="text"
                                         value={formState.name}
                                         onChange={handleChange('name')}
-                                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+                                        className="w-full p-4 bg-cocoa-50 border border-cocoa-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-snack-200 outline-none transition-all"
                                         placeholder="Nama lengkap"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Username</label>
+                                    <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">Username</label>
                                     <input
                                         type="text"
                                         value={formState.username}
                                         onChange={handleChange('username')}
-                                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-mono focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+                                        className="w-full p-4 bg-cocoa-50 border border-cocoa-200 rounded-2xl text-sm font-mono focus:ring-2 focus:ring-snack-200 outline-none transition-all"
                                         placeholder="username"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Role</label>
+                                    <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">Role</label>
                                     <select
                                         value={formState.role}
                                         onChange={handleChange('role')}
-                                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+                                        className="w-full p-4 bg-cocoa-50 border border-cocoa-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-snack-200 outline-none transition-all"
                                     >
                                         <option value="CASHIER">CASHIER</option>
                                         <option value="SUPERVISOR">SUPERVISOR</option>
@@ -364,37 +364,37 @@ export default function UsersTab() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Password</label>
+                                    <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">Password</label>
                                     <input
                                         type="password"
                                         value={formState.password}
                                         onChange={handleChange('password')}
-                                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+                                        className="w-full p-4 bg-cocoa-50 border border-cocoa-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-snack-200 outline-none transition-all"
                                         placeholder="Min. 8 karakter, huruf besar, angka, simbol"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">PIN</label>
+                                    <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">PIN</label>
                                     <input
                                         type="text"
                                         value={formState.pin}
                                         onChange={handleChange('pin')}
-                                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-mono focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+                                        className="w-full p-4 bg-cocoa-50 border border-cocoa-200 rounded-2xl text-sm font-mono focus:ring-2 focus:ring-snack-200 outline-none transition-all"
                                         placeholder="6 digit"
                                     />
                                 </div>
 
                                 {isCredentialChange ? (
                                     <div className="sm:col-span-2">
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                                        <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider mb-2">
                                             Konfirmasi Supervisor
                                         </label>
                                         <input
                                             type="password"
                                             value={currentCredential}
                                             onChange={(event) => setCurrentCredential(event.target.value)}
-                                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+                                            className="w-full p-4 bg-cocoa-50 border border-cocoa-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-snack-200 outline-none transition-all"
                                             placeholder="Password atau PIN Anda saat ini"
                                             autoComplete="current-password"
                                         />
@@ -402,12 +402,12 @@ export default function UsersTab() {
                                 ) : null}
 
                                 <div className="sm:col-span-2 flex items-center gap-3">
-                                    <label className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600">
+                                    <label className="inline-flex items-center gap-2 text-sm font-semibold text-cocoa-600">
                                         <input
                                             type="checkbox"
                                             checked={formState.is_active}
                                             onChange={handleChange('is_active')}
-                                            className="size-4 accent-indigo-600"
+                                            className="size-4 accent-snack-600"
                                         />
                                         Aktif
                                     </label>
@@ -415,17 +415,17 @@ export default function UsersTab() {
                             </div>
                         </div>
 
-                        <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+                        <div className="p-6 border-t border-cocoa-100 bg-cocoa-50 flex justify-end gap-3">
                             <button
                                 onClick={() => setShowFormModal(false)}
-                                className="px-6 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-200 transition-colors text-sm"
+                                className="px-6 py-3 rounded-xl font-bold text-cocoa-500 hover:bg-cocoa-200 transition-colors text-sm"
                             >
                                 Batal
                             </button>
                             <button
                                 onClick={handleSave}
                                 disabled={isSaving || (isCredentialChange && !currentCredential.trim())}
-                                className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-lg hover:bg-indigo-700 transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                                className="px-8 py-3 bg-snack-600 text-white rounded-xl font-bold text-sm shadow-lg hover:bg-snack-700 transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                             >
                                 <Save size={18} /> {isSaving ? 'Menyimpan...' : 'Simpan'}
                             </button>
@@ -437,56 +437,56 @@ export default function UsersTab() {
             {showResetPinModal ? (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm animate-in fade-in duration-200">
                     <div className="bg-white w-full max-w-lg rounded-4xl shadow-2xl overflow-hidden">
-                        <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                        <div className="px-8 py-6 border-b border-cocoa-100 flex justify-between items-center bg-cocoa-50/50">
                             <div>
-                                <h3 className="font-bold text-xl text-slate-800">Reset PIN Staf</h3>
-                                <p className="text-sm text-slate-500">Masukkan PIN baru untuk {selectedStaff?.name}.</p>
+                                <h3 className="font-bold text-xl text-cocoa-800">Reset PIN Staf</h3>
+                                <p className="text-sm text-cocoa-500">Masukkan PIN baru untuk {selectedStaff?.name}.</p>
                             </div>
-                            <button onClick={() => setShowResetPinModal(false)} className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-500">
+                            <button onClick={() => setShowResetPinModal(false)} className="p-2 hover:bg-cocoa-200 rounded-full transition-colors text-cocoa-500">
                                 <X size={20} />
                             </button>
                         </div>
 
                         <div className="p-8 space-y-4">
                             {errorMessage ? (
-                                <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600">
+                                <div className="rounded-xl border border-danger-200 bg-danger-50 px-4 py-3 text-sm font-semibold text-danger-600">
                                     {errorMessage}
                                 </div>
                             ) : null}
                             <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">PIN Baru</label>
+                                <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider">PIN Baru</label>
                                 <input
                                     type="text"
                                     value={pinValue}
                                     onChange={(event) => setPinValue(event.target.value)}
-                                    className="mt-2 w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-mono focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+                                    className="mt-2 w-full p-4 bg-cocoa-50 border border-cocoa-200 rounded-2xl text-sm font-mono focus:ring-2 focus:ring-snack-200 outline-none transition-all"
                                     placeholder="6 digit yang tidak berulang atau berurutan"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Konfirmasi Supervisor</label>
+                                <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider">Konfirmasi Supervisor</label>
                                 <input
                                     type="password"
                                     value={currentCredential}
                                     onChange={(event) => setCurrentCredential(event.target.value)}
-                                    className="mt-2 w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+                                    className="mt-2 w-full p-4 bg-cocoa-50 border border-cocoa-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-snack-200 outline-none transition-all"
                                     placeholder="Password atau PIN Anda saat ini"
                                     autoComplete="current-password"
                                 />
                             </div>
                         </div>
 
-                        <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+                        <div className="p-6 border-t border-cocoa-100 bg-cocoa-50 flex justify-end gap-3">
                             <button
                                 onClick={() => setShowResetPinModal(false)}
-                                className="px-6 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-200 transition-colors text-sm"
+                                className="px-6 py-3 rounded-xl font-bold text-cocoa-500 hover:bg-cocoa-200 transition-colors text-sm"
                             >
                                 Batal
                             </button>
                             <button
                                 onClick={handleResetPin}
                                 disabled={isSaving || pinValue.length !== 6 || !currentCredential.trim()}
-                                className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-lg hover:bg-indigo-700 transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                                className="px-8 py-3 bg-snack-600 text-white rounded-xl font-bold text-sm shadow-lg hover:bg-snack-700 transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                             >
                                 <Save size={18} /> {isSaving ? 'Menyimpan...' : 'Reset PIN'}
                             </button>
@@ -509,16 +509,16 @@ export default function UsersTab() {
             >
                 <div className="space-y-3">
                     {errorMessage ? (
-                        <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600">
+                        <div className="rounded-xl border border-danger-200 bg-danger-50 px-3 py-2 text-xs font-semibold text-danger-600">
                             {errorMessage}
                         </div>
                     ) : null}
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Konfirmasi Supervisor</label>
+                    <label className="block text-xs font-bold text-cocoa-500 uppercase tracking-wider">Konfirmasi Supervisor</label>
                     <input
                         type="password"
                         value={currentCredential}
                         onChange={(event) => setCurrentCredential(event.target.value)}
-                        className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                        className="mt-2 w-full rounded-xl border border-cocoa-200 bg-white px-3 py-2 text-sm font-medium text-cocoa-700 focus:border-snack-300 focus:outline-none focus:ring-2 focus:ring-snack-100"
                         placeholder="Password atau PIN Anda saat ini"
                         autoComplete="current-password"
                     />

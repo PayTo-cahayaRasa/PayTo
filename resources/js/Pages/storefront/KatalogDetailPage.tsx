@@ -42,7 +42,7 @@ export default function KatalogDetailPage({ business, product }: KatalogDetailPa
                     <div className="mx-auto max-w-7xl space-y-4">
                         <Link
                             href={storefrontShopHref}
-                            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#eadfcf] bg-white px-4 text-sm font-semibold text-[#3a2318] transition duration-300 hover:-translate-y-px hover:bg-[#fff8ed]"
+                            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--color-cream-200)] bg-white px-4 text-sm font-semibold text-[#3a2318] transition duration-300 hover:-translate-y-px hover:bg-[#fff8ed]"
                         >
                             <ChevronLeft size={16} strokeWidth={1.9} />
                             Kembali ke Katalog
@@ -89,7 +89,7 @@ export default function KatalogDetailPage({ business, product }: KatalogDetailPa
                                             type="button"
                                             disabled={product.stock <= 0}
                                             onClick={() => addToCart(product.id)}
-                                            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#3a2117] px-5 text-sm font-semibold text-white transition hover:bg-[#523326] disabled:cursor-not-allowed disabled:opacity-45"
+                                            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[var(--color-cocoa-800)] px-5 text-sm font-semibold text-white transition hover:bg-[#523326] disabled:cursor-not-allowed disabled:opacity-45"
                                         >
                                             <ShoppingBag size={16} />
                                             Tambah ke Keranjang

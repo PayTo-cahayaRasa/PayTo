@@ -36,6 +36,7 @@ BUG_REPORT.md
 
 # Agent/skill configs (personal workspace - do not commit)
 /.agents/
+/.agent/
 /.github/tugas.md
 /.github/skills/
 /.github/copilot-instructions.md

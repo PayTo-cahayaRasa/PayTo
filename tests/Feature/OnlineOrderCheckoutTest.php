@@ -7,6 +7,7 @@ use App\Models\OnlineOrder;
 use App\Models\Product;
 use App\Models\StockItem;
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -301,6 +302,8 @@ class OnlineOrderCheckoutTest extends TestCase
 
     public function test_delivery_order_can_be_shipped_and_returns_whatsapp_notification_link(): void
     {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+
         AppSetting::query()->updateOrCreate(['key' => 'business.profile'], ['value' => ['whatsapp_number' => '6281234567890']]);
         [$order] = $this->createPendingOrder(1, 2);
         $cashier = User::factory()->create(['role' => 'CASHIER', 'is_active' => true]);

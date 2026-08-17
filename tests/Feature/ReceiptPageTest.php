@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Models\AppSetting;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\StockItem;
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -96,7 +98,6 @@ class ReceiptPageTest extends TestCase
         $response->assertInertia(fn ($page) => $page
             ->component('receipt')
             ->has('sale')
-            ->has('receipt_settings')
             ->has('business')
         );
     }
@@ -115,16 +116,28 @@ class ReceiptPageTest extends TestCase
         $this->assertStringStartsWith('%PDF', $response->getContent());
     }
 
-    public function test_cashier_cannot_access_other_cashier_receipt(): void
+    public function test_cashier_can_download_another_cashiers_receipt_pdf(): void
+    {
+        $cashier = $this->createCashier();
+        $saleOwner = $this->createCashier('Kasir Sebelumnya', 'kasir-sebelumnya');
+        $sale = $this->createSaleWithItems($saleOwner);
+
+        $response = $this->actingAs($cashier)->get(route('pos.receipt.download', $sale));
+
+        $response->assertOk()
+            ->assertHeader('content-type', 'application/pdf')
+            ->assertHeader('content-disposition', "attachment; filename=struk-{$sale->id}.pdf");
+    }
+
+    public function test_cashier_can_access_other_cashier_receipt(): void
     {
         $cashier1 = $this->createCashier('Kasir Satu', 'kasir1');
         $cashier2 = $this->createCashier('Kasir Dua', 'kasir2');
         $sale = $this->createSaleWithItems($cashier1);
 
-        // cashier2 tries to access cashier1's receipt
         $response = $this->actingAs($cashier2)->get(route('pos.receipt', $sale));
 
-        $response->assertForbidden();
+        $response->assertOk();
     }
 
     public function test_supervisor_can_access_any_receipt_page(): void
@@ -168,7 +181,7 @@ class ReceiptPageTest extends TestCase
         );
     }
 
-    public function test_receipt_contains_settings(): void
+    public function test_receipt_contains_business_profile(): void
     {
         $cashier = $this->createCashier();
         $sale = $this->createSaleWithItems($cashier);
@@ -177,15 +190,68 @@ class ReceiptPageTest extends TestCase
 
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
-            ->has('receipt_settings.header')
-            ->has('receipt_settings.footer')
             ->has('business.name')
             ->has('business.address')
+            ->has('business.instagram_username')
+            ->has('business.tiktok_username')
+        );
+    }
+
+    public function test_receipt_uses_business_profile_and_parses_social_usernames(): void
+    {
+        $cashier = $this->createCashier();
+        $sale = $this->createSaleWithItems($cashier);
+
+        AppSetting::query()->updateOrCreate(
+            ['key' => 'business.profile'],
+            ['value' => [
+                'name' => 'Cahaya Rasa',
+                'address' => 'Alamat Toko',
+                'instagram_url' => 'https://www.instagram.com/cahaya.rasa/?utm_source=qr',
+                'tiktok_url' => 'https://www.tiktok.com/@cahayarasa_28/',
+            ]]
+        );
+
+        $response = $this->actingAs($cashier)->get(route('pos.receipt', $sale));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->where('business.name', 'Cahaya Rasa')
+            ->where('business.address', 'Alamat Toko')
+            ->where('business.instagram_username', '@cahaya.rasa')
+            ->where('business.tiktok_username', '@cahayarasa_28')
+            ->missing('receipt_settings')
+        );
+    }
+
+    public function test_receipt_omits_social_usernames_from_invalid_urls(): void
+    {
+        $cashier = $this->createCashier();
+        $sale = $this->createSaleWithItems($cashier);
+
+        AppSetting::query()->updateOrCreate(
+            ['key' => 'business.profile'],
+            ['value' => [
+                'name' => 'Cahaya Rasa',
+                'address' => 'Alamat Toko',
+                'instagram_url' => 'https://bukaninstagram.com/cahaya.rasa',
+                'tiktok_url' => '',
+            ]]
+        );
+
+        $response = $this->actingAs($cashier)->get(route('pos.receipt', $sale));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->where('business.instagram_username', null)
+            ->where('business.tiktok_username', null)
         );
     }
 
     public function test_checkout_returns_receipt_url(): void
     {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+
         $cashier = $this->createCashier();
 
         $product = Product::factory()->create([

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\PosLoginController;
 use App\Http\Controllers\Auth\PosLogoutController;
 use App\Http\Controllers\Pos\PosController;
@@ -32,6 +33,15 @@ Route::get('/login', function (): \Inertia\Response|RedirectResponse {
 Route::post('/login', [PosLoginController::class, 'store'])
     ->middleware(['guest', 'throttle:login'])
     ->name('login.store');
+
+Route::get('/lupa-password', [PasswordResetController::class, 'requestPage'])->middleware('guest')->name('password.request');
+Route::post('/lupa-password', [PasswordResetController::class, 'send'])->middleware(['guest', 'throttle:login'])->name('password.email');
+Route::get('/reset-password/{token}', [PasswordResetController::class, 'resetPage'])->middleware('guest')->name('password.reset');
+Route::post('/reset-password', [PasswordResetController::class, 'reset'])->middleware('guest')->name('password.update');
+Route::get('/lupa-pin', [PasswordResetController::class, 'pinRequestPage'])->middleware('guest')->name('pin.request');
+Route::post('/lupa-pin', [PasswordResetController::class, 'sendPin'])->middleware(['guest', 'throttle:login'])->name('pin.email');
+Route::get('/reset-pin/{token}', [PasswordResetController::class, 'resetPinPage'])->middleware('guest')->name('pin.reset');
+Route::post('/reset-pin', [PasswordResetController::class, 'resetPin'])->middleware('guest')->name('pin.update');
 
 Route::post('/logout', [PosLogoutController::class, 'store'])
     ->middleware('auth')
